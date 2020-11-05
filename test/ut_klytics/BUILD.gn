@@ -1,0 +1,26 @@
+executable("ut_klytics") {
+
+  public_deps = [
+    "//src/klytics:klytics_sources"
+  ]
+  testonly = true
+
+  libs = [
+    "cpr"
+  ]
+
+
+  deps = [
+    "//test:gtest_main",
+    "//test:gtest_and_gmock"
+  ]
+
+  include_dirs = [
+    "//src",
+    "//third_party/json/include",
+  ]
+
+  sources = [
+    "klytics.test.cpp",
+  ]
+}

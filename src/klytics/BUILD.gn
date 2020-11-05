@@ -1,0 +1,34 @@
+config("inih") {
+  include_dirs = [
+    "//third_party/inih/cpp",
+  ]
+}
+
+config("json") {
+  include_dirs = [
+    "//third_party/json/include",
+  ]
+}
+
+source_set("ini_reader") {
+  sources = [
+    "//third_party/inih/ini.c",
+    "//third_party/inih/cpp/INIReader.cpp",
+  ]
+}
+
+source_set("klytics_sources") {
+  public_configs = [
+    ":inih",
+    ":json"
+  ]
+
+  include_dirs = [
+    "//src",
+  ]
+
+  sources = [
+    "//src/klytics/klytics.cpp"
+  ]
+}
+
