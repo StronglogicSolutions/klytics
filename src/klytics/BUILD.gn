@@ -10,6 +10,12 @@ config("json") {
   ]
 }
 
+config("process_executor") {
+  include_dirs = [
+    "//third_party/process_executor"
+  ]
+}
+
 source_set("ini_reader") {
   sources = [
     "//third_party/inih/ini.c",
@@ -20,11 +26,18 @@ source_set("ini_reader") {
 source_set("klytics_sources") {
   public_configs = [
     ":inih",
-    ":json"
+    ":json",
+    ":process_executor"
   ]
 
   include_dirs = [
     "//src",
+  ]
+
+  libs = [
+    "crypto",
+    "cpr",
+    "curl"
   ]
 
   sources = [
