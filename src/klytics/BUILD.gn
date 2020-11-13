@@ -16,6 +16,12 @@ config("process_executor") {
   ]
 }
 
+config("tabulate") {
+  include_dirs = [
+    "//third_party/tabulate/include"
+  ]
+}
+
 source_set("ini_reader") {
   sources = [
     "//third_party/inih/ini.c",
@@ -27,7 +33,8 @@ source_set("klytics_sources") {
   public_configs = [
     ":inih",
     ":json",
-    ":process_executor"
+    ":process_executor",
+    ":tabulate"
   ]
 
   include_dirs = [
