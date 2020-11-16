@@ -3,10 +3,13 @@
 
 #include <iostream>
 #include <ctime>
+#include <cpr/cpr.h>
 #include <string>
 #include <process.hpp>
 #include <nlohmann/json.hpp>
 #include <tabulate/table.hpp>
+#include "api.hpp"
+
 
 namespace klytics {
 namespace constants {
@@ -103,24 +106,35 @@ counts m_counts;
 class KLytics {
 public:
 
+
 /**
  * get_follower_count
+ * @returns [out] {std::string}
  */
 std::string get_follower_count() {
   ProcessResult result = execute(constants::FOLLOWER_APP);
-
   if (result.error) {
     return "Error executing followers app";
   }
 
   JSONResult json{};
-
   if (json.read(result.output)) {
     return json.to_string();
   }
 
   return "Error processing followers app data";
 }
+
+/**
+ * get_follower_count
+ * @returns [out] {std::string}
+ */
+std::string fetch_likes_count() {
+  return m_api.fetch_youtube_counts();
+}
+
+private:
+API m_api;
 };
 
 } // namespace klytics

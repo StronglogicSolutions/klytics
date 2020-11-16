@@ -22,6 +22,17 @@ config("tabulate") {
   ]
 }
 
+# config("youtube_api") {
+#   public_configs = [
+#     ":inih"
+#   ]
+#   include_dirs = ["//src"]
+#   # lib_dirs = [ "//src/klytics" ]
+#   libs = ["//src/klytics/libyoutube_api.so"] # or use full path directly
+#   # visibility = [ ":klytics_sources" ]
+# }
+
+
 source_set("ini_reader") {
   sources = [
     "//third_party/inih/ini.c",
@@ -30,11 +41,17 @@ source_set("ini_reader") {
 }
 
 source_set("klytics_sources") {
+
+  deps = [
+    ":ini_reader"
+  ]
+
   public_configs = [
     ":inih",
     ":json",
     ":process_executor",
-    ":tabulate"
+    ":tabulate",
+    # ":youtube_api"
   ]
 
   include_dirs = [
@@ -44,7 +61,7 @@ source_set("klytics_sources") {
   libs = [
     "crypto",
     "cpr",
-    "curl"
+    "curl",
   ]
 
   sources = [

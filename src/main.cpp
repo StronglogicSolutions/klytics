@@ -3,6 +3,7 @@
 
 int main(int argc, char** argv) {
   klytics::KLytics k_lytics{};
+
   std::string      std_out{};
 
   if (argc > 1) {
@@ -11,7 +12,7 @@ int main(int argc, char** argv) {
         std_out += k_lytics.get_follower_count() + "\n";
       }
       if (strcmp(argv[i], "likes") == 0) {
-        std_out += "Likes feature will be implemented soon\n";
+        std_out += k_lytics.fetch_likes_count() + "\n";
       }
     }
   }
