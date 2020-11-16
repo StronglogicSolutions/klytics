@@ -34,7 +34,7 @@ virtual std::string to_string() = 0;
  *
  * @helper function
  */
-void FormatTable(tabulate::Table& table);
+void FormatTable(tabulate::Table& table, uint8_t column_num);
 
 class JSONResult : public ResultInterface {
 using counts = std::vector<FollowerCount>;
@@ -49,7 +49,8 @@ virtual std::string to_string() override {
     table.add_row({result.platform, result.name, result.value});
   }
 
-  FormatTable(table);
+  FormatTable(table, 3);
+  table.column(2).format().font_align(FontAlign::right);
 
   return table.str();
 }
@@ -130,7 +131,12 @@ std::string get_follower_count() {
  * @returns [out] {std::string}
  */
 std::string fetch_likes_count() {
-  return m_api.fetch_youtube_counts();
+  using namespace tabulate;
+
+  Table stats_table = m_api.fetch_youtube_counts();
+  FormatTable(stats_table, 7);
+  stats_table.column(2).format().font_align(FontAlign::right);
+  return stats_table.str();
 }
 
 private:

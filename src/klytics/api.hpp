@@ -1,6 +1,7 @@
 #ifndef __API_HPP__
 #define __API_HPP__
 #include <cpr/cpr.h>
+#include <tabulate/table.hpp>
 #include "auth.hpp"
 
 struct VideoStats {
@@ -59,17 +60,24 @@ std::vector<VideoInfo> fetch_channel_videos() {
     if (!items.is_null() && items.is_array() && items.size() > 0) {
       for (const auto& item : items) {
         try {
+          auto time = item["snippet"]["publishedAt"].dump();
+          SanitizeJSON(time);
+
           VideoInfo info{
             .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
             .id          = item["id"]["videoId"].dump(),
             .title       = item["snippet"]["title"].dump(),
-            .description = item["snippet"]["description"].dump()
+            .description = item["snippet"]["description"].dump(),
+            .time        = to_readable_time(time.c_str())
           };
 
           SanitizeJSON(info.channel_id);
           SanitizeJSON(info.id);
           SanitizeJSON(info.title);
           SanitizeJSON(info.description);
+          StripLineBreaks(info.title);
+
+          info.title = CreateStringWithBreaks(info.title, 40);
 
           info_v.push_back(info);
 
@@ -86,8 +94,10 @@ std::vector<VideoInfo> fetch_channel_videos() {
   return info_v;
 }
 
-std::string fetch_video_stats(std::string id_string) {
+tabulate::Table fetch_video_stats(std::string id_string) {
   using namespace constants;
+  using namespace tabulate;
+
   using json = nlohmann::json;
 
   cpr::Response r = cpr::Get(
@@ -130,24 +140,27 @@ std::string fetch_video_stats(std::string id_string) {
         }
       }
 
-      std::string results{};
+      Table table{};
+      table.add_row({"ID", "Title", "Time", "Views", "Likes", "Dislikes", "Comments"});
 
       for (const auto& info : m_video_info) {
-        results += "ID: " + info.id + "\nTitle: " + info.title + "\nDescription: " + info.description + "\nTime: " + info.time + "\nViews: " + info.stats.views + "\nLikes: " + info.stats.likes + "\nDislikes: " + info.stats.dislikes + "\n";
+        table.add_row({
+          info.id, info.title, info.time, info.stats.views, info.stats.likes, info.stats.dislikes, info.stats.comments
+        });
       }
 
-      return results;
+      return table;
     }
   }
-  return "";
+  return Table{};
 }
 
-std::string fetch_youtube_counts() {
+tabulate::Table fetch_youtube_counts() {
   using namespace constants;
   using json = nlohmann::json;
 
   if (!m_authenticator.is_authenticated() && !m_authenticator.FetchToken()) {
-    return "";
+    return tabulate::Table{};
   }
 
   m_video_info = fetch_channel_videos();
@@ -158,9 +171,7 @@ std::string fetch_youtube_counts() {
     id_string += info.id + ",";
   }
 
-  std::string video_stats = fetch_video_stats(id_string);
-
-  return video_stats;
+  return fetch_video_stats(id_string);
 }
 
 private:
