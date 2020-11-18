@@ -4,17 +4,21 @@
 #include <process.hpp>
 #include <INIReader.h>
 #include <nlohmann/json.hpp>
+#include <cpr/cpr.h>
 
 #include "constants.hpp"
 #include "util.hpp"
 
 struct AuthData {
   std::string access_token;
+  std::string refresh_token;
   std::string scope;
   std::string token_type;
   std::string expiry_date;
   std::string key;
   std::string token_app_path;
+  std::string client_id;
+  std::string client_secret;
 };
 
 class Authenticator {
@@ -38,6 +42,21 @@ Authenticator() {
   if (!youtube_key.empty()) {
     m_auth.key = youtube_key;
   }
+
+  auto refresh_token = reader.GetString(constants::GOOGLE_CONFIG_SECTION, constants::REFRESH_TOKEN, "");
+  if (!refresh_token.empty()) {
+    m_auth.refresh_token = refresh_token;
+  }
+
+  auto client_id = reader.GetString(constants::GOOGLE_CONFIG_SECTION, constants::CLIENT_ID, "");
+  if (!client_id.empty()) {
+    m_auth.client_id = client_id;
+  }
+
+  auto client_secret = reader.GetString(constants::GOOGLE_CONFIG_SECTION, constants::CLIENT_SECRET, "");
+  if (!client_secret.empty()) {
+    m_auth.client_secret = client_secret;
+  }
 }
 
 /**
@@ -47,8 +66,12 @@ Authenticator() {
  */
 bool FetchToken() {
   using json = nlohmann::json;
-  if (m_auth.access_token.empty()) {
+  if (!m_auth.refresh_token.empty()) {
+    return refresh_access_token();
+  }
 
+  if (!m_auth.token_app_path.empty()) {
+    // TODO: Replace this with our own HTTP request
     ProcessResult result = qx({m_auth.token_app_path});
 
     if (!result.error) {
@@ -67,6 +90,48 @@ bool FetchToken() {
       }
     }
   }
+  return false;
+}
+
+bool refresh_access_token() {
+  using namespace constants;
+  using json = nlohmann::json;
+
+  cpr::Response r = cpr::Post(
+    cpr::Url{URL_VALUES.at(GOOGLE_AUTH_URL_INDEX)},
+    cpr::Header{
+      {HEADER_NAMES.at(CONTENT_TYPE_INDEX), HEADER_VALUES.at(FORM_URL_ENC_INDEX)}
+    },
+    // cpr::Parameters{
+      // {PARAM_NAMES.at(CLIENT_ID_INDEX),          m_auth.client_id},
+      // {PARAM_NAMES.at(CLIENT_SECRET_INDEX),      m_auth.client_secret},
+      // {PARAM_NAMES.at(REFRESH_TOKEN_NAME_INDEX), m_auth.refresh_token},
+      // {PARAM_NAMES.at(GRANT_TYPE_INDEX),         PARAM_VALUES.at(REFRESH_TOKEN_VALUE_INDEX)}
+    // },
+    cpr::Body{
+      std::string{
+        PARAM_NAMES.at(CLIENT_ID_INDEX)          + "=" + m_auth.client_id + "&" +
+        PARAM_NAMES.at(CLIENT_SECRET_INDEX)      + "=" + m_auth.client_secret + "&" +
+        PARAM_NAMES.at(REFRESH_TOKEN_NAME_INDEX) + "=" + m_auth.refresh_token + "&" +
+        PARAM_NAMES.at(GRANT_TYPE_INDEX)         + "=" + PARAM_VALUES.at(REFRESH_TOKEN_VALUE_INDEX)
+      }
+    }
+  );
+
+  json response = json::parse(r.text);
+
+  if (!response.is_null() && response.is_object()) {
+    m_auth.access_token = response["access_token"].dump();
+    m_auth.expiry_date  = response["expires_in"].dump();
+    m_auth.scope        = response["scope"].dump();
+    m_auth.token_type   = response["token_type"].dump();
+
+    log("Refreshed token successfully");
+    m_authenticated = true;
+
+    return true;
+  }
+
   return false;
 }
 

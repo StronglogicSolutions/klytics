@@ -10,6 +10,7 @@ namespace constants {
 const uint8_t SEARCH_URL_INDEX           = 0x00;
 const uint8_t VIDEOS_URL_INDEX           = 0x01;
 const uint8_t LIVE_CHAT_URL_INDEX        = 0x02;
+const uint8_t GOOGLE_AUTH_URL_INDEX      = 0x03;
 
 // Header Name Indexes
 const uint8_t ACCEPT_HEADER_INDEX        = 0x00;
@@ -18,6 +19,7 @@ const uint8_t CONTENT_TYPE_INDEX         = 0x02;
 
 // Header Value Indexes
 const uint8_t APP_JSON_INDEX             = 0x00;
+const uint8_t FORM_URL_ENC_INDEX         = 0x01;
 
 // Param Name Indexes
 const uint8_t PART_INDEX                 = 0x00;
@@ -27,6 +29,10 @@ const uint8_t TYPE_INDEX                 = 0x03;
 const uint8_t KEY_INDEX                  = 0x04;
 const uint8_t ID_NAME_INDEX              = 0x05;
 const uint8_t LIVE_CHAT_ID_INDEX         = 0x06;
+const uint8_t CLIENT_ID_INDEX            = 0x07;
+const uint8_t CLIENT_SECRET_INDEX        = 0x08;
+const uint8_t REFRESH_TOKEN_NAME_INDEX   = 0x09;
+const uint8_t GRANT_TYPE_INDEX           = 0x0A;
 
 // Param Value Indexes
 const uint8_t CHAN_KEY_INDEX             = 0x00;
@@ -38,12 +44,15 @@ const uint8_t LIVESTREAM_DETAILS_INDEX   = 0x05;
 const uint8_t KY_CHAN_KEY_INDEX          = 0x06;
 const uint8_t STATISTICS_INDEX           = 0x07;
 const uint8_t ID_VALUE_INDEX             = 0x08;
+const uint8_t REFRESH_TOKEN_VALUE_INDEX  = 0x09;
 
 // Strings
 const std::vector<std::string> URL_VALUES{
   "https://www.googleapis.com/youtube/v3/search",
   "https://www.googleapis.com/youtube/v3/videos",
-  "https://www.googleapis.com/youtube/v3/liveChat/messages"
+  "https://www.googleapis.com/youtube/v3/liveChat/messages",
+  "https://oauth2.googleapis.com/token"
+  // "https://www.googleapis.com/oauth2/v3/token"
 };
 
 const std::vector<std::string> HEADER_NAMES{
@@ -53,7 +62,8 @@ const std::vector<std::string> HEADER_NAMES{
 };
 
 const std::vector<std::string> HEADER_VALUES{
-  "application/json"
+  "application/json",
+  "application/x-www-form-urlencoded"
 };
 
 const std::vector<std::string> PARAM_NAMES = {
@@ -63,7 +73,11 @@ const std::vector<std::string> PARAM_NAMES = {
   "type",
   "key",
   "id",
-  "liveChatId"
+  "liveChatId",
+  "client_id",
+  "client_secret",
+  "refresh_token",
+  "grant_type"
 };
 
 const std::vector<std::string> PARAM_VALUES{
@@ -85,11 +99,16 @@ const std::vector<std::string> PARAM_VALUES{
   "liveStreamingDetails",
   "S15j0LRydks",
   "statistics",
-  "id"
+  "id",
+  "refresh_token",
 };
 
 const std::string E_CHANNEL_ID{"UCFP7BAwQIzqml"};
 const std::string DEFAULT_CONFIG_PATH{"config/config.ini"};
+const std::string GOOGLE_CONFIG_SECTION{"google"};
+const std::string REFRESH_TOKEN{"refresh_token"};
+const std::string CLIENT_ID{"client_id"};
+const std::string CLIENT_SECRET{"client_secret"};
 const std::string YOUTUBE_KEY{"key"};
 const std::string YOUTUBE_CONFIG_SECTION{"youtube"};
 const std::string YOUTUBE_TOKEN_APP{"token_app"};
