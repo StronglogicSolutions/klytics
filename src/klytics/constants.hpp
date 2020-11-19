@@ -33,6 +33,8 @@ const uint8_t CLIENT_ID_INDEX            = 0x07;
 const uint8_t CLIENT_SECRET_INDEX        = 0x08;
 const uint8_t REFRESH_TOKEN_NAME_INDEX   = 0x09;
 const uint8_t GRANT_TYPE_INDEX           = 0x0A;
+const uint8_t ORDER_INDEX                = 0x0B;
+const uint8_t MAX_RESULT_INDEX           = 0x0C;
 
 // Param Value Indexes
 const uint8_t CHAN_KEY_INDEX             = 0x00;
@@ -45,6 +47,8 @@ const uint8_t KY_CHAN_KEY_INDEX          = 0x06;
 const uint8_t STATISTICS_INDEX           = 0x07;
 const uint8_t ID_VALUE_INDEX             = 0x08;
 const uint8_t REFRESH_TOKEN_VALUE_INDEX  = 0x09;
+const uint8_t DATE_VALUE_INDEX           = 0x0A;
+const uint8_t CONTENT_DETAILS_INDEX      = 0x0B;
 
 // Strings
 const std::vector<std::string> URL_VALUES{
@@ -77,7 +81,9 @@ const std::vector<std::string> PARAM_NAMES = {
   "client_id",
   "client_secret",
   "refresh_token",
-  "grant_type"
+  "grant_type",
+  "order",
+  "maxResults"
 };
 
 const std::vector<std::string> PARAM_VALUES{
@@ -101,6 +107,8 @@ const std::vector<std::string> PARAM_VALUES{
   "statistics",
   "id",
   "refresh_token",
+  "date",
+  "contentDetails"
 };
 
 const std::string E_CHANNEL_ID{"UCFP7BAwQIzqml"};
@@ -117,6 +125,14 @@ const std::string YOUTUBE_GREET{"greet"};
 const std::string YOUTUBE_TEST_MODE{"test_mode"};
 const std::string YOUTUBE_RETRY_MODE{"retry"};
 
+inline const std::string VideoParamsFull() {
+  return std::string{
+    PARAM_VALUES.at(SNIPPET_INDEX) + "," +
+    PARAM_VALUES.at(CONTENT_DETAILS_INDEX) + "," +
+    PARAM_VALUES.at(STATISTICS_INDEX)
+  };
+        //  + "," + PARAM_VALUES.at(ID_VALUE_INDEX)
+}
 } // namespace constants
 
 #endif // __YOUTUBE_CONSTANTS_HPP__

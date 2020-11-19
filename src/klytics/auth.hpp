@@ -102,12 +102,6 @@ bool refresh_access_token() {
     cpr::Header{
       {HEADER_NAMES.at(CONTENT_TYPE_INDEX), HEADER_VALUES.at(FORM_URL_ENC_INDEX)}
     },
-    // cpr::Parameters{
-      // {PARAM_NAMES.at(CLIENT_ID_INDEX),          m_auth.client_id},
-      // {PARAM_NAMES.at(CLIENT_SECRET_INDEX),      m_auth.client_secret},
-      // {PARAM_NAMES.at(REFRESH_TOKEN_NAME_INDEX), m_auth.refresh_token},
-      // {PARAM_NAMES.at(GRANT_TYPE_INDEX),         PARAM_VALUES.at(REFRESH_TOKEN_VALUE_INDEX)}
-    // },
     cpr::Body{
       std::string{
         PARAM_NAMES.at(CLIENT_ID_INDEX)          + "=" + m_auth.client_id + "&" +

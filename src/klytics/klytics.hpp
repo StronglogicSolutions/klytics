@@ -127,13 +127,13 @@ std::string get_follower_count() {
 }
 
 /**
- * get_follower_count
+ * fetch_video_stats
  * @returns [out] {std::string}
  */
-std::string fetch_likes_count() {
+std::string fetch_video_stats() {
   using namespace tabulate;
 
-  Table stats_table = m_api.fetch_youtube_counts();
+  Table stats_table = m_api.fetch_youtube_stats();
   FormatTable(stats_table, 7);
   stats_table.column(2).format().font_align(FontAlign::right);
   return stats_table.str();

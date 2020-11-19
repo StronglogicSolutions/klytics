@@ -12,12 +12,19 @@ std::string comments;
 };
 
 struct VideoInfo {
-std::string channel_id;
-std::string id;
-std::string title;
-std::string description;
-std::string time;
-VideoStats  stats;
+std::string              channel_id;
+std::string              id;
+std::string              title;
+std::string              description;
+std::string              time;
+std::vector<std::string> keywords;
+VideoStats               stats;
+};
+
+struct Findings {
+std::vector<VideoInfo> videos;
+
+bool has_videos() { return !videos.empty(); }
 };
 
 class API {
@@ -45,11 +52,13 @@ std::vector<VideoInfo> fetch_channel_videos() {
       {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}
     },
     cpr::Parameters{
-      {PARAM_NAMES.at(PART_INDEX),    PARAM_VALUES.at(SNIPPET_INDEX)},
-      {PARAM_NAMES.at(KEY_INDEX),     m_authenticator.get_key()},
-      {PARAM_NAMES.at(CHAN_ID_INDEX), PARAM_VALUES.at(CHAN_KEY_INDEX)},
-      {PARAM_NAMES.at(EVENT_T_INDEX), PARAM_VALUES.at(COMPLETED_EVENT_TYPE_INDEX)},
-      {PARAM_NAMES.at(TYPE_INDEX),    PARAM_VALUES.at(VIDEO_TYPE_INDEX)}
+      {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},              // snippet
+      {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},                   // key
+      {PARAM_NAMES.at(CHAN_ID_INDEX),    PARAM_VALUES.at(CHAN_KEY_INDEX)},             // channel id
+      {PARAM_NAMES.at(EVENT_T_INDEX),    PARAM_VALUES.at(COMPLETED_EVENT_TYPE_INDEX)}, // event type
+      {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)},           // type
+      {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(DATE_VALUE_INDEX)},           // order by
+      {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                            // limit
     }
   );
 
@@ -60,24 +69,13 @@ std::vector<VideoInfo> fetch_channel_videos() {
     if (!items.is_null() && items.is_array() && items.size() > 0) {
       for (const auto& item : items) {
         try {
-          auto time = item["snippet"]["publishedAt"].dump();
-          SanitizeJSON(time);
-
           VideoInfo info{
             .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
-            .id          = item["id"]["videoId"].dump(),
-            .title       = item["snippet"]["title"].dump(),
-            .description = item["snippet"]["description"].dump(),
-            .time        = to_readable_time(time.c_str())
+            .id          = SanitizeJSON(item["id"]["videoId"].dump()),
+            .title       = /*CreateStringWithBreaks(*/StripLineBreaks(SanitizeJSON(item["snippet"]["title"].dump()))/*, 35)*/,
+            .description = SanitizeJSON(item["snippet"]["description"].dump()),
+            .time        = to_readable_time(SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str())
           };
-
-          SanitizeJSON(info.channel_id);
-          SanitizeJSON(info.id);
-          SanitizeJSON(info.title);
-          SanitizeJSON(info.description);
-          StripLineBreaks(info.title);
-
-          info.title = CreateStringWithBreaks(info.title, 40);
 
           info_v.push_back(info);
 
@@ -107,7 +105,7 @@ tabulate::Table fetch_video_stats(std::string id_string) {
       {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}
     },
     cpr::Parameters{
-      {PARAM_NAMES.at(PART_INDEX),    PARAM_VALUES.at(STATISTICS_INDEX) + "," + PARAM_VALUES.at(ID_VALUE_INDEX)},
+      {PARAM_NAMES.at(PART_INDEX),    VideoParamsFull()},
       {PARAM_NAMES.at(KEY_INDEX),     m_authenticator.get_key()},
       {PARAM_NAMES.at(ID_NAME_INDEX), id_string}
     }
@@ -117,21 +115,16 @@ tabulate::Table fetch_video_stats(std::string id_string) {
 
   if (!video_info.is_null() && video_info.is_object()) {
     auto items = video_info["items"];
-    if (!items.is_null() && items.is_array() && items.size() == m_video_info.size()) {
+    if (!items.is_null() && items.is_array() && items.size() == m_findings.videos.size()) {
       for (int i = 0; i < items.size(); i++) {
         try {
           const auto& item = items.at(i);
-          VideoInfo& info  = m_video_info.at(i);
+          VideoInfo& info  = m_findings.videos.at(i);
 
-          info.stats.views    = item["statistics"]["viewCount"].dump();
-          info.stats.likes    = item["statistics"]["likeCount"].dump();
-          info.stats.dislikes = item["statistics"]["dislikeCount"].dump();
-          info.stats.comments = item["statistics"]["commentCount"].dump();
-
-          SanitizeJSON(info.stats.views);
-          SanitizeJSON(info.stats.likes);
-          SanitizeJSON(info.stats.dislikes);
-          SanitizeJSON(info.stats.comments);
+          info.stats.views    = SanitizeJSON(item["statistics"]["viewCount"].dump());
+          info.stats.likes    = SanitizeJSON(item["statistics"]["likeCount"].dump());
+          info.stats.dislikes = SanitizeJSON(item["statistics"]["dislikeCount"].dump());
+          info.stats.comments = SanitizeJSON(item["statistics"]["commentCount"].dump());
 
         } catch (const std::exception& e) {
           std::string error_message{"Exception was caught: "};
@@ -143,9 +136,9 @@ tabulate::Table fetch_video_stats(std::string id_string) {
       Table table{};
       table.add_row({"ID", "Title", "Time", "Views", "Likes", "Dislikes", "Comments"});
 
-      for (const auto& info : m_video_info) {
+      for (const auto& video : m_findings.videos) {
         table.add_row({
-          info.id, info.title, info.time, info.stats.views, info.stats.likes, info.stats.dislikes, info.stats.comments
+          video.id, video.title, video.time, video.stats.views, video.stats.likes, video.stats.dislikes, video.stats.comments
         });
       }
 
@@ -155,7 +148,7 @@ tabulate::Table fetch_video_stats(std::string id_string) {
   return Table{};
 }
 
-tabulate::Table fetch_youtube_counts() {
+tabulate::Table fetch_youtube_stats() {
   using namespace constants;
   using json = nlohmann::json;
 
@@ -163,11 +156,11 @@ tabulate::Table fetch_youtube_counts() {
     return tabulate::Table{};
   }
 
-  m_video_info = fetch_channel_videos();
+  m_findings.videos = fetch_channel_videos();
 
   std::string id_string{};
 
-  for (const auto& info : m_video_info) {
+  for (const auto& info : m_findings.videos) {
     id_string += info.id + ",";
   }
 
@@ -176,7 +169,7 @@ tabulate::Table fetch_youtube_counts() {
 
 private:
 Authenticator          m_authenticator;
-std::vector<VideoInfo> m_video_info;
+Findings               m_findings;
 };
 
 #endif // __API_HPP__

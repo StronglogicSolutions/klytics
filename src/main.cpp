@@ -11,8 +11,8 @@ int main(int argc, char** argv) {
       if (strcmp(argv[i], "followers") == 0) {
         std_out += k_lytics.get_follower_count() + "\n";
       }
-      if (strcmp(argv[i], "likes") == 0) {
-        std_out += k_lytics.fetch_likes_count() + "\n";
+      if (strcmp(argv[i], "stats") == 0) {
+        std_out += k_lytics.fetch_video_stats() + "\n";
       }
     }
   }

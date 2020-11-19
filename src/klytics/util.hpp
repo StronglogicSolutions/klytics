@@ -19,11 +19,12 @@ inline void log(T s) {
  *
  * @param [in] {std::string&} A reference to a string object
  */
-inline void SanitizeJSON(std::string& s) {
+inline std::string SanitizeJSON(std::string s) {
   s.erase(
     std::remove(s.begin(), s.end(),'\"'),
     s.end()
   );
+  return s;
 }
 
 /**
@@ -33,11 +34,13 @@ inline void SanitizeJSON(std::string& s) {
  *
  * @param [in] {std::string&} A reference to a string object
  */
-inline void StripLineBreaks(std::string& s) {
+inline std::string StripLineBreaks(std::string s) {
   s.erase(
     std::remove(s.begin(), s.end(),'\n'),
     s.end()
   );
+
+  return s;
 }
 
 inline std::string CreateStringWithBreaks(const std::string &in, const size_t every_n) {
