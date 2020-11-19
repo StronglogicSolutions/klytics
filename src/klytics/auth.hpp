@@ -26,7 +26,7 @@ class Authenticator {
 public:
 
 Authenticator() {
-  INIReader reader{constants::DEFAULT_CONFIG_PATH};
+  INIReader reader{std::string{get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH}};
 
   if (reader.ParseError() < 0) {
     log("Error loading config");
