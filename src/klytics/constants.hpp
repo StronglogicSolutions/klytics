@@ -35,6 +35,7 @@ const uint8_t REFRESH_TOKEN_NAME_INDEX   = 0x09;
 const uint8_t GRANT_TYPE_INDEX           = 0x0A;
 const uint8_t ORDER_INDEX                = 0x0B;
 const uint8_t MAX_RESULT_INDEX           = 0x0C;
+const uint8_t QUERY_INDEX                = 0x0D;
 
 // Param Value Indexes
 const uint8_t CHAN_KEY_INDEX             = 0x00;
@@ -49,6 +50,7 @@ const uint8_t ID_VALUE_INDEX             = 0x08;
 const uint8_t REFRESH_TOKEN_VALUE_INDEX  = 0x09;
 const uint8_t DATE_VALUE_INDEX           = 0x0A;
 const uint8_t CONTENT_DETAILS_INDEX      = 0x0B;
+const uint8_t VIEW_COUNT_INDEX           = 0x0C;
 
 // Strings
 const std::vector<std::string> URL_VALUES{
@@ -83,7 +85,8 @@ const std::vector<std::string> PARAM_NAMES = {
   "refresh_token",
   "grant_type",
   "order",
-  "maxResults"
+  "maxResults",
+  "q"
 };
 
 const std::vector<std::string> PARAM_VALUES{
@@ -108,7 +111,8 @@ const std::vector<std::string> PARAM_VALUES{
   "id",
   "refresh_token",
   "date",
-  "contentDetails"
+  "contentDetails",
+  "viewCount"
 };
 
 const std::string E_CHANNEL_ID{"UCFP7BAwQIzqml"};

@@ -139,6 +139,15 @@ std::string fetch_video_stats() {
   return stats_table.str();
 }
 
+std::vector<VideoInfo> get_youtube_videos() {
+  return m_api.get_videos();
+}
+
+std::vector<VideoInfo> get_rival_videos(VideoInfo video) {
+  return m_api.fetch_rival_videos(video);
+}
+
+
 private:
 API m_api;
 };

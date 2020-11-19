@@ -27,6 +27,23 @@ std::vector<VideoInfo> videos;
 bool has_videos() { return !videos.empty(); }
 };
 
+inline std::vector<std::string> keywords_from_string(std::string s) {
+  std::vector<std::string> keywords;
+
+  if (s.size() > 2) {
+    s = s.substr(1, s.size() - 2);
+    size_t start;
+    size_t end{0};
+    auto delim = ",";
+
+    while ((start = s.find_first_not_of(delim, end)) != std::string::npos) {
+      end = s.find(delim, start);
+      keywords.push_back(s.substr(start, end - start));
+    }
+  }
+  return keywords;
+}
+
 class API {
 
 public:
@@ -72,7 +89,7 @@ std::vector<VideoInfo> fetch_channel_videos() {
           VideoInfo info{
             .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
             .id          = SanitizeJSON(item["id"]["videoId"].dump()),
-            .title       = /*CreateStringWithBreaks(*/StripLineBreaks(SanitizeJSON(item["snippet"]["title"].dump()))/*, 35)*/,
+            .title       = StripLineBreaks(SanitizeJSON(item["snippet"]["title"].dump())),
             .description = SanitizeJSON(item["snippet"]["description"].dump()),
             .time        = to_readable_time(SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str())
           };
@@ -125,6 +142,7 @@ tabulate::Table fetch_video_stats(std::string id_string) {
           info.stats.likes    = SanitizeJSON(item["statistics"]["likeCount"].dump());
           info.stats.dislikes = SanitizeJSON(item["statistics"]["dislikeCount"].dump());
           info.stats.comments = SanitizeJSON(item["statistics"]["commentCount"].dump());
+          info.keywords       = keywords_from_string(SanitizeJSON(item["snippet"]["tags"].dump()));
 
         } catch (const std::exception& e) {
           std::string error_message{"Exception was caught: "};
@@ -165,6 +183,64 @@ tabulate::Table fetch_youtube_stats() {
   }
 
   return fetch_video_stats(id_string);
+}
+
+std::vector<VideoInfo> fetch_rival_videos(VideoInfo video) {
+  using namespace constants;
+  using json = nlohmann::json;
+
+  auto search_term = video.keywords.front();
+
+  std::vector<VideoInfo> info_v{};
+
+  cpr::Response r = cpr::Get(
+    cpr::Url{URL_VALUES.at(SEARCH_URL_INDEX)},
+    cpr::Header{
+      {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
+      {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}
+    },
+    cpr::Parameters{
+      {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},              // snippet
+      {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},                   // key
+      {PARAM_NAMES.at(QUERY_INDEX),      search_term},                                 // query term
+      {PARAM_NAMES.at(EVENT_T_INDEX),    PARAM_VALUES.at(COMPLETED_EVENT_TYPE_INDEX)}, // event type
+      {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)},           // type
+      {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(VIEW_COUNT_INDEX)},           // order by
+      {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                            // limit
+    }
+  );
+
+  json video_info = json::parse(r.text);
+
+  if (!video_info.is_null() && video_info.is_object()) {
+    auto items = video_info["items"];
+    if (!items.is_null() && items.is_array()) {
+      for (const auto& item : items) {
+        try {
+          VideoInfo info{
+            .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
+            .id          = SanitizeJSON(item["id"]["videoId"].dump()),
+            .title       = StripLineBreaks(SanitizeJSON(item["snippet"]["title"].dump())),
+            .description = SanitizeJSON(item["snippet"]["description"].dump()),
+            .time        = to_readable_time(SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str())
+          };
+
+          info_v.push_back(info);
+
+        } catch (const std::exception& e) {
+          std::string error_message{"Exception was caught: "};
+          error_message += e.what();
+          log(error_message);
+        }
+      }
+      log("Fetched rival videos");
+    }
+  }
+  return info_v;
+}
+
+std::vector<VideoInfo> get_videos() {
+  return m_findings.videos;
 }
 
 private:
