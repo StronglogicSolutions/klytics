@@ -143,7 +143,7 @@ std::vector<VideoInfo> get_youtube_videos() {
   return m_api.get_videos();
 }
 
-std::vector<VideoInfo> get_rival_videos(VideoInfo video) {
+std::vector<VideoInfo> find_similar_videos(VideoInfo video) {
   return m_api.fetch_rival_videos(video);
 }
 
