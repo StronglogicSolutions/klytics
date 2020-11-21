@@ -3,6 +3,7 @@
 
 #include <ctime>
 #include <iomanip>
+#include <ctype.h>
 
 /**
  * Poor man's log
@@ -44,13 +45,20 @@ inline std::string StripLineBreaks(std::string s) {
 }
 
 inline std::string CreateStringWithBreaks(const std::string &in, const size_t every_n) {
-  std::string out;
+  std::string out{};
   out.reserve(in.size() + in.size() / every_n);
+  uint8_t prev_count{0};
+
   for(std::string::size_type i = 0; i < in.size(); i++) {
-      if (!(i % every_n) && i) {
-          out.push_back('\n');
-      }
-      out.push_back(in[i]);
+    if (!(i % every_n) && i) {
+      out.push_back('\n');
+    }
+
+    out.push_back(
+      (isascii(static_cast<uint8_t>(in[i]))) ?
+        in[i] :
+        ' '
+    );
   }
   return out;
 }
