@@ -8,8 +8,8 @@
 #include <process.hpp>
 #include <nlohmann/json.hpp>
 #include <tabulate/table.hpp>
-#include "api.hpp"
 
+#include "api/api.hpp"
 
 namespace klytics {
 namespace constants {
@@ -28,13 +28,6 @@ class ResultInterface {
 public:
 virtual std::string to_string() = 0;
 };
-
-/**
- * FormatTable
- *
- * @helper function
- */
-void FormatTable(tabulate::Table& table, uint8_t column_num);
 
 class JSONResult : public ResultInterface {
 using counts = std::vector<FollowerCount>;
@@ -109,10 +102,10 @@ public:
 
 
 /**
- * get_follower_count
+ * fetch_follower_count
  * @returns [out] {std::string}
  */
-std::string get_follower_count() {
+std::string fetch_follower_count() {
   ProcessResult result = execute(constants::FOLLOWER_APP);
   if (result.error) {
     return "Error executing followers app";
@@ -126,27 +119,69 @@ std::string get_follower_count() {
   return "Error processing followers app data";
 }
 
+
 /**
- * fetch_video_stats
+ * generate_report
+ *
  * @returns [out] {std::string}
  */
-std::string fetch_video_stats() {
+std::string generate_report() {
   using namespace tabulate;
 
-  Table stats_table = m_api.fetch_youtube_stats();
-  FormatTable(stats_table, 7);
-  stats_table.column(2).format().font_align(FontAlign::right);
-  return stats_table.str();
+  std::string::size_type extra_text_size{102};
+
+  std::string            output, video_stats_output, competitor_stats_output;
+  std::string            follower_count = fetch_follower_count();
+  std::vector<VideoInfo> videos         = m_api.fetch_youtube_stats();
+
+  if (!videos.empty()) {
+    video_stats_output      = table_to_formatted_string(videos_to_table(videos));
+    competitor_stats_output = table_to_formatted_string(videos_to_table(m_api.find_similar_videos(videos.front())));
+  }
+
+  output.resize(follower_count.size() + video_stats_output.size() + competitor_stats_output.size() + extra_text_size);
+
+  output += "FOLLOWER COUNT\n\n";
+  output += follower_count;
+  output += "\n\n";
+  output += "LATEST VIDEOS\n\n";
+  output += video_stats_output;
+  output += "\n\n";
+  output += "COMPETITOR VIDEOS (based on your most recent video)\n\n";
+  output += competitor_stats_output;
+  output += "\n\n";
+  output += "Thank you!!!";
+
+  return output;
 }
 
+/**
+ * generate_video_stats_table
+ *
+ * @returns [out] {std::string}
+ */
+std::string generate_video_stats_table() {
+  return table_to_formatted_string(
+    videos_to_table(
+      m_api.fetch_youtube_stats()
+    )
+  );
+}
+
+/**
+ * fetch_videos
+ */
+std::vector<VideoInfo> fetch_videos() {
+  return m_api.fetch_channel_videos();
+}
+/**
+ * get_youtube_videos
+ *
+ * @returns [out] {std::vector<VideoInfo}
+ */
 std::vector<VideoInfo> get_youtube_videos() {
   return m_api.get_videos();
 }
-
-std::vector<VideoInfo> find_similar_videos(VideoInfo video) {
-  return m_api.fetch_rival_videos(video);
-}
-
 
 private:
 API m_api;

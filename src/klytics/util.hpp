@@ -7,6 +7,8 @@
 
 /**
  * Poor man's log
+ *
+ * @param
  */
 template<typename T>
 inline void log(T s) {
@@ -18,7 +20,8 @@ inline void log(T s) {
  *
  * Helper function to remove escaped double quotes from a string
  *
- * @param [in] {std::string&} A reference to a string object
+ * @param   [in] {std::string}
+ * @returns [in] {std::string}
  */
 inline std::string SanitizeJSON(std::string s) {
   s.erase(
@@ -44,26 +47,30 @@ inline std::string StripLineBreaks(std::string s) {
   return s;
 }
 
+/**
+ * CreateStringWithBreaks
+ *
+ * @param
+ * @param
+ * @returns
+ */
 inline std::string CreateStringWithBreaks(const std::string &in, const size_t every_n) {
   std::string out{};
   out.reserve(in.size() + in.size() / every_n);
-  uint8_t prev_count{0};
-
   for(std::string::size_type i = 0; i < in.size(); i++) {
-    if (!(i % every_n) && i) {
-      out.push_back('\n');
-    }
-
-    out.push_back(
-      (isascii(static_cast<uint8_t>(in[i]))) ?
-        in[i] :
-        ' '
-    );
+    (isascii(static_cast<uint8_t>(in[i]))) ?
+    (!(i % every_n) && i) ? out.push_back('\n') : out.push_back(in[i]) :
+    (void)(out);
   }
   return out;
 }
 
-
+/**
+ * to_unixtime
+ *
+ * @param
+ * @returns
+ */
 inline const std::time_t to_unixtime(const char* datetime) {
   std::tm            t{};
   std::istringstream ss{datetime};
@@ -73,6 +80,12 @@ inline const std::time_t to_unixtime(const char* datetime) {
   return mktime(&t);
 }
 
+/**
+ * to_readable_time
+ *
+ * @param
+ * @returns
+ */
 inline std::string to_readable_time(const char* datetime) {
   uint8_t            buffer_size{24};
   std::tm            t{};
@@ -84,6 +97,5 @@ inline std::string to_readable_time(const char* datetime) {
 
   return std::string{b};
 }
-
 
 #endif // __UTIL_HPP__

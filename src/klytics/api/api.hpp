@@ -2,8 +2,14 @@
 #define __API_HPP__
 #include <cpr/cpr.h>
 #include <tabulate/table.hpp>
-#include "auth.hpp"
 
+#include "klytics/auth/auth.hpp"
+
+/**
+  ┌───────────────────────────────────────────────────────────┐
+  │░░░░░░░░░░░░░░░░░░░░░░░░░░ STRUCTS ░░░░░░░░░░░░░░░░░░░░░░░│
+  └───────────────────────────────────────────────────────────┘
+*/
 struct VideoStats {
 std::string              views;
 std::string              likes;
@@ -23,11 +29,22 @@ VideoStats               stats;
 };
 
 struct Findings {
-std::vector<VideoInfo> videos;
-
 bool has_videos() { return !videos.empty(); }
+std::vector<VideoInfo> videos;
 };
 
+/**
+  ┌───────────────────────────────────────────────────────────┐
+  │░░░░░░░░░░░░░░░░░░░░░░░░░░ FUNCTIONS ░░░░░░░░░░░░░░░░░░░░░░░│
+  └───────────────────────────────────────────────────────────┘
+*/
+
+/**
+ * keywords_from_string
+ *
+ * @param
+ * @returns
+ */
 inline std::vector<std::string> keywords_from_string(std::string s) {
   std::vector<std::string> keywords;
 
@@ -45,12 +62,25 @@ inline std::vector<std::string> keywords_from_string(std::string s) {
   return keywords;
 }
 
+
+/**
+ * youtube_id_to_url
+ *
+ * @param
+ * @returns
+ */
 inline std::string youtube_id_to_url(std::string id) {
   return std::string{
     "https://youtube.com/watch?v=" + id
   };
 }
 
+/**
+ * tags_to_string
+ *
+ * @param
+ * @returns
+ */
 inline std::string tags_to_string(std::vector<std::string> tags) {
   std::string s{};
   s.reserve(tags.size() * 9);
@@ -60,21 +90,55 @@ inline std::string tags_to_string(std::vector<std::string> tags) {
   return s;
 }
 
+/**
+ * FormatTable
+ *
+ * @param
+ * @param
+ */
+void FormatTable(tabulate::Table& table, uint8_t column_num);
+
+/**
+ * videos_to_table
+ */
 inline tabulate::Table videos_to_table(const std::vector<VideoInfo>& videos) {
   using namespace tabulate;
 
   Table table{};
-  table.add_row({"ID", "Title", "Time", "Views", "Likes", "Dislikes", "Comments", "Tags"});
 
-  for (const auto& video : videos) {
-    table.add_row({
-      video.id, video.title, video.time, video.stats.views, video.stats.likes, video.stats.dislikes, video.stats.comments, tags_to_string(video.stats.keywords)
-    });
+  if (!videos.empty()) {
+    table.add_row({"ID", "Title", "Time", "Views", "Likes", "Dislikes", "Comments", "Tags"});
+
+    for (const auto& video : videos) {
+      table.add_row({
+        video.id, video.title, video.time, video.stats.views, video.stats.likes, video.stats.dislikes, video.stats.comments, tags_to_string(video.stats.keywords)
+      });
+    }
   }
-
   return table;
 }
 
+/**
+ * fetch_video_stats
+ * @returns [out] {std::string}
+ */
+inline std::string table_to_formatted_string(tabulate::Table table) {
+  using namespace tabulate;
+
+  try {
+    FormatTable(table, 7);
+    table.column(2).format().font_align(FontAlign::right);
+  } catch (const std::exception& e) {
+    log(e.what());
+  }
+  return table.str();
+}
+
+/**
+  ┌───────────────────────────────────────────────────────────┐
+  │░░░░░░░░░░░░░░░░░░░░░░░░░░ API CLASS ░░░░░░░░░░░░░░░░░░░░░░░│
+  └───────────────────────────────────────────────────────────┘
+*/
 class API {
 
 public:
@@ -195,9 +259,16 @@ std::vector<VideoStats> fetch_video_stats(std::string id_string) {
   return stats;
 }
 
-tabulate::Table fetch_youtube_stats() {
+/**
+ * fetch_youtube_stats
+ *
+ * @returns [out] {std::vector<VideoInfo}
+ */
+std::vector<VideoInfo> fetch_youtube_stats() {
   using namespace constants;
   using json = nlohmann::json;
+
+  m_findings.videos.clear();
 
   if (m_authenticator.is_authenticated() || m_authenticator.FetchToken()) {
     m_findings.videos = fetch_channel_videos();
@@ -214,11 +285,9 @@ tabulate::Table fetch_youtube_stats() {
       for (uint8_t i = 0; i < stats_size; i++) {
         m_findings.videos.at(i).stats = stats.at(i);
       }
-
-      return videos_to_table(m_findings.videos);
     }
   }
-  return tabulate::Table{};
+  return m_findings.videos;
 }
 
 std::vector<VideoInfo> fetch_rival_videos(VideoInfo video) {
@@ -291,6 +360,19 @@ std::vector<VideoInfo> fetch_rival_videos(VideoInfo video) {
   return info_v;
 }
 
+/**
+ * find_similar_videos
+ *
+ * @param   [in]  {VideoInfo}
+ * @returns [out] {std::vector<VideoInfo>}
+ */
+std::vector<VideoInfo> find_similar_videos(VideoInfo video) {
+  return fetch_rival_videos(video);
+}
+
+/**
+ * get_videos
+ */
 std::vector<VideoInfo> get_videos() {
   return m_findings.videos;
 }

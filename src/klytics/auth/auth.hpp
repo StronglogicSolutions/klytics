@@ -6,8 +6,8 @@
 #include <nlohmann/json.hpp>
 #include <cpr/cpr.h>
 
-#include "constants.hpp"
-#include "util.hpp"
+#include "klytics/constants.hpp"
+#include "klytics/util.hpp"
 
 struct AuthData {
   std::string access_token;
