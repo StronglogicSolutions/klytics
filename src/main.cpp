@@ -20,8 +20,8 @@ int main(int argc, char** argv) {
       if (arg.compare("report") == 0) {
         std_out += k_lytics.generate_report()    + "\n";
       }
-      if (arg.compare("test") == 0) {
-        std_out += "TEST!\n";
+      if (arg.compare("html") == 0) {
+        std_out += test_html();
       }
     }
   }
