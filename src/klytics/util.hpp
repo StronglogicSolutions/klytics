@@ -40,8 +40,11 @@ inline std::string SanitizeJSON(std::string s) {
  * @returns [in] {std::string}
  */
 inline std::string SanitizeInput(std::string s) {
-  s.erase(std::remove(s.begin(), s.end(), '\''), s.end());
-  s.erase(std::remove(s.begin(), s.end(), '\"'), s.end());
+  s.erase(
+    std::remove_if(s.begin(), s.end(), [](char c){
+      return c == '\'' || c == '\"';
+    }),
+  s.end());
 
   return s;
 }
