@@ -5,10 +5,14 @@
 #include <ctime>
 #include <cpr/cpr.h>
 #include <string>
-#include <process.hpp>
+
 #include <nlohmann/json.hpp>
 #include <tabulate/table.hpp>
 #include <HTML/HTML.h>
+
+#include "process.hpp"
+#include "api/api.hpp"
+
 
 inline std::string test_html() {
   HTML::Document document("Welcome to HTML");
@@ -77,10 +81,8 @@ inline std::string test_html() {
     document << HTML::Script("https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js")
         .integrity("sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM").crossorigin("anonymous");
 
-    return document.toString();
+    return SanitizeOutput(document.toString());
 }
-
-#include "api/api.hpp"
 
 namespace klytics {
 namespace constants {

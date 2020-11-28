@@ -15,6 +15,22 @@ inline void log(T s) {
   std::cout << s << std::endl;
 }
 
+inline std::string SanitizeOutput(std::string s) {
+  std::string o{};
+
+  for (const char& c : s) {
+    if (c == '\'')
+      o += "\\'";
+    else
+    if (c == '"')
+      o += "\\\"";
+    else
+      o += c;
+  }
+
+  return o;
+}
+
 /**
  * SanitizeJSON
  *
