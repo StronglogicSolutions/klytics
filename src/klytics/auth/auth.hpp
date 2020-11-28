@@ -83,7 +83,7 @@ bool FetchToken() {
         m_auth.token_type   = auth_json["token_type"].dump();
         m_auth.expiry_date  = auth_json["expiry_date"].dump();
 
-        log("Fetched token successfully");
+        // log("Fetched token successfully");
         m_authenticated = true;
 
         return true;
@@ -120,7 +120,7 @@ bool refresh_access_token() {
     m_auth.scope        = response["scope"].dump();
     m_auth.token_type   = response["token_type"].dump();
 
-    log("Refreshed token successfully");
+    // log("Refreshed token successfully");
     m_authenticated = true;
 
     return true;

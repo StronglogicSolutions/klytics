@@ -201,7 +201,7 @@ std::vector<VideoInfo> fetch_channel_videos() {
         }
       }
     }
-    log("Fetched video info for channel " + PARAM_VALUES.at(CHAN_KEY_INDEX));
+    // log("Fetched video info for channel " + PARAM_VALUES.at(CHAN_KEY_INDEX));
   }
 
   return info_v;
@@ -345,7 +345,7 @@ std::vector<VideoInfo> fetch_rival_videos(VideoInfo video) {
           log(error_message);
         }
       }
-      log("Fetched rival videos");
+      // log("Fetched rival videos");
     }
   }
 

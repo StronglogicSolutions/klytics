@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdio.h>
 #include "klytics/klytics.hpp"
 
 int main(int argc, char** argv) {
@@ -8,16 +9,20 @@ int main(int argc, char** argv) {
 
   if (argc > 1) {
     for (int i = 1; i < argc; i++) {
-      if (strcmp(argv[i], "followers") == 0) {
+      std::string arg = SanitizeInput(arg);
+
+      if (arg.compare("followers") == 0) {
         std_out += k_lytics.fetch_follower_count() + "\n";
       }
-      if (strcmp(argv[i], "stats") == 0) {
+      if (arg.compare("stats") == 0) {
         std_out += k_lytics.generate_video_stats_table()  + "\n";
       }
-      if (strcmp(argv[i], "report") == 0) {
+      if (arg.compare("report") == 0) {
         std_out += k_lytics.generate_report()    + "\n";
       }
-
+      if (arg.compare("test") == 0) {
+        std_out += "TEST!\n";
+      }
     }
   }
 

@@ -32,6 +32,21 @@ inline std::string SanitizeJSON(std::string s) {
 }
 
 /**
+ * SanitizeInput
+ *
+ * Helper function to remove quotes from a string
+ *
+ * @param   [in] {std::string}
+ * @returns [in] {std::string}
+ */
+inline std::string SanitizeInput(std::string s) {
+  s.erase(std::remove(s.begin(), s.end(), '\''), s.end());
+  s.erase(std::remove(s.begin(), s.end(), '\"'), s.end());
+
+  return s;
+}
+
+/**
  * SanitizeJSON
  *
  * Helper function to remove escaped double quotes from a string
