@@ -25,6 +25,12 @@ inline std::string SanitizeOutput(std::string s) {
     if (c == '"')
       o += "\\\"";
     else
+    if (c == '(')
+      o += "\\(";
+    else
+    if (c == ')')
+      o += "\\)";
+    else
       o += c;
   }
 
