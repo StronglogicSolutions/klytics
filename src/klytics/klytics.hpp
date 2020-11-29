@@ -13,34 +13,15 @@
 #include "process.hpp"
 #include "api/api.hpp"
 
-
 inline std::string test_html() {
   HTML::Document document("Welcome to HTML");
-    document.addAttribute("lang", "en");
 
-    // Head
-    document.head() << HTML::Meta("utf-8")
-        << HTML::Meta("viewport", "width=device-width, initial-scale=1, shrink-to-fit=no");
     document.head() << HTML::Rel("stylesheet", "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css")
         .integrity("sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T").crossorigin("anonymous");
     document.head() << HTML::Style(".navbar{margin-bottom:20px;}");
 
     // Body
     document.body().cls("bg-light");
-
-    // Navbar
-    HTML::List navList(false, "navbar-nav mr-auto");
-    navList << std::move(HTML::ListItem().cls("nav-item active") << HTML::Link("Home", "#").cls("nav-link"));
-    navList << std::move(HTML::ListItem().cls("nav-item") << HTML::Link("Link", "#").cls("nav-link"));
-    navList << std::move(HTML::ListItem().cls("nav-item") << HTML::Link("Disabled", "#").cls("nav-link disabled"));
-    navList << std::move(HTML::ListItem().cls("nav-item dropdown")
-        << HTML::Link("Dropdown", "#").cls("nav-link dropdown-toggle").id("dropdown01").addAttribute("data-toggle", "dropdown").addAttribute("aria-haspopup", "true").addAttribute("aria-expanded", "false")
-        << (HTML::Div("dropdown-menu").addAttribute("aria-labelledby", "dropdown01")
-            << HTML::Link("Action", "#").cls("dropdown-item")
-            << HTML::Link("Another", "#").cls("dropdown-item")
-        )
-    );
-    document << (HTML::Nav("navbar navbar-expand navbar-dark bg-dark") << (HTML::Div("collapse navbar-collapse") << std::move(navList)));
 
     // Content in a container
     HTML::Div main("container");
@@ -97,6 +78,39 @@ std::string platform;
 std::string value;
 };
 
+/**
+ * counts_to_html
+ *
+ * @param
+ * @returns
+ */
+inline std::string counts_to_html(std::vector<FollowerCount> counts) {
+  HTML::Document document{"KIQ Analytics"};
+
+  document.addAttribute("lang", "en");
+  document.head() << HTML::Meta("utf-8")
+                  << HTML::Meta("viewport", "width=device-width, initial-scale=1, shrink-to-fit=no");
+  document.head() << HTML::Style(".navbar{margin-bottom:20px;}");
+  document.body().cls("follower-counts");
+
+  HTML::Div main{"container"};
+  main << HTML::Header1("KIQ Analytics");
+  main << HTML::Header2("Follower Counts") << HTML::Break() << HTML::Break();
+
+  HTML::Table table{};
+  table.cls("table");
+  table << HTML::Caption{"Results"};
+  table << (HTML::Row() << HTML::ColHeader("Name") << HTML::ColHeader("Platform") << HTML::ColHeader("Count"));
+
+  for (const auto& count : counts)
+    table << (HTML::Row() << HTML::Col(count.name) << HTML::Col(count.platform) << HTML::Col(count.value));
+
+  main     << std::move(table);
+  document << std::move(main);
+
+  return SanitizeOutput(document.toString());
+}
+
 class ResultInterface {
 public:
 virtual std::string to_string() = 0;
@@ -106,19 +120,7 @@ class JSONResult : public ResultInterface {
 using counts = std::vector<FollowerCount>;
 public:
 virtual std::string to_string() override {
-  using namespace tabulate;
-
-  Table table{};
-  table.add_row({"Platform", "Name", "Count"});
-
-  for (const auto& result : m_counts) {
-    table.add_row({result.platform, result.name, result.value});
-  }
-
-  FormatTable(table, 3);
-  table.column(2).format().font_align(FontAlign::right);
-
-  return table.str();
+  return counts_to_html(m_counts);
 }
 
 /**
