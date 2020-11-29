@@ -222,8 +222,8 @@ std::vector<VideoInfo> fetch_channel_videos() {
           VideoInfo info{
             .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
             .id          = video_id,
-            .title       = SanitizeJSON(item["snippet"]["title"].dump()),
-            .description = SanitizeJSON(item["snippet"]["description"].dump()),
+            .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
+            .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
             .time        = to_readable_time(SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str()),
             .url         = youtube_id_to_url(video_id)
           };
@@ -366,8 +366,8 @@ std::vector<VideoInfo> fetch_rival_videos(VideoInfo video) {
           VideoInfo info{
             .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
             .id          = video_id,
-            .title       = SanitizeJSON(item["snippet"]["title"].dump()),
-            .description = SanitizeJSON(item["snippet"]["description"].dump()),
+            .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
+            .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
             .time        = to_readable_time(SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str()),
             .url         = youtube_id_to_url(video_id)
           };
