@@ -2,6 +2,7 @@
 #define __API_HPP__
 #include <cpr/cpr.h>
 #include <tabulate/table.hpp>
+#include <HTML/HTML.h>
 
 #include "klytics/auth/auth.hpp"
 
@@ -119,6 +120,41 @@ inline tabulate::Table videos_to_table(const std::vector<VideoInfo>& videos) {
 }
 
 /**
+ * counts_to_html
+ *
+ * @param
+ * @returns
+ */
+inline std::string videos_to_html(const std::vector<VideoInfo>& videos) {
+  HTML::Document document{"KIQ Analytics"};
+
+  document.addAttribute("lang", "en");
+  document.head() << HTML::Meta("utf-8")
+                  << HTML::Meta("viewport", "width=device-width, initial-scale=1, shrink-to-fit=no");
+  document.head() << HTML::Style(".navbar{margin-bottom:20px;}");
+  document.body().cls("videos");
+
+  HTML::Div main{"container"};
+  main << HTML::Header1("KIQ Analytics");
+  main << HTML::Header2("Follower Counts") << HTML::Break() << HTML::Break();
+
+  HTML::Table table{};
+  table.cls("table");
+  table << HTML::Caption{"Results"}; //"ID", "Title", "Time", "Views", "Likes", "Dislikes", "Comments", "Tags"
+  table << (HTML::Row() << HTML::ColHeader("ID")       << HTML::ColHeader("Title") << HTML::ColHeader("Time")
+                        << HTML::ColHeader("Views")    << HTML::ColHeader("Likes") << HTML::ColHeader("Dislikes")
+                        << HTML::ColHeader("Comments") << HTML::ColHeader("Tags"));
+
+  for (const auto& video : videos)
+    table << (HTML::Row() << HTML::Col(video.id) << HTML::Col(video.title) << HTML::Col(video.time) << HTML::Col(video.stats.views) << HTML::Col(video.stats.likes) << HTML::Col(video.stats.dislikes) << HTML::Col(video.stats.comments) << HTML::Col(tags_to_string(video.stats.keywords)));
+
+  main     << std::move(table);
+  document << std::move(main);
+
+  return SanitizeOutput(document.toString());
+}
+
+/**
  * fetch_video_stats
  * @returns [out] {std::string}
  */
@@ -186,7 +222,7 @@ std::vector<VideoInfo> fetch_channel_videos() {
           VideoInfo info{
             .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
             .id          = video_id,
-            .title       = CreateStringWithBreaks(StripLineBreaks(SanitizeJSON(item["snippet"]["title"].dump())), 30),
+            .title       = SanitizeJSON(item["snippet"]["title"].dump()),
             .description = SanitizeJSON(item["snippet"]["description"].dump()),
             .time        = to_readable_time(SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str()),
             .url         = youtube_id_to_url(video_id)
@@ -330,7 +366,7 @@ std::vector<VideoInfo> fetch_rival_videos(VideoInfo video) {
           VideoInfo info{
             .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
             .id          = video_id,
-            .title       = CreateStringWithBreaks(StripLineBreaks(SanitizeJSON(item["snippet"]["title"].dump())), 30),
+            .title       = SanitizeJSON(item["snippet"]["title"].dump()),
             .description = SanitizeJSON(item["snippet"]["description"].dump()),
             .time        = to_readable_time(SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str()),
             .url         = youtube_id_to_url(video_id)

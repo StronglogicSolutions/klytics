@@ -8,7 +8,6 @@
 
 #include <nlohmann/json.hpp>
 #include <tabulate/table.hpp>
-#include <HTML/HTML.h>
 
 #include "process.hpp"
 #include "api/api.hpp"
@@ -210,8 +209,8 @@ std::string generate_report() {
   std::vector<VideoInfo> videos         = m_api.fetch_youtube_stats();
 
   if (!videos.empty()) {
-    video_stats_output      = table_to_formatted_string(videos_to_table(videos));
-    competitor_stats_output = table_to_formatted_string(videos_to_table(m_api.find_similar_videos(videos.front())));
+    video_stats_output      = videos_to_html(videos);
+    competitor_stats_output = videos_to_html(m_api.find_similar_videos(videos.front()));
   }
 
   output.resize(follower_count.size() + video_stats_output.size() + competitor_stats_output.size() + extra_text_size);
@@ -236,10 +235,8 @@ std::string generate_report() {
  * @returns [out] {std::string}
  */
 std::string generate_video_stats_table() {
-  return table_to_formatted_string(
-    videos_to_table(
-      m_api.fetch_youtube_stats()
-    )
+  return videos_to_html(
+    m_api.fetch_youtube_stats()
   );
 }
 
