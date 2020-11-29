@@ -353,8 +353,6 @@ std::vector<VideoInfo> fetch_rival_videos(VideoInfo video) {
     }
   );
 
-  log(r.text);
-
   json video_info = json::parse(r.text);
 
   if (!video_info.is_null() && video_info.is_object()) {
