@@ -15,7 +15,7 @@ inline void log(T s) {
   std::cout << s << std::endl;
 }
 
-inline std::string SanitizeOutput(std::string s) {
+inline std::string SanitizeOutput(const std::string& s) {
   std::string o{};
 
   for (const char& c : s) {
@@ -26,10 +26,10 @@ inline std::string SanitizeOutput(std::string s) {
       o += "\\\"";
     else
     if (c == '(')
-      o += "\\(";
+      o += "&#x28;";
     else
     if (c == ')')
-      o += "\\)";
+      o += "&#x29;";
     else
       o += c;
   }
