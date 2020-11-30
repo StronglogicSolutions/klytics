@@ -213,7 +213,7 @@ std::string generate_report() {
     competitor_stats_output = videos_to_html(m_api.find_similar_videos(videos.front()));
   }
 
-  output.resize(follower_count.size() + video_stats_output.size() + competitor_stats_output.size() + extra_text_size);
+  output.reserve(follower_count.size() + video_stats_output.size() + competitor_stats_output.size() + extra_text_size);
 
   output += "FOLLOWER COUNT\n\n";
   output += follower_count;

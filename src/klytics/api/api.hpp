@@ -136,11 +136,11 @@ inline std::string videos_to_html(const std::vector<VideoInfo>& videos) {
 
   HTML::Div main{"container"};
   main << HTML::Header1("KIQ Analytics");
-  main << HTML::Header2("Follower Counts") << HTML::Break() << HTML::Break();
+  main << HTML::Header2("Video Statistics");
 
   HTML::Table table{};
   table.cls("table");
-  table << HTML::Caption{"Results"}; //"ID", "Title", "Time", "Views", "Likes", "Dislikes", "Comments", "Tags"
+  table << HTML::Caption{"Results"};
   table << (HTML::Row() << HTML::ColHeader("ID")       << HTML::ColHeader("Title") << HTML::ColHeader("Time")
                         << HTML::ColHeader("Views")    << HTML::ColHeader("Likes") << HTML::ColHeader("Dislikes")
                         << HTML::ColHeader("Comments") << HTML::ColHeader("Tags"));
@@ -149,6 +149,7 @@ inline std::string videos_to_html(const std::vector<VideoInfo>& videos) {
     table << (HTML::Row() << HTML::Col(video.id) << HTML::Col(video.title) << HTML::Col(video.time) << HTML::Col(video.stats.views) << HTML::Col(video.stats.likes) << HTML::Col(video.stats.dislikes) << HTML::Col(video.stats.comments) << HTML::Col(tags_to_string(video.stats.keywords)));
 
   main     << std::move(table);
+  main     << HTML::Break() << HTML::Break();
   document << std::move(main);
 
   return SanitizeOutput(document.toString());

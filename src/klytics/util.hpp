@@ -20,10 +20,10 @@ inline std::string SanitizeOutput(const std::string& s) {
 
   for (const char& c : s) {
     if (c == '\'')
-      o += '\'';
+      o += "\'";
     else
     if (c == '"')
-      o += '\"';
+      o += "\\\"";
     else
     if (c == '(')
       o += "&#x28;";
