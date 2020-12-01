@@ -146,18 +146,32 @@ inline std::string videos_to_html(const std::vector<VideoInfo>& videos) {
   document.body().cls("videos");
 
   HTML::Div main{"container"};
-  main << HTML::Header1("KIQ Analytics");
-  main << HTML::Header2("Video Statistics");
+  main.style("background-color:#333;");
+  main << HTML::Header1("KIQ Analytics").style("padding: 12px;text-align: center;");
+  main << HTML::Header2("Video Statistics").style("padding: 12px;text-align: center;");
 
   HTML::Table table{};
   table.cls("table");
   table << HTML::Caption{"Results"};
-  table << (HTML::Row() << HTML::ColHeader("ID")       << HTML::ColHeader("Title") << HTML::ColHeader("Time")
-                        << HTML::ColHeader("Views")    << HTML::ColHeader("Likes") << HTML::ColHeader("Dislikes")
-                        << HTML::ColHeader("Comments") << HTML::ColHeader("Tags"));
+  table << (HTML::Row() << HTML::ColHeader("ID")      .style("color:#ef5e3f;padding: 4px;")
+                        << HTML::ColHeader("Title")   .style("color:#ef5e3f;padding: 4px;")
+                        << HTML::ColHeader("Time")    .style("color:#ef5e3f;padding: 4px;")
+                        << HTML::ColHeader("Views")   .style("color:#ef5e3f;padding: 4px;")
+                        << HTML::ColHeader("Likes")   .style("color:#ef5e3f;padding: 4px;")
+                        << HTML::ColHeader("Dislikes").style("color:#ef5e3f;padding: 4px;")
+                        << HTML::ColHeader("Comments").style("color:#ef5e3f;padding: 4px;")
+                        << HTML::ColHeader("Tags")    .style("color:#ef5e3f;padding: 4px;"));
 
   for (const auto& video : videos)
-    table << (HTML::Row() << HTML::Col(video.id) << HTML::Col(video.title) << HTML::Col(video.time) << HTML::Col(video.stats.views) << HTML::Col(video.stats.likes) << HTML::Col(video.stats.dislikes) << HTML::Col(video.stats.comments) << HTML::Col(tags_to_string(video.stats.keywords)));
+    table << (HTML::Row()
+      << HTML::Col(video.id)            .style("color: #FFF;padding: 8px;")
+      << HTML::Col(video.title)         .style("color: #FFF;padding: 8px;")
+      << HTML::Col(video.time)          .style("color: #FFF;padding: 8px;")
+      << HTML::Col(video.stats.views)   .style("color: #FFF;padding: 8px;")
+      << HTML::Col(video.stats.likes)   .style("color: #FFF;padding: 8px;")
+      << HTML::Col(video.stats.dislikes).style("color: #FFF;padding: 8px;")
+      << HTML::Col(video.stats.comments).style("color: #FFF;padding: 8px;")
+      << HTML::Col(tags_to_string(video.stats.keywords)).style("color: #FFF;padding: 8px;"));
 
   main     << std::move(table);
   main     << HTML::Break() << HTML::Break();
