@@ -63,7 +63,18 @@ inline std::vector<std::string> keywords_from_string(std::string s) {
   return keywords;
 }
 
+/**
+  ┌───────────────────────────────────────────────────────────┐
+  │░░░░░░░░░░░░░░░░░░░░░░░░░░ CONSTANTS ░░░░░░░░░░░░░░░░░░░░░░░│
+  └───────────────────────────────────────────────────────────┘
+*/
 
+namespace constants {
+const std::string HTML_STYLE{
+".container{background-color:#333;}.container h1,.container h2,.container th{color:#ef5e3f;}"
+".container td{color: #FFF;}}"
+};
+} // namespace constants
 /**
  * youtube_id_to_url
  *
@@ -86,7 +97,7 @@ inline std::string tags_to_string(std::vector<std::string> tags) {
   std::string s{};
   s.reserve(tags.size() * 9);
 
-  for (const auto& tag : tags) s += tag + '\n';
+  for (const auto& tag : tags) s += '#' + tag + "  ";
 
   return s;
 }
@@ -131,7 +142,7 @@ inline std::string videos_to_html(const std::vector<VideoInfo>& videos) {
   document.addAttribute("lang", "en");
   document.head() << HTML::Meta("utf-8")
                   << HTML::Meta("viewport", "width=device-width, initial-scale=1, shrink-to-fit=no");
-  document.head() << HTML::Style(".navbar{margin-bottom:20px;}");
+  document.head() << HTML::Style(constants::HTML_STYLE);
   document.body().cls("videos");
 
   HTML::Div main{"container"};
