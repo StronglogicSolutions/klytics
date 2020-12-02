@@ -179,7 +179,7 @@ inline std::string videos_to_html(const std::vector<VideoInfo>& videos) {
   document.body().cls("videos");
 
   HTML::Div main{"container"};
-  main.style("background-color:#333;");
+  main.style("background-color:#FFF;");
   main << HTML::Header1("KIQ Analytics").style("padding: 12px;text-align: center;");
   main << HTML::Header2("Video Statistics").style("padding: 12px;text-align: center;");
 
