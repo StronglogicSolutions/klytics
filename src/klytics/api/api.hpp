@@ -34,6 +34,39 @@ bool has_videos() { return !videos.empty(); }
 std::vector<VideoInfo> videos;
 };
 
+class VideoAnalyzer {
+using Videos = std::vector<VideoInfo>;
+
+public:
+VideoAnalyzer(Videos videos)
+: m_videos(videos) {}
+
+bool analyze() {
+  if (!m_videos.empty()) {
+    return true;
+  }
+
+  return false;
+}
+
+VideoInfo most_likes() {
+  VideoInfo p_video{};
+  int       most_likes{};
+
+  for (const auto& video : m_videos) {
+    int likes = std::stoi(video.stats.likes);
+    if (likes > most_likes) {
+      most_likes = likes;
+      p_video = video;
+    }
+  }
+  return p_video;
+}
+
+private:
+Videos m_videos;
+};
+
 /**
   ┌───────────────────────────────────────────────────────────┐
   │░░░░░░░░░░░░░░░░░░░░░░░░░░ FUNCTIONS ░░░░░░░░░░░░░░░░░░░░░░░│
@@ -152,26 +185,28 @@ inline std::string videos_to_html(const std::vector<VideoInfo>& videos) {
 
   HTML::Table table{};
   table.cls("table");
-  table << HTML::Caption{"Results"};
-  table << (HTML::Row() << HTML::ColHeader("ID")      .style("color:#ef5e3f;padding: 4px;")
-                        << HTML::ColHeader("Title")   .style("color:#ef5e3f;padding: 4px;")
-                        << HTML::ColHeader("Time")    .style("color:#ef5e3f;padding: 4px;")
-                        << HTML::ColHeader("Views")   .style("color:#ef5e3f;padding: 4px;")
-                        << HTML::ColHeader("Likes")   .style("color:#ef5e3f;padding: 4px;")
-                        << HTML::ColHeader("Dislikes").style("color:#ef5e3f;padding: 4px;")
-                        << HTML::ColHeader("Comments").style("color:#ef5e3f;padding: 4px;")
-                        << HTML::ColHeader("Tags")    .style("color:#ef5e3f;padding: 4px;"));
+  table << (HTML::Row() << HTML::ColHeader("ID")      .style("color:#ef5e3f; padding: 4px;")
+                        << HTML::ColHeader("Title")   .style("color:#ef5e3f; padding: 4px;")
+                        << HTML::ColHeader("Time")    .style("color:#ef5e3f; padding: 4px;")
+                        << HTML::ColHeader("Views")   .style("color:#ef5e3f; padding: 4px;")
+                        << HTML::ColHeader("Likes")   .style("color:#ef5e3f; padding: 4px;")
+                        << HTML::ColHeader("Dislikes").style("color:#ef5e3f; padding: 4px;")
+                        << HTML::ColHeader("Comments").style("color:#ef5e3f; padding: 4px;"));
 
-  for (const auto& video : videos)
+  for (const auto& video : videos) {
     table << (HTML::Row()
-      << HTML::Col(video.id)            .style("color: #FFF;padding: 8px;")
-      << HTML::Col(video.title)         .style("color: #FFF;padding: 8px;")
-      << HTML::Col(video.time)          .style("color: #FFF;padding: 8px;")
-      << HTML::Col(video.stats.views)   .style("color: #FFF;padding: 8px;")
-      << HTML::Col(video.stats.likes)   .style("color: #FFF;padding: 8px;")
-      << HTML::Col(video.stats.dislikes).style("color: #FFF;padding: 8px;")
-      << HTML::Col(video.stats.comments).style("color: #FFF;padding: 8px;")
-      << HTML::Col(tags_to_string(video.stats.keywords)).style("color: #FFF;padding: 8px;"));
+      << HTML::Col(video.id)            .style("color: #000; padding: 8px;")
+      << HTML::Col(video.title)         .style("color: #000; padding: 8px;")
+      << HTML::Col(video.time)          .style("color: #000; padding: 8px;")
+      << HTML::Col(video.stats.views)   .style("color: #000; padding: 8px;")
+      << HTML::Col(video.stats.likes)   .style("color: #000; padding: 8px;")
+      << HTML::Col(video.stats.dislikes).style("color: #000; padding: 8px;")
+      << HTML::Col(video.stats.comments).style("color: #000; padding: 8px;"));
+    table << (HTML::Row()
+      << HTML::Col(tags_to_string(video.stats.keywords)).style("color: #333; padding: 8px;")
+                                                        .addAttribute("rowspan", 1 )
+                                                        .addAttribute("colspan", 10));
+  }
 
   main     << std::move(table);
   main     << HTML::Break() << HTML::Break();
