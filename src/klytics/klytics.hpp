@@ -5,10 +5,10 @@
 #include <ctime>
 #include <cpr/cpr.h>
 #include <string>
-#include <process.hpp>
-#include <nlohmann/json.hpp>
-#include <tabulate/table.hpp>
 
+#include <nlohmann/json.hpp>
+
+#include "process.hpp"
 #include "api/api.hpp"
 
 namespace klytics {
@@ -24,6 +24,39 @@ std::string platform;
 std::string value;
 };
 
+/**
+ * counts_to_html
+ *
+ * @param
+ * @returns
+ */
+inline std::string counts_to_html(std::vector<FollowerCount> counts) {
+  HTML::Document document{"KIQ Analytics"};
+
+  document.addAttribute("lang", "en");
+  document.head() << HTML::Meta("utf-8")
+                  << HTML::Meta("viewport", "width=device-width, initial-scale=1, shrink-to-fit=no");
+  document.head() << HTML::Style(".navbar{margin-bottom:20px;}");
+  document.body().cls("follower-counts");
+
+  HTML::Div main{"container"};
+  main << HTML::Header1("KIQ Analytics");
+  main << HTML::Header2("Follower Counts") << HTML::Break() << HTML::Break();
+
+  HTML::Table table{};
+  table.cls("table");
+  table << HTML::Caption{"Results"};
+  table << (HTML::Row() << HTML::ColHeader("Name") << HTML::ColHeader("Platform") << HTML::ColHeader("Count"));
+
+  for (const auto& count : counts)
+    table << (HTML::Row() << HTML::Col(count.name) << HTML::Col(count.platform) << HTML::Col(count.value));
+
+  main     << std::move(table);
+  document << std::move(main);
+
+  return SanitizeOutput(document.toString());
+}
+
 class ResultInterface {
 public:
 virtual std::string to_string() = 0;
@@ -33,19 +66,7 @@ class JSONResult : public ResultInterface {
 using counts = std::vector<FollowerCount>;
 public:
 virtual std::string to_string() override {
-  using namespace tabulate;
-
-  Table table{};
-  table.add_row({"Platform", "Name", "Count"});
-
-  for (const auto& result : m_counts) {
-    table.add_row({result.platform, result.name, result.value});
-  }
-
-  FormatTable(table, 3);
-  table.column(2).format().font_align(FontAlign::right);
-
-  return table.str();
+  return counts_to_html(m_counts);
 }
 
 /**
@@ -126,8 +147,6 @@ std::string fetch_follower_count() {
  * @returns [out] {std::string}
  */
 std::string generate_report() {
-  using namespace tabulate;
-
   std::string::size_type extra_text_size{102};
 
   std::string            output, video_stats_output, competitor_stats_output;
@@ -135,11 +154,13 @@ std::string generate_report() {
   std::vector<VideoInfo> videos         = m_api.fetch_youtube_stats();
 
   if (!videos.empty()) {
-    video_stats_output      = table_to_formatted_string(videos_to_table(videos));
-    competitor_stats_output = table_to_formatted_string(videos_to_table(m_api.find_similar_videos(videos.front())));
+    video_stats_output      = videos_to_html(videos);
+    competitor_stats_output = videos_to_html(m_api.find_similar_videos(videos.front()));
   }
 
-  output.resize(follower_count.size() + video_stats_output.size() + competitor_stats_output.size() + extra_text_size);
+  output.reserve(
+    follower_count.size() + video_stats_output.size() + competitor_stats_output.size() + extra_text_size
+  );
 
   output += "FOLLOWER COUNT\n\n";
   output += follower_count;
@@ -161,10 +182,8 @@ std::string generate_report() {
  * @returns [out] {std::string}
  */
 std::string generate_video_stats_table() {
-  return table_to_formatted_string(
-    videos_to_table(
-      m_api.fetch_youtube_stats()
-    )
+  return videos_to_html(
+    m_api.fetch_youtube_stats()
   );
 }
 

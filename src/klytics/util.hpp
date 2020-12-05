@@ -4,6 +4,7 @@
 #include <ctime>
 #include <iomanip>
 #include <ctype.h>
+#include <iostream>
 
 /**
  * Poor man's log
@@ -13,6 +14,28 @@
 template<typename T>
 inline void log(T s) {
   std::cout << s << std::endl;
+}
+
+inline std::string SanitizeOutput(const std::string& s) {
+  std::string o{};
+
+  for (const char& c : s) {
+    if (c == '\'')
+      o += "\'";
+    // else
+    // if (c == '"')
+    //   o += "\\\"";
+    else
+    if (c == '(')
+      o += "&#x28;";
+    else
+    if (c == ')')
+      o += "&#x29;";
+    else
+      o += c;
+  }
+
+  return o;
 }
 
 /**

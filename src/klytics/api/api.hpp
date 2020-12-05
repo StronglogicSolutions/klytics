@@ -1,7 +1,7 @@
 #ifndef __API_HPP__
 #define __API_HPP__
 #include <cpr/cpr.h>
-#include <tabulate/table.hpp>
+#include <HTML/HTML.h>
 
 #include "klytics/auth/auth.hpp"
 
@@ -33,6 +33,39 @@ bool has_videos() { return !videos.empty(); }
 std::vector<VideoInfo> videos;
 };
 
+class VideoAnalyzer {
+using Videos = std::vector<VideoInfo>;
+
+public:
+VideoAnalyzer(Videos videos)
+: m_videos(videos) {}
+
+bool analyze() {
+  if (!m_videos.empty()) {
+    return true;
+  }
+
+  return false;
+}
+
+VideoInfo most_likes() {
+  VideoInfo p_video{};
+  int       most_likes{};
+
+  for (const auto& video : m_videos) {
+    int likes = std::stoi(video.stats.likes);
+    if (likes > most_likes) {
+      most_likes = likes;
+      p_video = video;
+    }
+  }
+  return p_video;
+}
+
+private:
+Videos m_videos;
+};
+
 /**
   ┌───────────────────────────────────────────────────────────┐
   │░░░░░░░░░░░░░░░░░░░░░░░░░░ FUNCTIONS ░░░░░░░░░░░░░░░░░░░░░░░│
@@ -62,7 +95,18 @@ inline std::vector<std::string> keywords_from_string(std::string s) {
   return keywords;
 }
 
+/**
+  ┌───────────────────────────────────────────────────────────┐
+  │░░░░░░░░░░░░░░░░░░░░░░░░░░ CONSTANTS ░░░░░░░░░░░░░░░░░░░░░░░│
+  └───────────────────────────────────────────────────────────┘
+*/
 
+namespace constants {
+const std::string HTML_STYLE{
+".container{background-color:#333;}.container h1,.container h2,.container th{color:#ef5e3f;}"
+".container td{color: #FFF;}}"
+};
+} // namespace constants
 /**
  * youtube_id_to_url
  *
@@ -85,53 +129,61 @@ inline std::string tags_to_string(std::vector<std::string> tags) {
   std::string s{};
   s.reserve(tags.size() * 9);
 
-  for (const auto& tag : tags) s += tag + '\n';
+  for (const auto& tag : tags) s += '#' + tag + "  ";
 
   return s;
 }
 
 /**
- * FormatTable
+ * counts_to_html
  *
  * @param
- * @param
+ * @returns
  */
-void FormatTable(tabulate::Table& table, uint8_t column_num);
+inline std::string videos_to_html(const std::vector<VideoInfo>& videos) {
+  HTML::Document document{"KIQ Analytics"};
 
-/**
- * videos_to_table
- */
-inline tabulate::Table videos_to_table(const std::vector<VideoInfo>& videos) {
-  using namespace tabulate;
+  document.addAttribute("lang", "en");
+  document.head() << HTML::Meta("utf-8")
+                  << HTML::Meta("viewport", "width=device-width, initial-scale=1, shrink-to-fit=no");
+  document.head() << HTML::Style(constants::HTML_STYLE);
+  document.body().cls("videos");
 
-  Table table{};
+  HTML::Div main{"container"};
+  main.style("background-color:#FFF;");
+  main << HTML::Header1("KIQ Analytics")   .style("color:#ef5e3f; padding: 12px;text-align: center;");
+  main << HTML::Header2("Video Statistics").style("color:#ef5e3f; padding: 12px;text-align: center;");
 
-  if (!videos.empty()) {
-    table.add_row({"ID", "Title", "Time", "Views", "Likes", "Dislikes", "Comments", "Tags"});
+  HTML::Table table{};
+  table.cls("table");
+  table << (HTML::Row() << HTML::ColHeader("ID")      .style("color:#ef5e3f; padding: 4px;")
+                        << HTML::ColHeader("Title")   .style("color:#ef5e3f; padding: 4px;")
+                        << HTML::ColHeader("Time")    .style("color:#ef5e3f; padding: 4px;")
+                        << HTML::ColHeader("Views")   .style("color:#ef5e3f; padding: 4px;")
+                        << HTML::ColHeader("Likes")   .style("color:#ef5e3f; padding: 4px;")
+                        << HTML::ColHeader("Dislikes").style("color:#ef5e3f; padding: 4px;")
+                        << HTML::ColHeader("Comments").style("color:#ef5e3f; padding: 4px;"));
 
-    for (const auto& video : videos) {
-      table.add_row({
-        video.id, video.title, video.time, video.stats.views, video.stats.likes, video.stats.dislikes, video.stats.comments, tags_to_string(video.stats.keywords)
-      });
-    }
+  for (const auto& video : videos) {
+    table << (HTML::Row()
+      << HTML::Col(video.id)            .style("color: #000; padding: 8px;")
+      << HTML::Col(video.title)         .style("color: #000; padding: 8px;")
+      << HTML::Col(video.time)          .style("color: #000; padding: 8px;")
+      << HTML::Col(video.stats.views)   .style("color: #000; padding: 8px;")
+      << HTML::Col(video.stats.likes)   .style("color: #000; padding: 8px;")
+      << HTML::Col(video.stats.dislikes).style("color: #000; padding: 8px;")
+      << HTML::Col(video.stats.comments).style("color: #000; padding: 8px;"));
+    table << (HTML::Row()
+      << HTML::Col(tags_to_string(video.stats.keywords)).style("color: #333; padding: 8px;")
+                                                        .addAttribute("rowspan", 1 )
+                                                        .addAttribute("colspan", 10));
   }
-  return table;
-}
 
-/**
- * fetch_video_stats
- * @returns [out] {std::string}
- */
-inline std::string table_to_formatted_string(tabulate::Table table) {
-  using namespace tabulate;
+  main     << std::move(table);
+  main     << HTML::Break() << HTML::Break();
+  document << std::move(main);
 
-  try {
-    FormatTable(table, 7);
-    table.column(2).format().font_align(FontAlign::right);
-  } catch (const std::exception& e) {
-    log(e.what());
-  }
-  return table.str();
+  return SanitizeOutput(document.toString());
 }
 
 /**
@@ -167,7 +219,6 @@ std::vector<VideoInfo> fetch_channel_videos() {
       {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},              // snippet
       {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},                   // key
       {PARAM_NAMES.at(CHAN_ID_INDEX),    PARAM_VALUES.at(CHAN_KEY_INDEX)},             // channel id
-      {PARAM_NAMES.at(EVENT_T_INDEX),    PARAM_VALUES.at(COMPLETED_EVENT_TYPE_INDEX)}, // event type
       {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)},           // type
       {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(DATE_VALUE_INDEX)},           // order by
       {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                            // limit
@@ -186,8 +237,8 @@ std::vector<VideoInfo> fetch_channel_videos() {
           VideoInfo info{
             .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
             .id          = video_id,
-            .title       = CreateStringWithBreaks(StripLineBreaks(SanitizeJSON(item["snippet"]["title"].dump())), 30),
-            .description = SanitizeJSON(item["snippet"]["description"].dump()),
+            .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
+            .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
             .time        = to_readable_time(SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str()),
             .url         = youtube_id_to_url(video_id)
           };
@@ -209,7 +260,6 @@ std::vector<VideoInfo> fetch_channel_videos() {
 
 std::vector<VideoStats> fetch_video_stats(std::string id_string) {
   using namespace constants;
-  using namespace tabulate;
 
   using json = nlohmann::json;
 
@@ -310,14 +360,11 @@ std::vector<VideoInfo> fetch_rival_videos(VideoInfo video) {
       {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},              // snippet
       {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},                   // key
       {PARAM_NAMES.at(QUERY_INDEX),      search_term},                                 // query term
-      {PARAM_NAMES.at(EVENT_T_INDEX),    PARAM_VALUES.at(COMPLETED_EVENT_TYPE_INDEX)}, // event type
       {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)},           // type
       {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(VIEW_COUNT_INDEX)},           // order by
       {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                            // limit
     }
   );
-
-  log(r.text);
 
   json video_info = json::parse(r.text);
 
@@ -330,8 +377,8 @@ std::vector<VideoInfo> fetch_rival_videos(VideoInfo video) {
           VideoInfo info{
             .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
             .id          = video_id,
-            .title       = CreateStringWithBreaks(StripLineBreaks(SanitizeJSON(item["snippet"]["title"].dump())), 30),
-            .description = SanitizeJSON(item["snippet"]["description"].dump()),
+            .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
+            .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
             .time        = to_readable_time(SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str()),
             .url         = youtube_id_to_url(video_id)
           };
