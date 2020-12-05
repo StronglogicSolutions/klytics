@@ -16,12 +16,6 @@ config("process_executor") {
   ]
 }
 
-config("tabulate") {
-  include_dirs = [
-    "//third_party/tabulate/include"
-  ]
-}
-
 config("html") {
   include_dirs = [
     "//third_party/HtmlBuilder/include"
@@ -56,7 +50,6 @@ source_set("klytics_sources") {
     ":inih",
     ":json",
     ":process_executor",
-    ":tabulate",
     ":html"
   ]
 

@@ -7,7 +7,6 @@
 #include <string>
 
 #include <nlohmann/json.hpp>
-#include <tabulate/table.hpp>
 
 #include "process.hpp"
 #include "api/api.hpp"

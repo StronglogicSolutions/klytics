@@ -4,6 +4,7 @@
 #include <ctime>
 #include <iomanip>
 #include <ctype.h>
+#include <iostream>
 
 /**
  * Poor man's log

@@ -1,7 +1,6 @@
 #ifndef __API_HPP__
 #define __API_HPP__
 #include <cpr/cpr.h>
-#include <tabulate/table.hpp>
 #include <HTML/HTML.h>
 
 #include "klytics/auth/auth.hpp"
@@ -136,34 +135,6 @@ inline std::string tags_to_string(std::vector<std::string> tags) {
 }
 
 /**
- * FormatTable
- *
- * @param
- * @param
- */
-void FormatTable(tabulate::Table& table, uint8_t column_num);
-
-/**
- * videos_to_table
- */
-inline tabulate::Table videos_to_table(const std::vector<VideoInfo>& videos) {
-  using namespace tabulate;
-
-  Table table{};
-
-  if (!videos.empty()) {
-    table.add_row({"ID", "Title", "Time", "Views", "Likes", "Dislikes", "Comments", "Tags"});
-
-    for (const auto& video : videos) {
-      table.add_row({
-        video.id, video.title, video.time, video.stats.views, video.stats.likes, video.stats.dislikes, video.stats.comments, tags_to_string(video.stats.keywords)
-      });
-    }
-  }
-  return table;
-}
-
-/**
  * counts_to_html
  *
  * @param
@@ -180,8 +151,8 @@ inline std::string videos_to_html(const std::vector<VideoInfo>& videos) {
 
   HTML::Div main{"container"};
   main.style("background-color:#FFF;");
-  main << HTML::Header1("KIQ Analytics").style("padding: 12px;text-align: center;");
-  main << HTML::Header2("Video Statistics").style("padding: 12px;text-align: center;");
+  main << HTML::Header1("KIQ Analytics")   .style("color:#ef5e3f; padding: 12px;text-align: center;");
+  main << HTML::Header2("Video Statistics").style("color:#ef5e3f; padding: 12px;text-align: center;");
 
   HTML::Table table{};
   table.cls("table");
@@ -213,22 +184,6 @@ inline std::string videos_to_html(const std::vector<VideoInfo>& videos) {
   document << std::move(main);
 
   return SanitizeOutput(document.toString());
-}
-
-/**
- * fetch_video_stats
- * @returns [out] {std::string}
- */
-inline std::string table_to_formatted_string(tabulate::Table table) {
-  using namespace tabulate;
-
-  try {
-    FormatTable(table, 7);
-    table.column(2).format().font_align(FontAlign::right);
-  } catch (const std::exception& e) {
-    log(e.what());
-  }
-  return table.str();
 }
 
 /**
@@ -264,7 +219,6 @@ std::vector<VideoInfo> fetch_channel_videos() {
       {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},              // snippet
       {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},                   // key
       {PARAM_NAMES.at(CHAN_ID_INDEX),    PARAM_VALUES.at(CHAN_KEY_INDEX)},             // channel id
-      {PARAM_NAMES.at(EVENT_T_INDEX),    PARAM_VALUES.at(COMPLETED_EVENT_TYPE_INDEX)}, // event type
       {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)},           // type
       {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(DATE_VALUE_INDEX)},           // order by
       {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                            // limit
@@ -306,7 +260,6 @@ std::vector<VideoInfo> fetch_channel_videos() {
 
 std::vector<VideoStats> fetch_video_stats(std::string id_string) {
   using namespace constants;
-  using namespace tabulate;
 
   using json = nlohmann::json;
 
@@ -407,7 +360,6 @@ std::vector<VideoInfo> fetch_rival_videos(VideoInfo video) {
       {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},              // snippet
       {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},                   // key
       {PARAM_NAMES.at(QUERY_INDEX),      search_term},                                 // query term
-      {PARAM_NAMES.at(EVENT_T_INDEX),    PARAM_VALUES.at(COMPLETED_EVENT_TYPE_INDEX)}, // event type
       {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)},           // type
       {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(VIEW_COUNT_INDEX)},           // order by
       {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                            // limit
