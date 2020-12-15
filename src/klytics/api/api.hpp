@@ -288,10 +288,14 @@ std::vector<VideoStats> fetch_video_stats(std::string id_string) {
           const auto& item = items.at(i);
           // VideoInfo& info  = m_findings.videos.at(i);
           stats.emplace_back(VideoStats{
-            .views    = SanitizeJSON(item["statistics"]["viewCount"].dump()),
-            .likes    = SanitizeJSON(item["statistics"]["likeCount"].dump()),
-            .dislikes = SanitizeJSON(item["statistics"]["dislikeCount"].dump()),
-            .comments = SanitizeJSON(item["statistics"]["commentCount"].dump()),
+            .views    = (item["statistics"].contains("viewCount")) ?
+                          SanitizeJSON(item["statistics"]["viewCount"].dump())    : "0",
+            .likes    = (item["statistics"].contains("likeCount")) ?
+                          SanitizeJSON(item["statistics"]["likeCount"].dump())    : "0",
+            .dislikes = (item["statistics"].contains("dislikeCount")) ?
+                          SanitizeJSON(item["statistics"]["dislikeCount"].dump()) : "0",
+            .comments = (item["statistics"].contains("commentCount")) ?
+                          SanitizeJSON(item["statistics"]["commentCount"].dump()) : "0",
             .keywords = (item["snippet"].contains("tags")) &&
                         (!item["snippet"]["tags"].empty()) ?
                           keywords_from_string(SanitizeJSON(item["snippet"]["tags"].dump())) :
