@@ -130,13 +130,29 @@ bool read(std::string s) {
 
     if (!youtube.is_null() && youtube.is_object()) {
       for (const auto& it : youtube.items()) {
-      m_counts.push_back(
-        FollowerCount{
-          .name     = it.key(),
-          .platform = "youtube",
-          .value    = it.value()["value"].dump()
+        std::string name           = it.key();
+        std::string value          = it.value()["value"].dump();
+        std::string previous_date {};
+        uint32_t    previous_count{};
+
+        s_json["youtube"][name]["value"] = value;
+        s_json["youtube"][name]["date"]  = current_time;
+
+        if (f_youtube.contains(name) && !f_youtube[name].is_null()) {
+          previous_date  = f_youtube[name]["date"];
+          previous_count = std::stoi(SanitizeJSON(f_youtube[name]["value"].dump()));
         }
-      );
+
+        m_counts.push_back(
+          FollowerCount{
+            .name     = name,
+            .platform = "youtube",
+            .value    = value,
+            .time     = current_time,
+            .delta_t  = get_datetime_delta(current_time, (previous_date.empty()) ? current_time : previous_date),
+            .delta_v  = std::to_string(std::stoi(value) - previous_count),
+          }
+        );
       }
     }
 
