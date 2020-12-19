@@ -131,7 +131,7 @@ bool read(std::string s) {
     if (!youtube.is_null() && youtube.is_object()) {
       for (const auto& it : youtube.items()) {
         std::string name           = it.key();
-        std::string value          = it.value()["value"].dump();
+        std::string value          = SanitizeJSON(it.value()["value"].dump());
         std::string previous_date {};
         uint32_t    previous_count{};
 
