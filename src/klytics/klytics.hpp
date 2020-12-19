@@ -14,6 +14,7 @@
 namespace klytics {
 namespace constants {
 const std::string FOLLOWER_APP{"../external/followers/followers.js"};
+const std::string FOLLOWER_JSON{"../config/followers.json"};
 } // namespace constants
 
 ProcessResult execute(std::string program);
@@ -22,6 +23,9 @@ struct FollowerCount {
 std::string name;
 std::string platform;
 std::string value;
+std::string time;
+std::string delta_t;
+std::string delta_v;
 };
 
 /**
@@ -46,10 +50,13 @@ inline std::string counts_to_html(std::vector<FollowerCount> counts) {
   HTML::Table table{};
   table.cls("table");
   table << HTML::Caption{"Results"};
-  table << (HTML::Row() << HTML::ColHeader("Name") << HTML::ColHeader("Platform") << HTML::ColHeader("Count"));
+  table << (HTML::Row() <<
+    HTML::ColHeader("Name")  << HTML::ColHeader("Platform") <<
+    HTML::ColHeader("Count") << HTML::ColHeader("CountΔ")   << HTML::ColHeader("TimeΔ")
+  );
 
   for (const auto& count : counts)
-    table << (HTML::Row() << HTML::Col(count.name) << HTML::Col(count.platform) << HTML::Col(count.value));
+    table << (HTML::Row() << HTML::Col(count.name) << HTML::Col(count.platform) << HTML::Col(count.value) << HTML::Col(count.delta_v) << HTML::Col(count.delta_t));
 
   main     << std::move(table);
   document << std::move(main);
@@ -74,20 +81,48 @@ virtual std::string to_string() override {
  */
 bool read(std::string s) {
   using json = nlohmann::json;
+  using namespace constants;
 
   json r_json = json::parse(s);
+  json f_json = json::parse(ReadFromFile(get_executable_cwd() + FOLLOWER_JSON), nullptr, false);
+  json s_json{};
+
+  bool file_valid = (!f_json.is_null() && f_json.is_object());
 
   if (!r_json.is_null() && r_json.is_object()) {
-    auto instagram = r_json["instagram"];
-    auto youtube   = r_json["youtube"];
+    json instagram   = r_json["instagram"];
+    json youtube     = r_json["youtube"];
+    json f_instagram = (file_valid && f_json.contains("instagram")) ? f_json["instagram"] : json{};
+    json f_youtube   = (file_valid && f_json.contains("youtube"))   ? f_json["youtube"]   : json{};
+
+    bool found_ig_file = (!f_instagram.is_null() && f_instagram.is_object());
+    bool found_yt_file = (!f_youtube.is_null()   && f_youtube.is_object());
+
+    std::string current_time = get_simple_datetime();
 
     if (!instagram.is_null() && instagram.is_object()) {
       for (const auto& it : instagram.items()) {
+        std::string name           = it.key();
+        std::string value          = it.value()["value"].dump();
+        std::string previous_date {};
+        uint32_t    previous_count{};
+
+        s_json["instagram"][name]["value"] = value;
+        s_json["instagram"][name]["date"]  = current_time;
+
+        if (f_instagram.contains(name) && !f_instagram[name].is_null()) {
+          previous_date  = f_instagram[name]["date"];
+          previous_count = std::stoi(SanitizeJSON(f_instagram[name]["value"].dump()));
+        }
+
         m_counts.push_back(
           FollowerCount{
             .name     = it.key(),
             .platform = "instagram",
-            .value    = it.value()["value"].dump()
+            .value    = value,
+            .time     = current_time,
+            .delta_t  = get_datetime_delta(current_time, (previous_date.empty()) ? current_time : previous_date),
+            .delta_v  = std::to_string(std::stoi(value) - previous_count),
           }
         );
       }
@@ -104,12 +139,25 @@ bool read(std::string s) {
       );
       }
     }
+
+    SaveToFile(s_json.dump(), get_executable_cwd() + FOLLOWER_JSON);
+
     return true;
   }
   return false;
 }
 
 private:
+
+void compute_delta() {
+using json = nlohmann::json;
+using namespace constants;
+
+json follower_json = json::parse(ReadFromFile(FOLLOWER_JSON));
+if (!follower_json.is_null()) {
+
+}
+}
 counts m_counts;
 };
 
