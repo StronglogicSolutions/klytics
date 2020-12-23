@@ -4,67 +4,8 @@
 #include <HTML/HTML.h>
 
 #include "klytics/auth/auth.hpp"
+#include "analysis/tools.hpp"
 
-/**
-  ┌───────────────────────────────────────────────────────────┐
-  │░░░░░░░░░░░░░░░░░░░░░░░░░░ STRUCTS ░░░░░░░░░░░░░░░░░░░░░░░│
-  └───────────────────────────────────────────────────────────┘
-*/
-struct VideoStats {
-std::string              views;
-std::string              likes;
-std::string              dislikes;
-std::string              comments;
-std::vector<std::string> keywords;
-};
-
-struct VideoInfo {
-std::string              channel_id;
-std::string              id;
-std::string              title;
-std::string              description;
-std::string              time;
-std::string              url;
-VideoStats               stats;
-};
-
-struct Findings {
-bool has_videos() { return !videos.empty(); }
-std::vector<VideoInfo> videos;
-};
-
-class VideoAnalyzer {
-using Videos = std::vector<VideoInfo>;
-
-public:
-VideoAnalyzer(Videos videos)
-: m_videos(videos) {}
-
-bool analyze() {
-  if (!m_videos.empty()) {
-    return true;
-  }
-
-  return false;
-}
-
-VideoInfo most_likes() {
-  VideoInfo p_video{};
-  int       most_likes{};
-
-  for (const auto& video : m_videos) {
-    int likes = std::stoi(video.stats.likes);
-    if (likes > most_likes) {
-      most_likes = likes;
-      p_video = video;
-    }
-  }
-  return p_video;
-}
-
-private:
-Videos m_videos;
-};
 
 /**
   ┌───────────────────────────────────────────────────────────┐
@@ -233,13 +174,15 @@ std::vector<VideoInfo> fetch_channel_videos() {
       for (const auto& item : items) {
         try {
           auto video_id = SanitizeJSON(item["id"]["videoId"].dump());
+          auto datetime = SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str();
 
           VideoInfo info{
             .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
             .id          = video_id,
             .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
             .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
-            .time        = to_readable_time(SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str()),
+            .datetime    = datetime,
+            .time        = to_readable_time(datetime),
             .url         = youtube_id_to_url(video_id)
           };
 
@@ -286,7 +229,7 @@ std::vector<VideoStats> fetch_video_stats(std::string id_string) {
       for (int i = 0; i < items.size(); i++) {
         try {
           const auto& item = items.at(i);
-          // VideoInfo& info  = m_findings.videos.at(i);
+
           stats.emplace_back(VideoStats{
             .views    = (item["statistics"].contains("viewCount")) ?
                           SanitizeJSON(item["statistics"]["viewCount"].dump())    : "0",
@@ -378,12 +321,15 @@ std::vector<VideoInfo> fetch_rival_videos(VideoInfo video) {
       for (const auto& item : items) {
         try {
           auto video_id = SanitizeJSON(item["id"]["videoId"].dump());
+          auto datetime = SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str();
+
           VideoInfo info{
             .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
             .id          = video_id,
             .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
             .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
-            .time        = to_readable_time(SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str()),
+            .datetime    = datetime,
+            .time        = to_readable_time(datetime),
             .url         = youtube_id_to_url(video_id)
           };
 

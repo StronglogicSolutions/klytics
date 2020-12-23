@@ -169,7 +169,8 @@ inline std::string get_simple_datetime() {
   throw std::runtime_error("Failed to get current date as string");
 }
 
-inline std::string human_readable_duration(std::chrono::duration<int64_t, std::nano> delta) {
+// template <typename T = float>
+inline std::string human_readable_duration(std::chrono::duration<int64_t> delta) {
   using namespace std;
   using namespace std::chrono;
   using days = duration<int, ratio<86400>>;
@@ -196,7 +197,14 @@ inline std::string human_readable_duration(std::chrono::duration<int64_t, std::n
   return ss.str();
 };
 
-inline std::string get_datetime_delta(std::string dt1, std::string dt2) {
+
+// template <typename T = float>
+inline std::string delta_to_string(std::chrono::duration<int64_t, std::nano> d) {
+  return human_readable_duration(std::chrono::duration_cast<std::chrono::seconds>(d));
+}
+
+// template <typename T = float>
+inline std::chrono::duration<int64_t, std::nano> get_datetime_delta(std::string dt1, std::string dt2) {
   std::tm            t{};
   std::istringstream ss{dt1};
   ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S");
@@ -211,9 +219,13 @@ inline std::string get_datetime_delta(std::string dt1, std::string dt2) {
   std::chrono::time_point tp_2 = std::chrono::system_clock::from_time_t(mktime(&t));
 
   std::chrono::duration<int64_t, std::nano> elapsed = tp_1 - tp_2;
-
-  return human_readable_duration(elapsed);
+  return elapsed;
 }
 
+// template <typename T = float>
+inline std::string datetime_delta_string(std::string dt1, std::string dt2) {
+  std::chrono::duration<int64_t, std::nano> datetime_delta = get_datetime_delta(dt1, dt1);
+  return delta_to_string(datetime_delta);
+}
 
 #endif // __UTIL_HPP__

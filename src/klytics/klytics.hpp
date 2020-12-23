@@ -121,7 +121,7 @@ bool read(std::string s) {
             .platform = "instagram",
             .value    = value,
             .time     = current_time,
-            .delta_t  = get_datetime_delta(current_time, (previous_date.empty()) ? current_time : previous_date),
+            .delta_t  = datetime_delta_string(current_time, (previous_date.empty()) ? current_time : previous_date),
             .delta_v  = std::to_string(std::stoi(value) - previous_count),
           }
         );
@@ -149,7 +149,7 @@ bool read(std::string s) {
             .platform = "youtube",
             .value    = value,
             .time     = current_time,
-            .delta_t  = get_datetime_delta(current_time, (previous_date.empty()) ? current_time : previous_date),
+            .delta_t  = datetime_delta_string(current_time, (previous_date.empty()) ? current_time : previous_date),
             .delta_v  = std::to_string(std::stoi(value) - previous_count),
           }
         );
