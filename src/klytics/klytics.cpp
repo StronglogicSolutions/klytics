@@ -99,4 +99,16 @@ std::vector<VideoInfo> KLytics::get_youtube_videos() {
   return m_api.get_videos();
 }
 
+bool KLytics::add_videos(std::vector<VideoInfo> v) {
+  if (!v.empty()) {
+    m_comparator.add_content(v.front().channel_id, v);
+    return true;
+  }
+  return false;
+}
+
+VideoCreatorComparison KLytics::get_findings() {
+  return VideoCreatorComparison{};
+}
+
 } // namespace klytics
