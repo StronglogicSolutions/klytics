@@ -13,11 +13,17 @@ namespace constants {
 static const char* SIMPLE_DATE_FORMAT{"%Y-%m-%dT%H:%M:%S"};
 } // namespace constants
 
+/**
+ * SaveToFile
+ */
 inline void SaveToFile(std::string data, std::string path) {
   std::ofstream o{path};
   o << data;
 }
 
+/**
+ * ReadFromFile
+ */
 inline std::string ReadFromFile(std::string path) {
   std::ifstream f{path};
   std::stringstream fs{};

@@ -20,6 +20,11 @@ std::vector<std::string> keywords;
 double                   view_score;
 };
 
+/**
+ * VideoInfo struct
+ *
+ * TODO: consider wrapping as a class with an ID
+ */
 struct VideoInfo {
 std::string              channel_id;
 std::string              id;
@@ -36,6 +41,13 @@ bool has_videos() { return !videos.empty(); }
 std::vector<VideoInfo> videos;
 };
 
-using VideoMap = std::unordered_map<std::string, std::vector<VideoInfo>>;
+struct FollowerCount {
+std::string name;
+std::string platform;
+std::string value;
+std::string time;
+std::string delta_t;
+std::string delta_v;
+};
 
 #endif // __TYPES_HPP__

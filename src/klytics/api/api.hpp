@@ -1,382 +1,305 @@
 #ifndef __API_HPP__
 #define __API_HPP__
 #include <cpr/cpr.h>
-#include <HTML/HTML.h>
 
 #include "klytics/auth/auth.hpp"
+#include "results.hpp"
+#include "analysis/html.hpp"
 #include "analysis/tools.hpp"
 
+class SecureAPI {
+public:
+virtual ~SecureAPI() {}
 
-/**
-  ┌───────────────────────────────────────────────────────────┐
-  │░░░░░░░░░░░░░░░░░░░░░░░░░░ FUNCTIONS ░░░░░░░░░░░░░░░░░░░░░░░│
-  └───────────────────────────────────────────────────────────┘
-*/
-
-/**
- * keywords_from_string
- *
- * @param
- * @returns
- */
-inline std::vector<std::string> keywords_from_string(std::string s) {
-  std::vector<std::string> keywords;
-
-  if (s.size() > 2) {
-    s = s.substr(1, s.size() - 2);
-    size_t start;
-    size_t end{0};
-    auto delim = ",";
-
-    while ((start = s.find_first_not_of(delim, end)) != std::string::npos) {
-      end = s.find(delim, start);
-      keywords.push_back(s.substr(start, end - start));
-    }
-  }
-  return keywords;
-}
-
-/**
-  ┌───────────────────────────────────────────────────────────┐
-  │░░░░░░░░░░░░░░░░░░░░░░░░░░ CONSTANTS ░░░░░░░░░░░░░░░░░░░░░░░│
-  └───────────────────────────────────────────────────────────┘
-*/
-
-namespace constants {
-const std::string HTML_STYLE{
-".container{background-color:#333;}.container h1,.container h2,.container th{color:#ef5e3f;}"
-".container td{color: #FFF;}}"
+virtual bool is_authenticated() = 0;
+virtual bool init()             = 0;
 };
-} // namespace constants
-/**
- * youtube_id_to_url
- *
- * @param
- * @returns
- */
-inline std::string youtube_id_to_url(std::string id) {
-  return std::string{
-    "https://youtube.com/watch?v=" + id
-  };
-}
 
-/**
- * tags_to_string
- *
- * @param
- * @returns
- */
-inline std::string tags_to_string(std::vector<std::string> tags) {
-  std::string s{};
-  s.reserve(tags.size() * 9);
+class VideoAPI {
+public:
+virtual ~VideoAPI() {}
 
-  for (const auto& tag : tags) s += '#' + tag + "  ";
+virtual std::vector<VideoInfo> get_videos() = 0;
+virtual bool                   has_videos() = 0;
+};
 
-  return s;
-}
-
-/**
- * counts_to_html
- *
- * @param
- * @returns
- */
-inline std::string videos_to_html(const std::vector<VideoInfo>& videos) {
-  HTML::Document document{"KIQ Analytics"};
-
-  document.addAttribute("lang", "en");
-  document.head() << HTML::Meta("utf-8")
-                  << HTML::Meta("viewport", "width=device-width, initial-scale=1, shrink-to-fit=no");
-  document.head() << HTML::Style(constants::HTML_STYLE);
-  document.body().cls("videos");
-
-  HTML::Div main{"container"};
-  main.style("background-color:#FFF;");
-  main << HTML::Header1("KIQ Analytics")   .style("color:#ef5e3f; padding: 12px;text-align: center;");
-  main << HTML::Header2("Video Statistics").style("color:#ef5e3f; padding: 12px;text-align: center;");
-
-  HTML::Table table{};
-  table.cls("table");
-  table << (HTML::Row() << HTML::ColHeader("ID")      .style("color:#ef5e3f; padding: 4px;")
-                        << HTML::ColHeader("Title")   .style("color:#ef5e3f; padding: 4px;")
-                        << HTML::ColHeader("Time")    .style("color:#ef5e3f; padding: 4px;")
-                        << HTML::ColHeader("Views")   .style("color:#ef5e3f; padding: 4px;")
-                        << HTML::ColHeader("Likes")   .style("color:#ef5e3f; padding: 4px;")
-                        << HTML::ColHeader("Dislikes").style("color:#ef5e3f; padding: 4px;")
-                        << HTML::ColHeader("Comments").style("color:#ef5e3f; padding: 4px;"));
-
-  for (const auto& video : videos) {
-    table << (HTML::Row()
-      << HTML::Col(video.id)            .style("color: #000; padding: 8px;")
-      << HTML::Col(video.title)         .style("color: #000; padding: 8px;")
-      << HTML::Col(video.time)          .style("color: #000; padding: 8px;")
-      << HTML::Col(video.stats.views)   .style("color: #000; padding: 8px;")
-      << HTML::Col(video.stats.likes)   .style("color: #000; padding: 8px;")
-      << HTML::Col(video.stats.dislikes).style("color: #000; padding: 8px;")
-      << HTML::Col(video.stats.comments).style("color: #000; padding: 8px;"));
-    table << (HTML::Row()
-      << HTML::Col(tags_to_string(video.stats.keywords)).style("color: #333; padding: 8px;")
-                                                        .addAttribute("rowspan", 1 )
-                                                        .addAttribute("colspan", 10));
-  }
-
-  main     << std::move(table);
-  main     << HTML::Break() << HTML::Break();
-  document << std::move(main);
-
-  return SanitizeOutput(document.toString());
-}
 
 /**
   ┌───────────────────────────────────────────────────────────┐
   │░░░░░░░░░░░░░░░░░░░░░░░░░░ API CLASS ░░░░░░░░░░░░░░░░░░░░░░░│
   └───────────────────────────────────────────────────────────┘
 */
-class API {
+class API : public SecureAPI,
+            public VideoAPI {
 
 public:
+  virtual bool is_authenticated() override
+  {
+    return m_authenticator.is_authenticated();
+  }
 
-bool is_authenticated() {
-  return m_authenticator.is_authenticated();
-}
+  virtual bool init() override
+  {
+    return m_authenticator.FetchToken();
+  }
 
-bool init() {
-  return m_authenticator.FetchToken();
-}
+  std::vector<VideoInfo> fetch_channel_videos()
+  {
+    using namespace constants;
+    using json = nlohmann::json;
 
-std::vector<VideoInfo> fetch_channel_videos() {
-  using namespace constants;
-  using json = nlohmann::json;
+    std::vector<VideoInfo> info_v{};
 
-  std::vector<VideoInfo> info_v{};
+    cpr::Response r = cpr::Get(
+        cpr::Url{URL_VALUES.at(SEARCH_URL_INDEX)},
+        cpr::Header{
+            {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
+            {HEADER_NAMES.at(AUTH_HEADER_INDEX), m_authenticator.get_token()}},
+        cpr::Parameters{
+            {PARAM_NAMES.at(PART_INDEX), PARAM_VALUES.at(SNIPPET_INDEX)},     // snippet
+            {PARAM_NAMES.at(KEY_INDEX), m_authenticator.get_key()},           // key
+            {PARAM_NAMES.at(CHAN_ID_INDEX), PARAM_VALUES.at(CHAN_KEY_INDEX)}, // channel id
+            {PARAM_NAMES.at(TYPE_INDEX), PARAM_VALUES.at(VIDEO_TYPE_INDEX)},  // type
+            {PARAM_NAMES.at(ORDER_INDEX), PARAM_VALUES.at(DATE_VALUE_INDEX)}, // order by
+            {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}             // limit
+        });
 
-  cpr::Response r = cpr::Get(
-    cpr::Url{URL_VALUES.at(SEARCH_URL_INDEX)},
-    cpr::Header{
-      {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
-      {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}
-    },
-    cpr::Parameters{
-      {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},              // snippet
-      {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},                   // key
-      {PARAM_NAMES.at(CHAN_ID_INDEX),    PARAM_VALUES.at(CHAN_KEY_INDEX)},             // channel id
-      {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)},           // type
-      {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(DATE_VALUE_INDEX)},           // order by
-      {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                            // limit
+    json video_info = json::parse(r.text);
+
+    if (!video_info.is_null() && video_info.is_object())
+    {
+      auto items = video_info["items"];
+      if (!items.is_null() && items.is_array() && items.size() > 0)
+      {
+        for (const auto &item : items)
+        {
+          try
+          {
+            auto video_id = SanitizeJSON(item["id"]["videoId"].dump());
+            auto datetime = SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str();
+
+            VideoInfo info{
+                .channel_id = PARAM_VALUES.at(CHAN_KEY_INDEX),
+                .id = video_id,
+                .title = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
+                .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
+                .datetime = datetime,
+                .time = to_readable_time(datetime),
+                .url = youtube_id_to_url(video_id)};
+
+            info_v.push_back(info);
+          }
+          catch (const std::exception &e)
+          {
+            std::string error_message{"Exception was caught: "};
+            error_message += e.what();
+            log(error_message);
+          }
+        }
+      }
+      // log("Fetched video info for channel " + PARAM_VALUES.at(CHAN_KEY_INDEX));
     }
-  );
 
-  json video_info = json::parse(r.text);
+    return info_v;
+  }
 
-  if (!video_info.is_null() && video_info.is_object()) {
-    auto items = video_info["items"];
-    if (!items.is_null() && items.is_array() && items.size() > 0) {
-      for (const auto& item : items) {
-        try {
-          auto video_id = SanitizeJSON(item["id"]["videoId"].dump());
-          auto datetime = SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str();
+  std::vector<VideoStats> fetch_video_stats(std::string id_string)
+  {
+    using namespace constants;
 
-          VideoInfo info{
-            .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
-            .id          = video_id,
-            .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
-            .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
-            .datetime    = datetime,
-            .time        = to_readable_time(datetime),
-            .url         = youtube_id_to_url(video_id)
-          };
+    using json = nlohmann::json;
 
-          info_v.push_back(info);
+    std::vector<VideoStats> stats{};
 
-        } catch (const std::exception& e) {
-          std::string error_message{"Exception was caught: "};
-          error_message += e.what();
-          log(error_message);
+    cpr::Response r = cpr::Get(
+        cpr::Url{URL_VALUES.at(VIDEOS_URL_INDEX)},
+        cpr::Header{
+            {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
+            {HEADER_NAMES.at(AUTH_HEADER_INDEX), m_authenticator.get_token()}},
+        cpr::Parameters{
+            {PARAM_NAMES.at(PART_INDEX), VideoParamsFull()},
+            {PARAM_NAMES.at(KEY_INDEX), m_authenticator.get_key()},
+            {PARAM_NAMES.at(ID_NAME_INDEX), id_string}});
+
+    json video_info = json::parse(r.text);
+
+    if (!video_info.is_null() && video_info.is_object())
+    {
+      auto items = video_info["items"];
+      if (!items.is_null() && items.is_array() && items.size())
+      {
+        for (int i = 0; i < items.size(); i++)
+        {
+          try
+          {
+            const auto &item = items.at(i);
+
+            stats.emplace_back(VideoStats{
+                .views = (item["statistics"].contains("viewCount")) ? SanitizeJSON(item["statistics"]["viewCount"].dump()) : "0",
+                .likes = (item["statistics"].contains("likeCount")) ? SanitizeJSON(item["statistics"]["likeCount"].dump()) : "0",
+                .dislikes = (item["statistics"].contains("dislikeCount")) ? SanitizeJSON(item["statistics"]["dislikeCount"].dump()) : "0",
+                .comments = (item["statistics"].contains("commentCount")) ? SanitizeJSON(item["statistics"]["commentCount"].dump()) : "0",
+                .keywords = (item["snippet"].contains("tags")) &&
+                                    (!item["snippet"]["tags"].empty())
+                                ? keywords_from_string(SanitizeJSON(item["snippet"]["tags"].dump()))
+                                : std::vector<std::string>{}});
+          }
+          catch (const std::exception &e)
+          {
+            std::string error_message{"Exception was caught: "};
+            error_message += e.what();
+            log(error_message);
+          }
         }
       }
     }
-    // log("Fetched video info for channel " + PARAM_VALUES.at(CHAN_KEY_INDEX));
+    return stats;
   }
 
-  return info_v;
-}
-
-std::vector<VideoStats> fetch_video_stats(std::string id_string) {
-  using namespace constants;
-
-  using json = nlohmann::json;
-
-  std::vector<VideoStats> stats{};
-
-  cpr::Response r = cpr::Get(
-    cpr::Url{URL_VALUES.at(VIDEOS_URL_INDEX)},
-    cpr::Header{
-      {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
-      {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}
-    },
-    cpr::Parameters{
-      {PARAM_NAMES.at(PART_INDEX),    VideoParamsFull()},
-      {PARAM_NAMES.at(KEY_INDEX),     m_authenticator.get_key()},
-      {PARAM_NAMES.at(ID_NAME_INDEX), id_string}
-    }
-  );
-
-  json video_info = json::parse(r.text);
-
-  if (!video_info.is_null() && video_info.is_object()) {
-    auto items = video_info["items"];
-    if (!items.is_null() && items.is_array() && items.size()) {
-      for (int i = 0; i < items.size(); i++) {
-        try {
-          const auto& item = items.at(i);
-
-          stats.emplace_back(VideoStats{
-            .views    = (item["statistics"].contains("viewCount")) ?
-                          SanitizeJSON(item["statistics"]["viewCount"].dump())    : "0",
-            .likes    = (item["statistics"].contains("likeCount")) ?
-                          SanitizeJSON(item["statistics"]["likeCount"].dump())    : "0",
-            .dislikes = (item["statistics"].contains("dislikeCount")) ?
-                          SanitizeJSON(item["statistics"]["dislikeCount"].dump()) : "0",
-            .comments = (item["statistics"].contains("commentCount")) ?
-                          SanitizeJSON(item["statistics"]["commentCount"].dump()) : "0",
-            .keywords = (item["snippet"].contains("tags")) &&
-                        (!item["snippet"]["tags"].empty()) ?
-                          keywords_from_string(SanitizeJSON(item["snippet"]["tags"].dump())) :
-                          std::vector<std::string>{}
-          });
-
-        } catch (const std::exception& e) {
-          std::string error_message{"Exception was caught: "};
-          error_message += e.what();
-          log(error_message);
-        }
-      }
-    }
-  }
-  return stats;
-}
-
-/**
+  /**
  * fetch_youtube_stats
  *
  * @returns [out] {std::vector<VideoInfo}
  */
-std::vector<VideoInfo> fetch_youtube_stats() {
-  using namespace constants;
-  using json = nlohmann::json;
+  std::vector<VideoInfo> fetch_youtube_stats()
+  {
+    using namespace constants;
+    using json = nlohmann::json;
 
-  m_findings.videos.clear();
+    m_videos.clear();
 
-  if (m_authenticator.is_authenticated() || m_authenticator.FetchToken()) {
-    m_findings.videos = fetch_channel_videos();
-    std::string id_string{};
+    if (m_authenticator.is_authenticated() || m_authenticator.FetchToken())
+    {
+      m_videos = fetch_channel_videos();
+      std::string id_string{};
 
-    for (const auto& info : m_findings.videos) {
-      id_string += info.id + ",";
-    }
-
-    std::vector<VideoStats> stats      =  fetch_video_stats(id_string);
-    auto                    stats_size = stats.size();
-
-    if (stats_size == m_findings.videos.size()) {
-      for (uint8_t i = 0; i < stats_size; i++) {
-        m_findings.videos.at(i).stats = stats.at(i);
+      for (const auto &info : m_videos)
+      {
+        id_string += info.id + ",";
       }
-    }
-  }
-  return m_findings.videos;
-}
 
-std::vector<VideoInfo> fetch_rival_videos(VideoInfo video) {
-  using namespace constants;
-  using json = nlohmann::json;
+      std::vector<VideoStats> stats = fetch_video_stats(id_string);
+      auto stats_size = stats.size();
 
-  auto search_term = video.stats.keywords.front();
-
-  std::vector<VideoInfo> info_v{};
-  std::string            id_string{};
-  std::string            delim{};
-
-  cpr::Response r = cpr::Get(
-    cpr::Url{URL_VALUES.at(SEARCH_URL_INDEX)},
-    cpr::Header{
-      {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
-      {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}
-    },
-    cpr::Parameters{
-      {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},              // snippet
-      {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},                   // key
-      {PARAM_NAMES.at(QUERY_INDEX),      search_term},                                 // query term
-      {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)},           // type
-      {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(VIEW_COUNT_INDEX)},           // order by
-      {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                            // limit
-    }
-  );
-
-  json video_info = json::parse(r.text);
-
-  if (!video_info.is_null() && video_info.is_object()) {
-    auto items = video_info["items"];
-    if (!items.is_null() && items.is_array()) {
-      for (const auto& item : items) {
-        try {
-          auto video_id = SanitizeJSON(item["id"]["videoId"].dump());
-          auto datetime = SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str();
-
-          VideoInfo info{
-            .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
-            .id          = video_id,
-            .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
-            .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
-            .datetime    = datetime,
-            .time        = to_readable_time(datetime),
-            .url         = youtube_id_to_url(video_id)
-          };
-
-          info_v.push_back(info);
-          id_string += delim + video_id;
-          delim = ",";
-        } catch (const std::exception& e) {
-          std::string error_message{"Exception was caught: "};
-          error_message += e.what();
-          log(error_message);
+      if (stats_size == m_videos.size())
+      {
+        for (uint8_t i = 0; i < stats_size; i++)
+        {
+          m_videos.at(i).stats = stats.at(i);
         }
       }
-      // log("Fetched rival videos");
     }
+    return m_videos;
   }
 
-  std::vector<VideoStats> vid_stats  = fetch_video_stats(id_string);
-  auto                    stats_size = vid_stats.size();
+  std::vector<VideoInfo> fetch_rival_videos(VideoInfo video)
+  {
+    using namespace constants;
+    using json = nlohmann::json;
 
-  if (stats_size == info_v.size()) {
-    for (uint8_t i = 0; i < stats_size; i++) {
-      info_v.at(i).stats = vid_stats.at(i);
+    auto search_term = video.stats.keywords.front();
+
+    std::vector<VideoInfo> info_v{};
+    std::string id_string{};
+    std::string delim{};
+
+    cpr::Response r = cpr::Get(
+        cpr::Url{URL_VALUES.at(SEARCH_URL_INDEX)},
+        cpr::Header{
+            {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
+            {HEADER_NAMES.at(AUTH_HEADER_INDEX), m_authenticator.get_token()}},
+        cpr::Parameters{
+            {PARAM_NAMES.at(PART_INDEX), PARAM_VALUES.at(SNIPPET_INDEX)},     // snippet
+            {PARAM_NAMES.at(KEY_INDEX), m_authenticator.get_key()},           // key
+            {PARAM_NAMES.at(QUERY_INDEX), search_term},                       // query term
+            {PARAM_NAMES.at(TYPE_INDEX), PARAM_VALUES.at(VIDEO_TYPE_INDEX)},  // type
+            {PARAM_NAMES.at(ORDER_INDEX), PARAM_VALUES.at(VIEW_COUNT_INDEX)}, // order by
+            {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}             // limit
+        });
+
+    json video_info = json::parse(r.text);
+
+    if (!video_info.is_null() && video_info.is_object())
+    {
+      auto items = video_info["items"];
+      if (!items.is_null() && items.is_array())
+      {
+        for (const auto &item : items)
+        {
+          try
+          {
+            auto video_id = SanitizeJSON(item["id"]["videoId"].dump());
+            auto datetime = SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str();
+
+            VideoInfo info{
+                .channel_id = PARAM_VALUES.at(CHAN_KEY_INDEX),
+                .id = video_id,
+                .title = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
+                .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
+                .datetime = datetime,
+                .time = to_readable_time(datetime),
+                .url = youtube_id_to_url(video_id)};
+
+            info_v.push_back(info);
+            id_string += delim + video_id;
+            delim = ",";
+          }
+          catch (const std::exception &e)
+          {
+            std::string error_message{"Exception was caught: "};
+            error_message += e.what();
+            log(error_message);
+          }
+        }
+        // log("Fetched rival videos");
+      }
     }
-  }
-  return info_v;
-}
 
-/**
+    std::vector<VideoStats> vid_stats = fetch_video_stats(id_string);
+    auto stats_size = vid_stats.size();
+
+    if (stats_size == info_v.size())
+    {
+      for (uint8_t i = 0; i < stats_size; i++)
+      {
+        info_v.at(i).stats = vid_stats.at(i);
+      }
+    }
+    return info_v;
+  }
+
+  /**
  * find_similar_videos
  *
  * @param   [in]  {VideoInfo}
  * @returns [out] {std::vector<VideoInfo>}
  */
-std::vector<VideoInfo> find_similar_videos(VideoInfo video) {
-  return fetch_rival_videos(video);
-}
+  std::vector<VideoInfo> find_similar_videos(VideoInfo video)
+  {
+    return fetch_rival_videos(video);
+  }
 
-/**
+  /**
  * get_videos
  */
-std::vector<VideoInfo> get_videos() {
-  return m_findings.videos;
-}
+  std::vector<VideoInfo> get_videos()
+  {
+    return m_videos;
+  }
+
+  /**
+   * has_videos
+   *
+   * @interface
+   */
+
+  virtual bool has_videos() override {
+    return !m_videos.empty();
+  }
 
 private:
-Authenticator          m_authenticator;
-Findings               m_findings;
+  Authenticator m_authenticator;
+  std::vector<VideoInfo> m_videos;
 };
 
 #endif // __API_HPP__

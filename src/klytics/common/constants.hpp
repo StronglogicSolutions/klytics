@@ -6,6 +6,10 @@
 #include <string_view>
 
 namespace constants {
+// Paths
+const std::string FOLLOWER_APP{"../external/followers/followers.js"};
+const std::string FOLLOWER_JSON{"../config/followers.json"};
+
 // URL Indexes
 const uint8_t SEARCH_URL_INDEX           = 0x00;
 const uint8_t VIDEOS_URL_INDEX           = 0x01;

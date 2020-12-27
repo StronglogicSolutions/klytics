@@ -3,27 +3,23 @@
 
 #include "klytics/common/types.hpp"
 
-class ContentComparator {
-
-bool add_content(std::string key, std::vector<VideoInfo> videos) {
-  if (m_map.find(key) != m_map.end()) {
-    return false;
-  }
-
-  m_map[key] = videos;
-
-  return true;
-}
-
-private:
-VideoMap m_map;
+enum Platform {
+  INSTAGRAM = 0x00,
+  UNKNOWN   = 0x01
 };
 
-class VideoAnalyzer {
+class PlatformSpecificComparator {
+public:
+  virtual ~PlatformSpecificComparator() {}
+  virtual Platform get_type() = 0;
+};
+
+
+class VideoStudy {
+public:
 using Videos = std::vector<VideoInfo>;
 
-public:
-VideoAnalyzer(Videos videos)
+VideoStudy(Videos videos)
 : m_videos(videos) {}
 
 bool analyze() {
@@ -62,6 +58,8 @@ VideoInfo most_controversial() {
   return p_video;
 }
 
+Videos get_videos() { return m_videos; }
+
 private:
 
 double compute_view_score(VideoInfo v) {
@@ -76,5 +74,46 @@ double compute_view_score(VideoInfo v) {
 
 Videos m_videos;
 };
+
+
+class ContentComparator : public PlatformSpecificComparator {
+using StudyMap = std::unordered_map<std::string, VideoStudy>;
+using Videos = VideoStudy::Videos;
+
+public:
+/**
+ * get_type
+ *
+ * @override
+ * @returns [out] {Platform}
+ */
+virtual Platform get_type() override {
+  return Platform::INSTAGRAM;
+}
+
+/**
+ * add_content
+ *
+ * @param [in]
+ * @param [in]
+ * @returns [out] {bool}
+ */
+bool add_content(std::string key, Videos videos) {
+  if (m_map.find(key) != m_map.end()) {
+    return false;
+  }
+
+  VideoStudy study{videos};
+  study.analyze();
+
+  m_map.insert({key, study});
+
+  return true;
+}
+
+private:
+StudyMap m_map;
+};
+
 
 #endif // __TOOLS_HPP__
