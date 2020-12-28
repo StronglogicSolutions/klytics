@@ -5,9 +5,6 @@ ProcessResult execute(std::string program) {
   return qx({program}, get_executable_cwd());
 }
 
-
-
-
 /**
  * fetch_follower_count
  * @returns [out] {std::string}
@@ -99,6 +96,9 @@ std::vector<VideoInfo> KLytics::get_youtube_videos() {
   return m_api.get_videos();
 }
 
+/**
+ * add_videos
+ */
 bool KLytics::add_videos(std::vector<VideoInfo> v) {
   if (!v.empty()) {
     m_comparator.add_content(v.front().channel_id, v);
@@ -107,6 +107,9 @@ bool KLytics::add_videos(std::vector<VideoInfo> v) {
   return false;
 }
 
+/**
+ * get_findings
+ */
 VideoCreatorComparison KLytics::get_findings() {
   return VideoCreatorComparison{};
 }

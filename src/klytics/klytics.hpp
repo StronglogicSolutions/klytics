@@ -72,14 +72,14 @@ using VComparison = VideoCreatorComparison;
 public:
 virtual ~KLytics() {}
 
-virtual std::string            fetch_follower_count()             override;
-virtual std::string            generate_report()                  override;
-virtual std::vector<VideoInfo> fetch_videos()                     override;
-virtual std::vector<VideoInfo> get_youtube_videos()               override;
-virtual bool                   add_videos(std::vector<VideoInfo>) override;
-virtual VideoCreatorComparison get_findings()                     override;
+virtual std::string            fetch_follower_count()                    override;
+virtual std::string            generate_report()                         override;
+virtual std::vector<VideoInfo> fetch_videos()                            override;
+virtual std::vector<VideoInfo> get_youtube_videos()                      override;
+virtual bool                   add_videos(std::vector<VideoInfo> videos) override;
+virtual VideoCreatorComparison get_findings()                            override;
 
-std::string                    generate_video_stats_table();
+        std::string            generate_video_stats_table();
 
 private:
 API               m_api;

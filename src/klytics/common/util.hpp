@@ -172,7 +172,7 @@ inline std::string get_simple_datetime() {
   if (::gmtime_r(&now, &tm))
     if (std::strftime(b, sizeof(b), constants::SIMPLE_DATE_FORMAT, &tm))
       return std::string{b};
-  throw std::runtime_error("Failed to get current date as string");
+  throw std::runtime_error{"Failed to get current date as string"};
 }
 
 // template <typename T = float>
