@@ -28,6 +28,8 @@ TEST(KLyticsTest, ComparatorComparesVideoVectors) {
 
   EXPECT_TRUE(all_videos_added);
 
+  comparison_result.analyze();
+
   VideoCreatorComparison::ResultMap result_map = comparison_result.get_result();
 
   EXPECT_FALSE(result_map.empty());

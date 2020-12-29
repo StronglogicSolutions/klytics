@@ -50,6 +50,12 @@ VideoStudy(Videos videos)
 const VideoStudyResult analyze() {
   VideoStudyResult result{};
 
+  std::for_each(m_videos.begin(), m_videos.end(),
+    [this](VideoInfo& video) {
+      video.stats.view_score = compute_view_score(video);
+    }
+  );
+
   if (!m_videos.empty()) {
     result.most_likes     = most_liked();
     result.most_dislikes  = most_controversial();
@@ -70,7 +76,7 @@ const Videos::const_iterator most_liked() const {
     m_videos.begin(),
     m_videos.end(),
     [](const VideoInfo& a, const VideoInfo& b) {
-      return std::stoi(a.stats.likes) > std::stoi(b.stats.likes);
+      return std::stoi(a.stats.likes) < std::stoi(b.stats.likes);
     }
   );
 }
@@ -86,7 +92,7 @@ const Videos::const_iterator most_controversial() const {
     m_videos.begin(),
     m_videos.end(),
     [](const VideoInfo& a, const VideoInfo& b) {
-      return std::stoi(a.stats.dislikes) > std::stoi(b.stats.dislikes);
+      return std::stoi(a.stats.dislikes) < std::stoi(b.stats.dislikes);
     }
   );
 }
@@ -101,7 +107,7 @@ const Videos::const_iterator top_view_score() const {
     m_videos.begin(),
     m_videos.end(),
     [](const VideoInfo& a, const VideoInfo& b) {
-      return a.stats.view_score > b.stats.view_score;
+      return a.stats.view_score < b.stats.view_score;
     }
   );
 }
@@ -123,12 +129,13 @@ private:
  */
 double compute_view_score(VideoInfo v) {
   int     views   = std::stoi(v.stats.views);
-  int64_t delta_t = std::chrono::duration_cast<std::chrono::seconds>(
+
+  int64_t delta_t = std::chrono::duration_cast<std::chrono::minutes>(
     get_datetime_delta(
       get_simple_datetime(), v.datetime)
   ).count();
 
-  return static_cast<double>(views / delta_t);
+  return static_cast<double>(views * 1000 / delta_t);
 }
 
 Videos m_videos;
