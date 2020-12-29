@@ -39,14 +39,12 @@ virtual std::vector<VideoInfo> fetch_videos()       = 0;
 virtual std::vector<VideoInfo> get_youtube_videos() = 0;
 };
 
-struct VideoCreatorComparison {};
-
 class VideoAnalyzer {
 public:
-virtual ~VideoAnalyzer() {}
+virtual       ~VideoAnalyzer() {}
 
-virtual bool add_videos(std::vector<VideoInfo> v) = 0;
-virtual VideoCreatorComparison get_findings()     = 0;
+virtual       bool add_videos(std::vector<VideoInfo> v) = 0;
+virtual const VideoCreatorComparison get_findings()     = 0;
 };
 
 /**
@@ -63,21 +61,20 @@ ProcessResult execute(std::string program);
   └───────────────────────────────────────────────────────────┘
 */
 
-class KLytics : public YouTubeAnalyzer,
+class KLytics : public VideoAnalyzer,
                 public SocialMediaAnalyzer,
-                public SummaryGenerator,
-                public VideoAnalyzer {
+                public YouTubeAnalyzer,
+                public SummaryGenerator {
 
-using VComparison = VideoCreatorComparison;
 public:
-virtual ~KLytics() {}
+virtual       ~KLytics() {}
 
-virtual std::string            fetch_follower_count()                    override;
-virtual std::string            generate_report()                         override;
-virtual std::vector<VideoInfo> fetch_videos()                            override;
-virtual std::vector<VideoInfo> get_youtube_videos()                      override;
-virtual bool                   add_videos(std::vector<VideoInfo> videos) override;
-virtual VideoCreatorComparison get_findings()                            override;
+virtual       std::string            fetch_follower_count()                    override;
+virtual       std::string            generate_report()                         override;
+virtual       std::vector<VideoInfo> fetch_videos()                            override;
+virtual       std::vector<VideoInfo> get_youtube_videos()                      override;
+virtual       bool                   add_videos(std::vector<VideoInfo> videos) override;
+virtual const VideoCreatorComparison get_findings()                            override;
 
         std::string            generate_video_stats_table();
 

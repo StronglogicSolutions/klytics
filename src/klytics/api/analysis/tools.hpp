@@ -3,65 +3,124 @@
 
 #include "klytics/common/types.hpp"
 
+
+/**
+ * Platform
+ * @enum
+ */
 enum Platform {
   INSTAGRAM = 0x00,
   UNKNOWN   = 0x01
 };
 
+/**
+ * @interface
+ */
 class PlatformSpecificComparator {
 public:
   virtual ~PlatformSpecificComparator() {}
   virtual Platform get_type() = 0;
 };
 
-
 class VideoStudy {
 public:
 using Videos = std::vector<VideoInfo>;
 
+struct VideoStudyResult {
+Videos::const_iterator most_likes;
+Videos::const_iterator most_dislikes;
+Videos::const_iterator most_comments;
+Videos::const_iterator top_view_score;
+};
+
+/**
+ * VideoStudy
+ *
+ * @constructor
+ * @returns [out] {VideoStudy}
+ */
 VideoStudy(Videos videos)
 : m_videos(videos) {}
 
-bool analyze() {
+/**
+ * analyze
+ *
+ * @returns [out] {VideoStudyResult}
+ */
+const VideoStudyResult analyze() {
+  VideoStudyResult result{};
+
   if (!m_videos.empty()) {
-    return true;
+    result.most_likes     = most_liked();
+    result.most_dislikes  = most_controversial();
+    result.most_comments  = m_videos.end();
+    result.top_view_score = top_view_score();
   }
 
-  return false;
+  return result;
 }
 
-VideoInfo most_likes() {
-  VideoInfo p_video{};
-  int       most_likes{};
-
-  for (const auto& video : m_videos) {
-    int likes = std::stoi(video.stats.likes);
-    if (likes > most_likes) {
-      most_likes = likes;
-      p_video = video;
+/**
+ * most_liked
+ *
+ * @returns [out] {Videos::const_iterator} The video with the most likes
+ */
+const Videos::const_iterator most_liked() const {
+  return std::max_element(
+    m_videos.begin(),
+    m_videos.end(),
+    [](const VideoInfo& a, const VideoInfo& b) {
+      return std::stoi(a.stats.likes) > std::stoi(b.stats.likes);
     }
-  }
-  return p_video;
+  );
 }
 
-VideoInfo most_controversial() {
-  VideoInfo p_video{};
-  float     most_controversial{};
 
-  for (const auto& video : m_videos) {
-    float controversy_score = std::stoi(video.stats.likes);
-    if (controversy_score > most_controversial) {
-      most_controversial = controversy_score;
-      p_video = video;
+/**
+ * most_controversial
+ *
+ * @returns [out] {Videos::const_iterator} The video with the most dislikes
+ */
+const Videos::const_iterator most_controversial() const {
+  return std::max_element(
+    m_videos.begin(),
+    m_videos.end(),
+    [](const VideoInfo& a, const VideoInfo& b) {
+      return std::stoi(a.stats.dislikes) > std::stoi(b.stats.dislikes);
     }
-  }
-  return p_video;
+  );
 }
 
+/**
+ * top_view_score
+ *
+ * @returns [out] {Videos::const_iterator} The video with the most dislikes
+ */
+const Videos::const_iterator top_view_score() const {
+  return std::max_element(
+    m_videos.begin(),
+    m_videos.end(),
+    [](const VideoInfo& a, const VideoInfo& b) {
+      return a.stats.view_score > b.stats.view_score;
+    }
+  );
+}
+
+/**
+ * get_videos
+ *
+ * @returns [out] {std::vector<VideoInfo>}
+ */
 Videos get_videos() { return m_videos; }
 
 private:
 
+/**
+ * compute_view_score
+ *
+ * @param   [in]  {VideoInfo}
+ * @returns [out] {double}
+ */
 double compute_view_score(VideoInfo v) {
   int     views   = std::stoi(v.stats.views);
   int64_t delta_t = std::chrono::duration_cast<std::chrono::seconds>(
@@ -75,9 +134,32 @@ double compute_view_score(VideoInfo v) {
 Videos m_videos;
 };
 
+using StudyMap = std::unordered_map<std::string, VideoStudy>;
+
+struct VideoCreatorComparison {
+public:
+using ResultMap = std::unordered_map<std::string, VideoStudy::VideoStudyResult>;
+
+VideoCreatorComparison(StudyMap study_map)
+: map(study_map) {
+  result.reserve(map.size());
+}
+
+void      analyze() {
+  for (auto&& [key, value] : map) {
+    result[key] = value.analyze();
+  }
+}
+
+ResultMap get_result() { return result; }
+
+private:
+ResultMap result;
+StudyMap  map;
+};
+
 
 class ContentComparator : public PlatformSpecificComparator {
-using StudyMap = std::unordered_map<std::string, VideoStudy>;
 using Videos = VideoStudy::Videos;
 
 public:
@@ -104,11 +186,18 @@ bool add_content(std::string key, Videos videos) {
   }
 
   VideoStudy study{videos};
-  study.analyze();
 
   m_map.insert({key, study});
 
   return true;
+}
+
+const VideoCreatorComparison analyze() const {
+  VideoCreatorComparison comparison{m_map};
+
+  comparison.analyze();
+
+  return comparison;
 }
 
 private:

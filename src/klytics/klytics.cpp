@@ -110,8 +110,8 @@ bool KLytics::add_videos(std::vector<VideoInfo> v) {
 /**
  * get_findings
  */
-VideoCreatorComparison KLytics::get_findings() {
-  return VideoCreatorComparison{};
+const VideoCreatorComparison KLytics::get_findings() {
+  return m_comparator.analyze();
 }
 
 } // namespace klytics
