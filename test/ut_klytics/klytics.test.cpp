@@ -36,11 +36,11 @@ TEST(KLyticsTest, ComparatorComparesVideoVectors) {
   auto best_viewscore          = best_viewscore_it->stats.view_score;
   auto most_likes_channel      = analysis.most_likes_channel_name();
   auto most_dislikes_channel   = analysis.most_dislikes_channel_name();
-  auto best_viewscore_channel = analysis.best_viewscore_channel_name();
+  auto best_viewscore_channel  = analysis.best_viewscore_channel_name();
 
-  std::cout << "\nMost likes: "     << most_likes     << "(" << most_likes_channel     << ")"
-               "\nMost dislikes: "  << most_dislikes  << "(" << most_dislikes_channel  << ")"
-               "\nBest Viewscore: " << best_viewscore << "(" << best_viewscore_channel << ")"
+  std::cout << "\nMost likes: "     << most_likes     << " ("     << most_likes_channel     << ")"
+               "\nMost dislikes: "  << most_dislikes  << "    ("  << most_dislikes_channel  << ")"
+               "\nBest viewscore: " << best_viewscore << "     (" << best_viewscore_channel << ")"
             << std::endl;
 
   EXPECT_TRUE(all_videos_added);

@@ -198,7 +198,8 @@ VideoAnalysis get_analysis() {
  * analyze
  */
 void analyze(StudyMap map) {
-  for (auto&& [key, value] : map) {
+  m_map = map;
+  for (auto&& [key, value] : m_map) {
     m_analysis.map[key] = value.analyze();
   }
 
@@ -207,6 +208,7 @@ void analyze(StudyMap map) {
 
 private:
 VideoAnalysis m_analysis;
+StudyMap      m_map;
 
 void find_maximums() {
   using StudyResult = VideoStudy::VideoStudyResult;
