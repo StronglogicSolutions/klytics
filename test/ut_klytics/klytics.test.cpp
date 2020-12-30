@@ -9,7 +9,7 @@ TEST(KLyticsTest, Instantiate) {
 */
 TEST(KLyticsTest, ComparatorComparesVideoVectors) {
   using namespace klytics;
-
+  using VideoAnalysis = VideoAnalyst::VideoAnalysis;
   bool all_videos_added{true};
   KLytics klytics{};
 
@@ -24,13 +24,13 @@ TEST(KLyticsTest, ComparatorComparesVideoVectors) {
     }
   }
 
-  VideoCreatorComparison comparison_result = klytics.get_findings();
+  VideoCreatorComparison  comparison_result = klytics.get_findings();
+  VideoAnalysis           analysis          = comparison_result.get_result();
+  ResultMap               result_map        = analysis.get_result_map();
 
   EXPECT_TRUE(all_videos_added);
-
-  comparison_result.analyze();
-
-  VideoCreatorComparison::ResultMap result_map = comparison_result.get_result();
-
   EXPECT_FALSE(result_map.empty());
+  EXPECT_FALSE(analysis.most_likes_index.empty());
+  EXPECT_FALSE(analysis.most_dislikes_index.empty());
+  EXPECT_FALSE(analysis.best_view_score_index.empty());
 }

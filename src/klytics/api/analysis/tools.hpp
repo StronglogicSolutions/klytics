@@ -141,28 +141,129 @@ double compute_view_score(VideoInfo v) {
 Videos m_videos;
 };
 
-using StudyMap = std::unordered_map<std::string, VideoStudy>;
+using StudyMap  = std::unordered_map<std::string, VideoStudy>;
+using ResultMap  = std::unordered_map<std::string, VideoStudy::VideoStudyResult>;
+using ResultPair = std::pair<std::string, VideoStudy::VideoStudyResult>;
 
-struct VideoCreatorComparison {
+/**
+ * VideoAnalyst
+ *
+ * @class
+ */
+class VideoAnalyst {
 public:
-using ResultMap = std::unordered_map<std::string, VideoStudy::VideoStudyResult>;
-
-VideoCreatorComparison(StudyMap study_map)
-: map(study_map) {
-  result.reserve(map.size());
+/**
+ * VideoAnalysis
+ *
+ * @struct
+ */
+struct VideoAnalysis {
+ResultMap get_result_map() {
+  return map;
 }
 
-void      analyze() {
+std::string most_likes_index;
+std::string most_dislikes_index;
+std::string most_comments_index;
+std::string best_view_score_index;
+
+ResultMap map;
+};
+
+/**
+ * get_analysis
+ *
+ * @returns [out] {VideoAnalysis}
+ */
+VideoAnalysis get_analysis() {
+  return m_analysis;
+}
+
+/**
+ * analyze
+ */
+void analyze(StudyMap map) {
   for (auto&& [key, value] : map) {
-    result[key] = value.analyze();
+    m_analysis.map[key] = value.analyze();
+  }
+
+  find_maximums();
+}
+
+private:
+VideoAnalysis m_analysis;
+
+void find_maximums() {
+  using StudyResult = VideoStudy::VideoStudyResult;
+
+  auto most_likes_index = std::max_element(
+    m_analysis.map.begin(),
+    m_analysis.map.end(),
+    [](const ResultPair& a, const ResultPair& b) {
+      return std::stoi(a.second.most_likes->stats.likes) < std::stoi(b.second.most_likes->stats.likes);
+    }
+  );
+
+  if (most_likes_index != m_analysis.map.end()) {
+    m_analysis.most_likes_index = most_likes_index->first;
+  }
+
+  auto most_dislikes_index = std::max_element(
+    m_analysis.map.begin(),
+    m_analysis.map.end(),
+    [](const ResultPair& a, const ResultPair& b) {
+      return std::stoi(a.second.most_dislikes->stats.dislikes) < std::stoi(b.second.most_dislikes->stats.dislikes);
+    }
+  );
+
+  if (most_dislikes_index != m_analysis.map.end()) {
+    m_analysis.most_dislikes_index = most_dislikes_index->first;
+  }
+
+  auto best_viewscore_index = std::max_element(
+    m_analysis.map.begin(),
+    m_analysis.map.end(),
+    [](const ResultPair& a, const ResultPair& b) {
+      return a.second.top_view_score->stats.view_score < b.second.top_view_score->stats.view_score;
+    }
+  );
+
+  if (best_viewscore_index != m_analysis.map.end()) {
+    m_analysis.best_view_score_index = best_viewscore_index->first;
   }
 }
 
-ResultMap get_result() { return result; }
+};
+
+struct VideoCreatorComparison {
+public:
+using VideoAnalysis = VideoAnalyst::VideoAnalysis;
+
+/**
+ * VideoCreatorComparison
+ *
+ * @constructor
+ */
+VideoCreatorComparison(StudyMap study_map)
+: map(study_map) {}
+
+/**
+ * analyze
+ */
+void      analyze() {
+  analyst.analyze(map);
+}
+
+/**
+ * get_result
+ *
+ * @returns [out] {VideoAnalysisResult}
+ */
+VideoAnalysis get_result() { return analyst.get_analysis(); }
 
 private:
-ResultMap result;
-StudyMap  map;
+VideoAnalyst analyst;
+StudyMap     map;
 };
 
 
@@ -199,6 +300,11 @@ bool add_content(std::string key, Videos videos) {
   return true;
 }
 
+/**
+ * analyze
+ *
+ * @returns [out] {VideoCreatorComparison}
+ */
 const VideoCreatorComparison analyze() const {
   VideoCreatorComparison comparison{m_map};
 

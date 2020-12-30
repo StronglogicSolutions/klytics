@@ -65,7 +65,7 @@ std::vector<VideoInfo> GetTestVideos_1() {
       .url         = TEST_URL,
       .stats       = VideoStats{
         .views       = TEST_VIEWS_LOW,
-        .likes       = TEST_LIKES_LOW,
+        .likes       = TEST_LIKES_HIGH,
         .dislikes    = TEST_DISLIKES_LOW,
         .comments    = TEST_COMMENTS_LOW,
         .keywords    = TEST_KEYWORDS
@@ -82,7 +82,7 @@ std::vector<VideoInfo> GetTestVideos_1() {
       .stats       = VideoStats{
         .views       = TEST_VIEWS_MEDIUM,
         .likes       = TEST_LIKES_MEDIUM,
-        .dislikes    = TEST_DISLIKES_MEDIUM,
+        .dislikes    = TEST_DISLIKES_LOW,
         .comments    = TEST_COMMENTS_MEDIUM,
         .keywords    = TEST_KEYWORDS
       }
@@ -96,10 +96,10 @@ std::vector<VideoInfo> GetTestVideos_1() {
       .time        = TEST_HUMAN_DATETIME_3,
       .url         = TEST_URL,
       .stats       = VideoStats{
-        .views       = TEST_VIEWS_HIGH,
-        .likes       = TEST_LIKES_HIGH,
+        .views       = TEST_VIEWS_LOW,
+        .likes       = TEST_LIKES_LOW,
         .dislikes    = TEST_DISLIKES_HIGH,
-        .comments    = TEST_COMMENTS_HIGH,
+        .comments    = TEST_COMMENTS_MEDIUM,
         .keywords    = TEST_KEYWORDS
       }
     }
@@ -117,8 +117,8 @@ std::vector<VideoInfo> GetTestVideos_2() {
       .time        = TEST_HUMAN_DATETIME_4,
       .url         = TEST_URL,
       .stats       = VideoStats{
-        .views       = TEST_VIEWS_LOW,
-        .likes       = TEST_LIKES_LOW,
+        .views       = TEST_VIEWS_MEDIUM,
+        .likes       = TEST_LIKES_HIGH,
         .dislikes    = TEST_DISLIKES_LOW,
         .comments    = TEST_COMMENTS_LOW,
         .keywords    = TEST_KEYWORDS
@@ -133,10 +133,10 @@ std::vector<VideoInfo> GetTestVideos_2() {
       .time        = TEST_HUMAN_DATETIME_5,
       .url         = TEST_URL,
       .stats       = VideoStats{
-        .views       = TEST_VIEWS_MEDIUM,
-        .likes       = TEST_LIKES_MEDIUM,
+        .views       = TEST_VIEWS_LOW,
+        .likes       = TEST_LIKES_LOW,
         .dislikes    = TEST_DISLIKES_MEDIUM,
-        .comments    = TEST_COMMENTS_MEDIUM,
+        .comments    = TEST_COMMENTS_HIGH,
         .keywords    = TEST_KEYWORDS
       }
     },
