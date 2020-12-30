@@ -32,6 +32,9 @@ TEST(KLyticsTest, ComparatorComparesVideoVectors) {
   auto most_likes_it           = result_map.at(analysis.most_likes_key).most_likes;
   auto most_dislikes_it        = result_map.at(analysis.most_dislikes_key).most_dislikes;
   auto best_viewscore_it       = result_map.at(analysis.best_viewscore_key).top_view_score;
+  auto best_likescore_it       = result_map.at(analysis.best_likescore_key).top_view_score;
+  auto best_dislikescore_it    = result_map.at(analysis.best_dislikescore_key).top_view_score;
+  auto best_commentscore_it    = result_map.at(analysis.best_commentscore_key).top_view_score;
   auto most_likes              = std::stoi(most_likes_it->stats.likes);
   auto most_dislikes           = std::stoi(most_dislikes_it->stats.dislikes);
   auto best_viewscore          = best_viewscore_it->stats.view_score;
@@ -39,10 +42,11 @@ TEST(KLyticsTest, ComparatorComparesVideoVectors) {
   auto most_dislikes_channel   = analysis.most_dislikes_channel_name();
   auto best_viewscore_channel  = analysis.best_viewscore_channel_name();
 
-  std::cout << "\nMost likes: "     << most_likes     << " ("     << most_likes_channel     << ")"
-               "\nMost dislikes: "  << most_dislikes  << "    ("  << most_dislikes_channel  << ")"
-               "\nBest viewscore: " << best_viewscore << "     (" << best_viewscore_channel << ")"
-            << std::endl;
+  std::cout <<
+    "\n\nMOST LIKES\n"     << *most_likes_it     <<
+    "\n\nMOST DISLIKES\n"  << *most_dislikes_it  <<
+    "\n\nBEST VIEWSCORE\n" << *best_viewscore_it <<
+  std::endl;
 
   EXPECT_TRUE(all_videos_added);
   EXPECT_TRUE(most_likes > 0);

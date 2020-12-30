@@ -18,6 +18,9 @@ std::string              dislikes;
 std::string              comments;
 std::vector<std::string> keywords;
 double                   view_score;
+double                   like_score;
+double                   dislike_score;
+double                   comment_score;
 };
 
 /**
@@ -34,6 +37,29 @@ std::string              datetime;
 std::string              time;
 std::string              url;
 VideoStats               stats;
+
+friend std::ostream &operator<<(std::ostream& o, const VideoInfo& v) {
+  o << "Channel ID:  " << v.channel_id     << "\n" <<
+       "Video ID:    " << v.id             << "\n" <<
+       "Title:       " << v.title          << "\n" <<
+       "Description: " << v.description    << "\n" <<
+       "Datetime:    " << v.datetime       << "\n" <<
+       "URL:         " << v.url            << "\n" <<
+
+       "STATISTICS\n" <<
+
+       "➝ Views:         " << v.stats.views      << "\n" <<
+       "➝ Likes:         " << v.stats.likes      << "\n" <<
+       "➝ Dislikes:      " << v.stats.dislikes   << "\n" <<
+       "➝ Comments:      " << v.stats.comments   << "\n" <<
+       "➝ View Score:    " << v.stats.view_score << "\n" <<
+       "➝ Like Score:    " << v.stats.like_score << "\n" <<
+       "➝ Dislike Score: " << v.stats.dislike_score << "\n" <<
+       "➝ Comment Score: " << v.stats.comment_score << "\n";
+
+  return o;
+}
+
 };
 
 struct Findings {

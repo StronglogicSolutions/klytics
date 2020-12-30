@@ -31,6 +31,9 @@ Videos::const_iterator most_likes;
 Videos::const_iterator most_dislikes;
 Videos::const_iterator most_comments;
 Videos::const_iterator top_view_score;
+Videos::const_iterator top_like_score;
+Videos::const_iterator top_dislike_score;
+Videos::const_iterator top_comment_score;
 };
 
 /**
@@ -52,16 +55,22 @@ const VideoStudyResult analyze() {
 
   std::for_each(m_videos.begin(), m_videos.end(),
     [this](VideoInfo& video) {
-      video.stats.view_score = compute_view_score(video);
+      video.stats.view_score    = compute_view_score   (video);
+      video.stats.like_score    = compute_like_score   (video);
+      video.stats.dislike_score = compute_dislike_score(video);
+      video.stats.comment_score = compute_comment_score(video);
     }
   );
 
   if (!m_videos.empty()) {
     std::cout << __PRETTY_FUNCTION__ << ": Implement most comments max counter" << std::endl;
-    result.most_likes     = most_liked();
-    result.most_dislikes  = most_controversial();
-    result.most_comments  = m_videos.end();
-    result.top_view_score = top_view_score();
+    result.most_likes        = most_liked();
+    result.most_dislikes     = most_controversial();
+    result.most_comments     = m_videos.end();
+    result.top_view_score    = top_view_score();
+    result.top_like_score    = top_like_score();
+    result.top_dislike_score = top_dislike_score();
+    result.top_comment_score = top_comment_score();
   }
 
   return result;
@@ -113,6 +122,51 @@ const Videos::const_iterator top_view_score() const {
 }
 
 /**
+ * top_like_score
+ *
+ * @returns [out] {Videos::const_iterator} The video the highest like rate
+ */
+const Videos::const_iterator top_like_score() const {
+  return std::max_element(
+    m_videos.begin(),
+    m_videos.end(),
+    [](const VideoInfo& a, const VideoInfo& b) {
+      return a.stats.like_score < b.stats.like_score;
+    }
+  );
+}
+
+/**
+ * top_dislike_score
+ *
+ * @returns [out] {Videos::const_iterator} The video the highest like rate
+ */
+const Videos::const_iterator top_dislike_score() const {
+  return std::max_element(
+    m_videos.begin(),
+    m_videos.end(),
+    [](const VideoInfo& a, const VideoInfo& b) {
+      return a.stats.dislike_score < b.stats.dislike_score;
+    }
+  );
+}
+
+/**
+ * top_comment_score
+ *
+ * @returns [out] {Videos::const_iterator} The video the highest comment rate
+ */
+const Videos::const_iterator top_comment_score() const {
+  return std::max_element(
+    m_videos.begin(),
+    m_videos.end(),
+    [](const VideoInfo& a, const VideoInfo& b) {
+      return a.stats.comment_score < b.stats.comment_score;
+    }
+  );
+}
+
+/**
  * get_videos
  *
  * @returns [out] {std::vector<VideoInfo>}
@@ -138,10 +192,49 @@ double compute_view_score(VideoInfo v) {
   return static_cast<double>(views * 1000 / delta_t);
 }
 
+/**
+ * compute_like_score
+ *
+ * @param   [in]  {VideoInfo}
+ * @returns [out] {double}
+ */
+double compute_like_score(VideoInfo v) {
+  float     views   = std::stof(v.stats.views);
+  float     likes   = std::stof(v.stats.likes);
+
+  return static_cast<double>(likes / views);
+}
+
+/**
+ * compute_dislike_score
+ *
+ * @param   [in]  {VideoInfo}
+ * @returns [out] {double}
+ */
+double compute_dislike_score(VideoInfo v) {
+  float     views    = std::stof(v.stats.views);
+  float     dislikes = std::stof(v.stats.dislikes);
+
+  return static_cast<double>(dislikes / views);
+}
+
+/**
+ * compute_comment_score
+ *
+ * @param   [in]  {VideoInfo}
+ * @returns [out] {double}
+ */
+double compute_comment_score(VideoInfo v) {
+  float     views    = std::stof(v.stats.views);
+  float     comments = std::stof(v.stats.comments);
+
+  return static_cast<double>(comments / views);
+}
+
 Videos m_videos;
 };
 
-using StudyMap  = std::unordered_map<std::string, VideoStudy>;
+using StudyMap   = std::unordered_map<std::string, VideoStudy>;
 using ResultMap  = std::unordered_map<std::string, VideoStudy::VideoStudyResult>;
 using ResultPair = std::pair<std::string, VideoStudy::VideoStudyResult>;
 
@@ -166,6 +259,9 @@ std::string most_likes_key;
 std::string most_dislikes_key;
 std::string most_comments_key;
 std::string best_viewscore_key;
+std::string best_likescore_key;
+std::string best_dislikescore_key;
+std::string best_commentscore_key;
 
 std::string most_likes_channel_name() {
   return most_likes_key;
@@ -248,6 +344,48 @@ void find_maximums() {
 
   if (best_viewscore_index != m_analysis.map.end()) {
     m_analysis.best_viewscore_key = best_viewscore_index->first;
+  }
+
+  auto best_likescore_index = std::max_element(
+    m_analysis.map.begin(),
+    m_analysis.map.end(),
+    [](const ResultPair& a, const ResultPair& b) {
+      return
+        a.second.top_like_score->stats.like_score <
+        b.second.top_like_score->stats.like_score;
+    }
+  );
+
+  if (best_likescore_index != m_analysis.map.end()) {
+    m_analysis.best_likescore_key = best_likescore_index->first;
+  }
+
+  auto best_dislikescore_index = std::max_element(
+    m_analysis.map.begin(),
+    m_analysis.map.end(),
+    [](const ResultPair& a, const ResultPair& b) {
+      return
+        a.second.top_dislike_score->stats.dislike_score <
+        b.second.top_dislike_score->stats.dislike_score;
+    }
+  );
+
+  if (best_dislikescore_index != m_analysis.map.end()) {
+    m_analysis.best_dislikescore_key = best_dislikescore_index->first;
+  }
+
+  auto best_commentscore_index = std::max_element(
+    m_analysis.map.begin(),
+    m_analysis.map.end(),
+    [](const ResultPair& a, const ResultPair& b) {
+      return
+        a.second.top_comment_score->stats.comment_score <
+        b.second.top_comment_score->stats.comment_score;
+    }
+  );
+
+  if (best_commentscore_index != m_analysis.map.end()) {
+    m_analysis.best_commentscore_key = best_commentscore_index->first;
   }
 }
 
