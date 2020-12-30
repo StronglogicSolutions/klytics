@@ -81,7 +81,6 @@ const Videos::const_iterator most_liked() const {
   );
 }
 
-
 /**
  * most_controversial
  *
@@ -165,7 +164,23 @@ ResultMap get_result_map() {
 std::string most_likes_index;
 std::string most_dislikes_index;
 std::string most_comments_index;
-std::string best_view_score_index;
+std::string best_viewscore_index;
+
+std::string most_likes_channel_name() {
+  return most_likes_index;
+}
+
+std::string most_dislikes_channel_name() {
+  return most_dislikes_index;
+}
+
+std::string most_comments_channel_name() {
+  return most_comments_index;
+}
+
+std::string best_viewscore_channel_name() {
+  return best_viewscore_index;
+}
 
 ResultMap map;
 };
@@ -229,7 +244,7 @@ void find_maximums() {
   );
 
   if (best_viewscore_index != m_analysis.map.end()) {
-    m_analysis.best_view_score_index = best_viewscore_index->first;
+    m_analysis.best_viewscore_index = best_viewscore_index->first;
   }
 }
 
