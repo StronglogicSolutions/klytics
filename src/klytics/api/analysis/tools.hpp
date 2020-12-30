@@ -57,6 +57,7 @@ const VideoStudyResult analyze() {
   );
 
   if (!m_videos.empty()) {
+    std::cout << __PRETTY_FUNCTION__ << ": Implement most comments max counter" << std::endl;
     result.most_likes     = most_liked();
     result.most_dislikes  = most_controversial();
     result.most_comments  = m_videos.end();
@@ -161,25 +162,25 @@ ResultMap get_result_map() {
   return map;
 }
 
-std::string most_likes_index;
-std::string most_dislikes_index;
-std::string most_comments_index;
-std::string best_viewscore_index;
+std::string most_likes_key;
+std::string most_dislikes_key;
+std::string most_comments_key;
+std::string best_viewscore_key;
 
 std::string most_likes_channel_name() {
-  return most_likes_index;
+  return most_likes_key;
 }
 
 std::string most_dislikes_channel_name() {
-  return most_dislikes_index;
+  return most_dislikes_key;
 }
 
 std::string most_comments_channel_name() {
-  return most_comments_index;
+  return most_comments_key;
 }
 
 std::string best_viewscore_channel_name() {
-  return best_viewscore_index;
+  return best_viewscore_key;
 }
 
 ResultMap map;
@@ -222,7 +223,7 @@ void find_maximums() {
   );
 
   if (most_likes_index != m_analysis.map.end()) {
-    m_analysis.most_likes_index = most_likes_index->first;
+    m_analysis.most_likes_key = most_likes_index->first;
   }
 
   auto most_dislikes_index = std::max_element(
@@ -234,7 +235,7 @@ void find_maximums() {
   );
 
   if (most_dislikes_index != m_analysis.map.end()) {
-    m_analysis.most_dislikes_index = most_dislikes_index->first;
+    m_analysis.most_dislikes_key = most_dislikes_index->first;
   }
 
   auto best_viewscore_index = std::max_element(
@@ -246,7 +247,7 @@ void find_maximums() {
   );
 
   if (best_viewscore_index != m_analysis.map.end()) {
-    m_analysis.best_viewscore_index = best_viewscore_index->first;
+    m_analysis.best_viewscore_key = best_viewscore_index->first;
   }
 }
 
