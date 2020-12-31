@@ -59,8 +59,7 @@ friend std::ostream &operator<<(std::ostream& o, const VideoInfo& v) {
 
   return o;
 }
-
-};
+}; // struct VideoInfo
 
 struct Findings {
 bool has_videos() { return !videos.empty(); }
@@ -74,6 +73,11 @@ std::string value;
 std::string time;
 std::string delta_t;
 std::string delta_v;
+};
+
+struct GoogleTrend {
+std::string term;
+int         value;
 };
 
 #endif // __TYPES_HPP__

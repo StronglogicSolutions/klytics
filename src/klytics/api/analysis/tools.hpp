@@ -199,10 +199,7 @@ double compute_view_score(VideoInfo v) {
  * @returns [out] {double}
  */
 double compute_like_score(VideoInfo v) {
-  float     views   = std::stof(v.stats.views);
-  float     likes   = std::stof(v.stats.likes);
-
-  return static_cast<double>(likes / views);
+  return static_cast<double>(std::stof(v.stats.likes) / std::stof(v.stats.views));
 }
 
 /**
@@ -212,10 +209,7 @@ double compute_like_score(VideoInfo v) {
  * @returns [out] {double}
  */
 double compute_dislike_score(VideoInfo v) {
-  float     views    = std::stof(v.stats.views);
-  float     dislikes = std::stof(v.stats.dislikes);
-
-  return static_cast<double>(dislikes / views);
+  return static_cast<double>(std::stof(v.stats.dislikes) / std::stof(v.stats.views));
 }
 
 /**
@@ -225,10 +219,7 @@ double compute_dislike_score(VideoInfo v) {
  * @returns [out] {double}
  */
 double compute_comment_score(VideoInfo v) {
-  float     views    = std::stof(v.stats.views);
-  float     comments = std::stof(v.stats.comments);
-
-  return static_cast<double>(comments / views);
+  return static_cast<double>(std::stof(v.stats.comments) / std::stof(v.stats.views));
 }
 
 Videos m_videos;

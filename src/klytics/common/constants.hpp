@@ -8,6 +8,7 @@
 namespace constants {
 // Paths
 const std::string FOLLOWER_APP{"../external/followers/followers.js"};
+const std::string TRENDS_APP{"../external/trends/index.js"};
 const std::string FOLLOWER_JSON{"../config/followers.json"};
 
 // URL Indexes
@@ -62,7 +63,6 @@ const std::vector<std::string> URL_VALUES{
   "https://www.googleapis.com/youtube/v3/videos",
   "https://www.googleapis.com/youtube/v3/liveChat/messages",
   "https://oauth2.googleapis.com/token"
-  // "https://www.googleapis.com/oauth2/v3/token"
 };
 
 const std::vector<std::string> HEADER_NAMES{

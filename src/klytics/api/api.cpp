@@ -1,5 +1,13 @@
 #include "api.hpp"
 
+ProcessResult execute(std::string program, std::vector<std::string> argv) {
+  std::vector<std::string> runtime_arguments{};
+  runtime_arguments.reserve(1 + argv.size());
+  runtime_arguments.emplace_back(program);
+  runtime_arguments.insert(runtime_arguments.end(), argv.begin(), argv.end());
+  return qx(runtime_arguments, get_executable_cwd());
+}
+
 bool API::is_authenticated()
 {
   return m_authenticator.is_authenticated();
@@ -262,4 +270,28 @@ std::vector<VideoInfo> API::get_videos()
 
 bool API::has_videos() {
   return !m_videos.empty();
+}
+
+/**
+ *
+ * fetch_google_trends
+ *
+ * @param   [in]  {std::vector<std::string>} terms
+ * @returns [out] {std::vector<GoogleTrend>}
+ */
+std::vector<GoogleTrend> API::fetch_google_trends(std::vector<std::string> terms) {
+  std::vector<std::string> argv{};
+  argv.reserve(terms.size());
+
+  for (const auto& term : terms) argv.emplace_back(std::string{"-t=" + term});
+
+  ProcessResult result = execute(constants::TRENDS_APP, argv);
+
+  if (result.error) {
+    throw std::runtime_error{"Error executing trends app"};
+  }
+
+  TrendsJSONResult processed{result.output};
+
+  return processed.get_result();
 }

@@ -13,6 +13,43 @@ public:
 virtual std::string to_string() = 0;
 };
 
+class TrendsJSONResult : public ResultInterface {
+public:
+TrendsJSONResult(std::string data)
+: m_data(data) {}
+
+virtual std::string to_string() override {
+  return m_data;
+}
+
+std::vector<GoogleTrend> get_result() {
+  using json = nlohmann::json;
+  json parsed = json::parse(m_data);
+
+  std::vector<GoogleTrend> result{};
+
+  if (!parsed.is_null() && parsed.is_object()) {
+    auto items = parsed["results"];
+
+    if (!items.is_null() && items.is_array()) {
+      for (const auto &item : items) {
+        result.emplace_back(
+          GoogleTrend{
+            .term = item["term"].dump(),
+            .value = std::stoi(item["lastScore"].dump())
+          }
+        );
+      }
+    }
+  }
+
+  return result;
+}
+
+private:
+std::string m_data;
+};
+
 class JSONResult : public ResultInterface {
 using counts = std::vector<FollowerCount>;
 public:

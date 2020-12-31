@@ -1,10 +1,6 @@
 #include "klytics.hpp"
 
 namespace klytics {
-ProcessResult execute(std::string program) {
-  return qx({program}, get_executable_cwd());
-}
-
 /**
  * fetch_follower_count
  * @returns [out] {std::string}
@@ -114,4 +110,24 @@ const VideoCreatorComparison KLytics::get_findings() {
   return m_comparator.analyze();
 }
 
+/**
+ * fetch_trends
+ *
+ * @param  [in]  {std::vector<std::string>} terms
+ * @return [out] {std::vector<GoogleTrend>}
+ */
+std::vector<GoogleTrend> KLytics::fetch_trends(std::vector<std::string> terms) {
+  return m_api.fetch_google_trends(terms);
+}
+
+std::string KLytics::fetch_trends_string(std::vector<std::string> terms) {
+  std::string result{};
+  std::vector<GoogleTrend> trends = fetch_trends(terms);
+
+  for (const auto& trend : trends) {
+    result += "Term: " + trend.term + " Value: " + std::to_string(trend.value) + "\n";
+  }
+
+  return result;
+}
 } // namespace klytics
