@@ -72,6 +72,13 @@ friend std::ostream &operator<<(std::ostream& o, const VideoInfo& v) {
        "➝ Dislike Score: " << v.stats.dislike_score << "\n" <<
        "➝ Comment Score: " << v.stats.comment_score << "\n";
 
+  if (!v.stats.trends.empty()) {
+    o << "KEYWORDS\n";
+    for (const auto& trend : v.stats.trends)
+      o << "➤ Term:  " << trend.term  << "\n" <<
+           "  Value: " << trend.value << "\n";
+  }
+
   return o;
 }
 }; // struct VideoInfo

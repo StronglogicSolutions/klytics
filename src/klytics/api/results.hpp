@@ -35,7 +35,7 @@ std::vector<GoogleTrend> get_result() {
       for (const auto &item : items) {
         result.emplace_back(
           GoogleTrend{
-            .term = item["term"].dump(),
+            .term = SanitizeJSON(item["term"].dump()),
             .value = std::stoi(item["lastScore"].dump())
           }
         );
