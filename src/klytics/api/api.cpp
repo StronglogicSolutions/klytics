@@ -1,13 +1,5 @@
 #include "api.hpp"
 
-ProcessResult execute(std::string program, std::vector<std::string> argv) {
-  std::vector<std::string> runtime_arguments{};
-  runtime_arguments.reserve(1 + argv.size());
-  runtime_arguments.emplace_back(program);
-  runtime_arguments.insert(runtime_arguments.end(), argv.begin(), argv.end());
-  return qx(runtime_arguments, get_executable_cwd());
-}
-
 bool API::is_authenticated()
 {
   return m_authenticator.is_authenticated();

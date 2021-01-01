@@ -11,6 +11,20 @@
   └───────────────────────────────────────────────────────────┘
 */
 
+struct FollowerCount {
+std::string name;
+std::string platform;
+std::string value;
+std::string time;
+std::string delta_t;
+std::string delta_v;
+};
+
+struct GoogleTrend {
+std::string term;
+int         value;
+};
+
 struct VideoStats {
 std::string              views;
 std::string              likes;
@@ -21,6 +35,7 @@ double                   view_score;
 double                   like_score;
 double                   dislike_score;
 double                   comment_score;
+std::vector<GoogleTrend> trends;
 };
 
 /**
@@ -61,23 +76,5 @@ friend std::ostream &operator<<(std::ostream& o, const VideoInfo& v) {
 }
 }; // struct VideoInfo
 
-struct Findings {
-bool has_videos() { return !videos.empty(); }
-std::vector<VideoInfo> videos;
-};
-
-struct FollowerCount {
-std::string name;
-std::string platform;
-std::string value;
-std::string time;
-std::string delta_t;
-std::string delta_v;
-};
-
-struct GoogleTrend {
-std::string term;
-int         value;
-};
 
 #endif // __TYPES_HPP__

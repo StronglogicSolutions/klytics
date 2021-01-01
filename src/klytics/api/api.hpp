@@ -4,18 +4,9 @@
 
 #include "interface.hpp"
 #include "results.hpp"
-#include "process.hpp"
 #include "klytics/auth/auth.hpp"
 #include "analysis/html.hpp"
 #include "analysis/tools.hpp"
-
-/**
-  ┌───────────────────────────────────────────────────────────┐
-  │░░░░░░░░░░░░░░░░░░░░░░░░░░░ Helpers ░░░░░░░░░░░░░░░░░░░░░░░│
-  └───────────────────────────────────────────────────────────┘
-*/
-ProcessResult execute(std::string program, std::vector<std::string> argv = {});
-
 
 /**
   ┌───────────────────────────────────────────────────────────┐

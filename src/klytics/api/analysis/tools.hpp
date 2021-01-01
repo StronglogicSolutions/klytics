@@ -1,8 +1,18 @@
 #ifndef __TOOLS_HPP__
 #define __TOOLS_HPP__
 
-#include "klytics/common/types.hpp"
+#include <iostream>
+#include <algorithm>
 
+#include "process.hpp"
+#include "klytics/common/types.hpp"
+#include "klytics/common/util.hpp"
+/**
+  ┌───────────────────────────────────────────────────────────┐
+  │░░░░░░░░░░░░░░░░░░░░░░░░░░░ Helpers ░░░░░░░░░░░░░░░░░░░░░░░│
+  └───────────────────────────────────────────────────────────┘
+*/
+ProcessResult execute(std::string program, std::vector<std::string> argv = {});
 
 /**
  * Platform
@@ -36,191 +46,22 @@ Videos::const_iterator top_dislike_score;
 Videos::const_iterator top_comment_score;
 };
 
-/**
- * VideoStudy
- *
- * @constructor
- * @returns [out] {VideoStudy}
- */
-VideoStudy(Videos videos)
-: m_videos(videos) {}
+VideoStudy(Videos videos);
 
-/**
- * analyze
- *
- * @returns [out] {VideoStudyResult}
- */
-const VideoStudyResult analyze() {
-  VideoStudyResult result{};
-
-  std::for_each(m_videos.begin(), m_videos.end(),
-    [this](VideoInfo& video) {
-      video.stats.view_score    = compute_view_score   (video);
-      video.stats.like_score    = compute_like_score   (video);
-      video.stats.dislike_score = compute_dislike_score(video);
-      video.stats.comment_score = compute_comment_score(video);
-    }
-  );
-
-  if (!m_videos.empty()) {
-    std::cout << __PRETTY_FUNCTION__ << ": Implement most comments max counter" << std::endl;
-    result.most_likes        = most_liked();
-    result.most_dislikes     = most_controversial();
-    result.most_comments     = m_videos.end();
-    result.top_view_score    = top_view_score();
-    result.top_like_score    = top_like_score();
-    result.top_dislike_score = top_dislike_score();
-    result.top_comment_score = top_comment_score();
-  }
-
-  return result;
-}
-
-/**
- * most_liked
- *
- * @returns [out] {Videos::const_iterator} The video with the most likes
- */
-const Videos::const_iterator most_liked() const {
-  return std::max_element(
-    m_videos.begin(),
-    m_videos.end(),
-    [](const VideoInfo& a, const VideoInfo& b) {
-      return std::stoi(a.stats.likes) < std::stoi(b.stats.likes);
-    }
-  );
-}
-
-/**
- * most_controversial
- *
- * @returns [out] {Videos::const_iterator} The video with the most dislikes
- */
-const Videos::const_iterator most_controversial() const {
-  return std::max_element(
-    m_videos.begin(),
-    m_videos.end(),
-    [](const VideoInfo& a, const VideoInfo& b) {
-      return std::stoi(a.stats.dislikes) < std::stoi(b.stats.dislikes);
-    }
-  );
-}
-
-/**
- * top_view_score
- *
- * @returns [out] {Videos::const_iterator} The video with the most dislikes
- */
-const Videos::const_iterator top_view_score() const {
-  return std::max_element(
-    m_videos.begin(),
-    m_videos.end(),
-    [](const VideoInfo& a, const VideoInfo& b) {
-      return a.stats.view_score < b.stats.view_score;
-    }
-  );
-}
-
-/**
- * top_like_score
- *
- * @returns [out] {Videos::const_iterator} The video the highest like rate
- */
-const Videos::const_iterator top_like_score() const {
-  return std::max_element(
-    m_videos.begin(),
-    m_videos.end(),
-    [](const VideoInfo& a, const VideoInfo& b) {
-      return a.stats.like_score < b.stats.like_score;
-    }
-  );
-}
-
-/**
- * top_dislike_score
- *
- * @returns [out] {Videos::const_iterator} The video the highest like rate
- */
-const Videos::const_iterator top_dislike_score() const {
-  return std::max_element(
-    m_videos.begin(),
-    m_videos.end(),
-    [](const VideoInfo& a, const VideoInfo& b) {
-      return a.stats.dislike_score < b.stats.dislike_score;
-    }
-  );
-}
-
-/**
- * top_comment_score
- *
- * @returns [out] {Videos::const_iterator} The video the highest comment rate
- */
-const Videos::const_iterator top_comment_score() const {
-  return std::max_element(
-    m_videos.begin(),
-    m_videos.end(),
-    [](const VideoInfo& a, const VideoInfo& b) {
-      return a.stats.comment_score < b.stats.comment_score;
-    }
-  );
-}
-
-/**
- * get_videos
- *
- * @returns [out] {std::vector<VideoInfo>}
- */
-Videos get_videos() { return m_videos; }
+const VideoStudyResult analyze();
+const Videos::const_iterator most_liked() const;
+const Videos::const_iterator most_controversial() const;
+const Videos::const_iterator top_view_score() const;
+const Videos::const_iterator top_like_score() const;
+const Videos::const_iterator top_dislike_score() const;
+const Videos::const_iterator top_comment_score() const;
+Videos get_videos();
 
 private:
-
-/**
- * compute_view_score
- *
- * @param   [in]  {VideoInfo}
- * @returns [out] {double}
- */
-double compute_view_score(VideoInfo v) {
-  int     views   = std::stoi(v.stats.views);
-
-  int64_t delta_t = std::chrono::duration_cast<std::chrono::minutes>(
-    get_datetime_delta(
-      get_simple_datetime(), v.datetime)
-  ).count();
-
-  return static_cast<double>(views * 1000 / delta_t);
-}
-
-/**
- * compute_like_score
- *
- * @param   [in]  {VideoInfo}
- * @returns [out] {double}
- */
-double compute_like_score(VideoInfo v) {
-  return static_cast<double>(std::stof(v.stats.likes) / std::stof(v.stats.views));
-}
-
-/**
- * compute_dislike_score
- *
- * @param   [in]  {VideoInfo}
- * @returns [out] {double}
- */
-double compute_dislike_score(VideoInfo v) {
-  return static_cast<double>(std::stof(v.stats.dislikes) / std::stof(v.stats.views));
-}
-
-/**
- * compute_comment_score
- *
- * @param   [in]  {VideoInfo}
- * @returns [out] {double}
- */
-double compute_comment_score(VideoInfo v) {
-  return static_cast<double>(std::stof(v.stats.comments) / std::stof(v.stats.views));
-}
+double compute_view_score(VideoInfo v);
+double compute_like_score(VideoInfo v);
+double compute_dislike_score(VideoInfo v);
+double compute_comment_score(VideoInfo v);
 
 Videos m_videos;
 };
@@ -273,112 +114,13 @@ std::string best_viewscore_channel_name() {
 ResultMap map;
 };
 
-/**
- * get_analysis
- *
- * @returns [out] {VideoAnalysis}
- */
-VideoAnalysis get_analysis() {
-  return m_analysis;
-}
-
-/**
- * analyze
- */
-void analyze(StudyMap map) {
-  m_map = map;
-  for (auto&& [key, value] : m_map) {
-    m_analysis.map[key] = value.analyze();
-  }
-
-  find_maximums();
-}
+VideoAnalysis get_analysis();
+void          analyze(StudyMap map);
 
 private:
+void find_maximums();
 VideoAnalysis m_analysis;
 StudyMap      m_map;
-
-void find_maximums() {
-  using StudyResult = VideoStudy::VideoStudyResult;
-
-  auto most_likes_index = std::max_element(
-    m_analysis.map.begin(),
-    m_analysis.map.end(),
-    [](const ResultPair& a, const ResultPair& b) {
-      return std::stoi(a.second.most_likes->stats.likes) < std::stoi(b.second.most_likes->stats.likes);
-    }
-  );
-
-  if (most_likes_index != m_analysis.map.end()) {
-    m_analysis.most_likes_key = most_likes_index->first;
-  }
-
-  auto most_dislikes_index = std::max_element(
-    m_analysis.map.begin(),
-    m_analysis.map.end(),
-    [](const ResultPair& a, const ResultPair& b) {
-      return std::stoi(a.second.most_dislikes->stats.dislikes) < std::stoi(b.second.most_dislikes->stats.dislikes);
-    }
-  );
-
-  if (most_dislikes_index != m_analysis.map.end()) {
-    m_analysis.most_dislikes_key = most_dislikes_index->first;
-  }
-
-  auto best_viewscore_index = std::max_element(
-    m_analysis.map.begin(),
-    m_analysis.map.end(),
-    [](const ResultPair& a, const ResultPair& b) {
-      return a.second.top_view_score->stats.view_score < b.second.top_view_score->stats.view_score;
-    }
-  );
-
-  if (best_viewscore_index != m_analysis.map.end()) {
-    m_analysis.best_viewscore_key = best_viewscore_index->first;
-  }
-
-  auto best_likescore_index = std::max_element(
-    m_analysis.map.begin(),
-    m_analysis.map.end(),
-    [](const ResultPair& a, const ResultPair& b) {
-      return
-        a.second.top_like_score->stats.like_score <
-        b.second.top_like_score->stats.like_score;
-    }
-  );
-
-  if (best_likescore_index != m_analysis.map.end()) {
-    m_analysis.best_likescore_key = best_likescore_index->first;
-  }
-
-  auto best_dislikescore_index = std::max_element(
-    m_analysis.map.begin(),
-    m_analysis.map.end(),
-    [](const ResultPair& a, const ResultPair& b) {
-      return
-        a.second.top_dislike_score->stats.dislike_score <
-        b.second.top_dislike_score->stats.dislike_score;
-    }
-  );
-
-  if (best_dislikescore_index != m_analysis.map.end()) {
-    m_analysis.best_dislikescore_key = best_dislikescore_index->first;
-  }
-
-  auto best_commentscore_index = std::max_element(
-    m_analysis.map.begin(),
-    m_analysis.map.end(),
-    [](const ResultPair& a, const ResultPair& b) {
-      return
-        a.second.top_comment_score->stats.comment_score <
-        b.second.top_comment_score->stats.comment_score;
-    }
-  );
-
-  if (best_commentscore_index != m_analysis.map.end()) {
-    m_analysis.best_commentscore_key = best_commentscore_index->first;
-  }
-}
 
 };
 
@@ -386,27 +128,10 @@ struct VideoCreatorComparison {
 public:
 using VideoAnalysis = VideoAnalyst::VideoAnalysis;
 
-/**
- * VideoCreatorComparison
- *
- * @constructor
- */
-VideoCreatorComparison(StudyMap study_map)
-: map(study_map) {}
+VideoCreatorComparison(StudyMap study_map);
 
-/**
- * analyze
- */
-void      analyze() {
-  analyst.analyze(map);
-}
-
-/**
- * get_result
- *
- * @returns [out] {VideoAnalysisResult}
- */
-VideoAnalysis get_result() { return analyst.get_analysis(); }
+void          analyze();
+VideoAnalysis get_result();
 
 private:
 VideoAnalyst analyst;
@@ -418,47 +143,9 @@ class ContentComparator : public PlatformSpecificComparator {
 using Videos = VideoStudy::Videos;
 
 public:
-/**
- * get_type
- *
- * @override
- * @returns [out] {Platform}
- */
-virtual Platform get_type() override {
-  return Platform::INSTAGRAM;
-}
-
-/**
- * add_content
- *
- * @param [in]
- * @param [in]
- * @returns [out] {bool}
- */
-bool add_content(std::string key, Videos videos) {
-  if (m_map.find(key) != m_map.end()) {
-    return false;
-  }
-
-  VideoStudy study{videos};
-
-  m_map.insert({key, study});
-
-  return true;
-}
-
-/**
- * analyze
- *
- * @returns [out] {VideoCreatorComparison}
- */
-const VideoCreatorComparison analyze() const {
-  VideoCreatorComparison comparison{m_map};
-
-  comparison.analyze();
-
-  return comparison;
-}
+virtual Platform get_type() override;
+bool add_content(std::string key, Videos videos);
+const VideoCreatorComparison analyze() const;
 
 private:
 StudyMap m_map;

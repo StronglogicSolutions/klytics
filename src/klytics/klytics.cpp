@@ -11,7 +11,7 @@ std::string KLytics::fetch_follower_count() {
     return "Error executing followers app";
   }
 
-  JSONResult json{};
+  FollowersJSONResult json{};
   if (json.read(result.output)) {
     return json.to_string();
   }

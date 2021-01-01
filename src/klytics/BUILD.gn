@@ -65,7 +65,8 @@ source_set("klytics_sources") {
 
   sources = [
     "//src/klytics/klytics.cpp",
-    "//src/klytics/api/api.cpp"
+    "//src/klytics/api/api.cpp",
+    "//src/klytics/api/analysis/tools.cpp"
   ]
 }
 

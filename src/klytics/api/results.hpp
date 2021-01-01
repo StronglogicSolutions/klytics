@@ -50,7 +50,7 @@ private:
 std::string m_data;
 };
 
-class JSONResult : public ResultInterface {
+class FollowersJSONResult : public ResultInterface {
 using counts = std::vector<FollowerCount>;
 public:
 virtual std::string to_string() override {
