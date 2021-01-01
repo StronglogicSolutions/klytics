@@ -272,18 +272,5 @@ bool API::has_videos() {
  * @returns [out] {std::vector<GoogleTrend>}
  */
 std::vector<GoogleTrend> API::fetch_google_trends(std::vector<std::string> terms) {
-  std::vector<std::string> argv{};
-  argv.reserve(terms.size());
-
-  for (const auto& term : terms) argv.emplace_back(std::string{"-t=" + term});
-
-  ProcessResult result = execute(constants::TRENDS_APP, argv);
-
-  if (result.error) {
-    throw std::runtime_error{"Error executing trends app"};
-  }
-
-  TrendsJSONResult processed{result.output};
-
-  return processed.get_result();
+  return query_google_trends(terms);
 }

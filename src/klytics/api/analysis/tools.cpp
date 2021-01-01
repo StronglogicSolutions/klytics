@@ -11,6 +11,25 @@ ProcessResult execute(std::string program, std::vector<std::string> argv) {
   return qx(runtime_arguments, get_executable_cwd());
 }
 
+/**
+ * query_google_trends
+ */
+std::vector<GoogleTrend> query_google_trends(std::vector<std::string> terms) {
+  std::vector<std::string> argv{};
+  argv.reserve(terms.size());
+
+  for (const auto& term : terms) argv.emplace_back(std::string{"-t=" + term});
+
+  ProcessResult result = execute(constants::TRENDS_APP, argv);
+
+  if (result.error) {
+    throw std::runtime_error{"Error executing trends app"};
+  }
+
+  TrendsJSONResult processed{result.output};
+
+  return processed.get_result();
+}
 
 /**
  * VideoStudy
@@ -31,10 +50,19 @@ const VideoStudy::VideoStudyResult VideoStudy::analyze() {
 
   std::for_each(m_videos.begin(), m_videos.end(),
     [this](VideoInfo& video) {
+      std::vector<std::string> keywords{};
+      if (!video.stats.keywords.empty()) {
+        if (video.stats.keywords.size() > 3) {
+          keywords.insert(keywords.end(), video.stats.keywords.begin(), video.stats.keywords.begin() + 3);
+        } else {
+          keywords = video.stats.keywords;
+        }
+      }
       video.stats.view_score    = compute_view_score   (video);
       video.stats.like_score    = compute_like_score   (video);
       video.stats.dislike_score = compute_dislike_score(video);
       video.stats.comment_score = compute_comment_score(video);
+      video.stats.trends        = query_google_trends  (keywords);
     }
   );
 
