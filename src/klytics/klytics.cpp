@@ -1,6 +1,21 @@
 #include "klytics.hpp"
 
 namespace klytics {
+
+
+/**
+ * @destructor
+ */
+
+KLytics::~KLytics() {
+  // Save number of youtube quota units used in this session
+  // TODO: read and append for each day
+  uint32_t youtube_quota_units_used = m_api.get_quota_used();
+  SaveToFile(
+    std::to_string(youtube_quota_units_used),
+    get_executable_cwd() + constants::YOUTUBE_QUOTA_PATH
+  );
+}
 /**
  * fetch_follower_count
  * @returns [out] {std::string}

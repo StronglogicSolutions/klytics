@@ -10,6 +10,7 @@ namespace constants {
 const std::string FOLLOWER_APP{"../external/followers/followers.js"};
 const std::string TRENDS_APP{"../external/trends/index.js"};
 const std::string FOLLOWER_JSON{"../config/followers.json"};
+const std::string YOUTUBE_QUOTA_PATH{"../config/youtube_quota.txt"};
 
 // URL Indexes
 const uint8_t SEARCH_URL_INDEX           = 0x00;
@@ -141,6 +142,29 @@ inline const std::string VideoParamsFull() {
   };
         //  + "," + PARAM_VALUES.at(ID_VALUE_INDEX)
 }
+
+/**
+* youtube data api constants
+*/
+namespace youtube {
+const uint32_t YOUTUBE_DAILY_QUOTA        = 10000;
+
+const uint8_t  VIDEO_LIST_QUOTA_INDEX     = 0x00;
+const uint8_t  CHANNEL_LIST_QUOTA_INDEX   = 0x01;
+const uint8_t  COMMENT_LIST_QUOTA_INDEX   = 0x02;
+const uint8_t  SEARCH_LIST_QUOTA_INDEX    = 0x03;
+const uint8_t  COMMENT_INSERT_QUOTA_INDEX = 0x04;
+
+const std::vector<uint32_t> QUOTA_LIMIT{
+  1,
+  1,
+  1,
+  100,
+  50
+};
+
+const uint8_t YOUTUBE_VIDEO_ID_LENGTH     = 11;
+} // namespace youtube
 } // namespace constants
 
 #endif // __YOUTUBE_CONSTANTS_HPP__

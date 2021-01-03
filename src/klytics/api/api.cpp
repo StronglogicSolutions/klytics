@@ -18,18 +18,21 @@ std::vector<VideoInfo> API::fetch_channel_videos()
   std::vector<VideoInfo> info_v{};
 
   cpr::Response r = cpr::Get(
-      cpr::Url{URL_VALUES.at(SEARCH_URL_INDEX)},
-      cpr::Header{
-          {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
-          {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}},
-      cpr::Parameters{
-          {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},    // snippet
-          {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},         // key
-          {PARAM_NAMES.at(CHAN_ID_INDEX),    PARAM_VALUES.at(CHAN_KEY_INDEX)},   // channel id
-          {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)}, // type
-          {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(DATE_VALUE_INDEX)}, // order by
-          {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                  // limit
-      });
+    cpr::Url{URL_VALUES.at(SEARCH_URL_INDEX)},
+    cpr::Header{
+      {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
+      {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}},
+    cpr::Parameters{
+      {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},    // snippet
+      {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},         // key
+      {PARAM_NAMES.at(CHAN_ID_INDEX),    PARAM_VALUES.at(CHAN_KEY_INDEX)},   // channel id
+      {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)}, // type
+      {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(DATE_VALUE_INDEX)}, // order by
+      {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                  // limit
+    }
+  );
+
+  m_quota += youtube::QUOTA_LIMIT.at(youtube::SEARCH_LIST_QUOTA_INDEX);
 
   json video_info = json::parse(r.text);
 
@@ -46,13 +49,13 @@ std::vector<VideoInfo> API::fetch_channel_videos()
           auto datetime = SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str();
 
           VideoInfo info{
-              .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
-              .id          = video_id,
-              .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
-              .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
-              .datetime    = datetime,
-              .time        = to_readable_time(datetime),
-              .url         = youtube_id_to_url(video_id)};
+            .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
+            .id          = video_id,
+            .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
+            .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
+            .datetime    = datetime,
+            .time        = to_readable_time(datetime),
+            .url         = youtube_id_to_url(video_id)};
 
           info_v.push_back(info);
         }
@@ -79,14 +82,19 @@ std::vector<VideoStats> API::fetch_video_stats(std::string id_string)
   std::vector<VideoStats> stats{};
 
   cpr::Response r = cpr::Get(
-      cpr::Url{URL_VALUES.at(VIDEOS_URL_INDEX)},
-      cpr::Header{
-          {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
-          {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}},
-      cpr::Parameters{
-          {PARAM_NAMES.at(PART_INDEX),    VideoParamsFull()},
-          {PARAM_NAMES.at(KEY_INDEX),     m_authenticator.get_key()},
-          {PARAM_NAMES.at(ID_NAME_INDEX), id_string}});
+    cpr::Url{URL_VALUES.at(VIDEOS_URL_INDEX)},
+    cpr::Header{
+      {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
+      {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}
+    },
+    cpr::Parameters{
+      {PARAM_NAMES.at(PART_INDEX),    VideoParamsFull()},
+      {PARAM_NAMES.at(KEY_INDEX),     m_authenticator.get_key()},
+      {PARAM_NAMES.at(ID_NAME_INDEX), id_string}
+    }
+  );
+
+  m_quota += youtube::QUOTA_LIMIT.at(youtube::VIDEO_LIST_QUOTA_INDEX);
 
   json video_info = json::parse(r.text);
 
@@ -171,18 +179,21 @@ std::vector<VideoInfo> API::fetch_rival_videos(VideoInfo video)
   std::string delim{};
 
   cpr::Response r = cpr::Get(
-      cpr::Url{URL_VALUES.at(SEARCH_URL_INDEX)},
-      cpr::Header{
-          {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
-          {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}},
-      cpr::Parameters{
-          {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},    // snippet
-          {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},         // key
-          {PARAM_NAMES.at(QUERY_INDEX),      search_term},                       // query term
-          {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)}, // type
-          {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(VIEW_COUNT_INDEX)}, // order by
-          {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                  // limit
-      });
+    cpr::Url{URL_VALUES.at(SEARCH_URL_INDEX)},
+    cpr::Header{
+      {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
+      {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}},
+    cpr::Parameters{
+      {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},    // snippet
+      {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},         // key
+      {PARAM_NAMES.at(QUERY_INDEX),      search_term},                       // query term
+      {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)}, // type
+      {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(VIEW_COUNT_INDEX)}, // order by
+      {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                  // limit
+    }
+  );
+
+  m_quota += youtube::QUOTA_LIMIT.at(youtube::SEARCH_LIST_QUOTA_INDEX);
 
   json video_info = json::parse(r.text);
 
@@ -273,4 +284,144 @@ bool API::has_videos() {
  */
 std::vector<GoogleTrend> API::fetch_google_trends(std::vector<std::string> terms) {
   return query_google_trends(terms);
+}
+
+/**
+ * fetch_videos_by_terms
+ *
+ * @param terms
+ * @return std::vector<VideoInfo>
+ */
+std::vector<VideoInfo> API::fetch_videos_by_terms(std::vector<std::string> terms) {
+  using namespace constants;
+  using json = nlohmann::json;
+
+  const char delimiter{'|'};
+
+  std::vector<VideoInfo> info_v{};
+
+  std::string query = std::accumulate(
+    std::next(terms.cbegin()),
+    terms.cend(),
+    terms.front(),
+    [&delimiter](const std::string& a, const std::string& b) {
+      return a + delimiter + b;
+    }
+  );
+
+  cpr::Response r = cpr::Get(
+    cpr::Url{URL_VALUES.at(SEARCH_URL_INDEX)},
+    cpr::Header{
+      {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
+      {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}},
+    cpr::Parameters{
+      {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},    // snippet
+      {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},         // key
+      {PARAM_NAMES.at(QUERY_INDEX),      query},                             // query terms
+      {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)}, // type
+      {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(VIEW_COUNT_INDEX)}, // order by
+      {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                  // limit
+    }
+  );
+
+  m_quota += youtube::QUOTA_LIMIT.at(youtube::SEARCH_LIST_QUOTA_INDEX);
+
+  json video_info = json::parse(r.text);
+
+  if (!video_info.is_null() && video_info.is_object())
+  {
+    auto items = video_info["items"];
+    if (!items.is_null() && items.is_array())
+    {
+      for (const auto &item : items)
+      {
+        try
+        {
+          auto video_id = SanitizeJSON(item["id"]["videoId"].dump());
+          auto datetime = SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str();
+
+          VideoInfo info{
+            .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
+            .id          = video_id,
+            .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
+            .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
+            .datetime    = datetime,
+            .time        = to_readable_time(datetime),
+            .url         = youtube_id_to_url(video_id)};
+
+          info_v.push_back(info);
+        }
+        catch (const std::exception &e)
+        {
+          std::string error_message{"Exception was caught: "};
+          error_message += e.what();
+          log(error_message);
+        }
+      }
+    }
+  }
+
+  return info_v;
+}
+
+/**
+ * fetch_term_info
+ *
+ * @param terms
+ * @return std::vector<TermInfo>
+ */
+std::vector<TermInfo> API::fetch_term_info(std::vector<std::string> terms) {
+  using namespace constants;
+  const char delimiter{','};
+
+  std::vector<TermInfo> metadata_v{};
+
+  if (m_authenticator.is_authenticated() || m_authenticator.FetchToken())
+  {
+    std::vector<VideoInfo> videos = fetch_videos_by_terms(terms);
+
+    if (!videos.empty()) {
+    std::string                                    id_string{};
+    std::vector<VideoInfo>::const_iterator it = videos.cbegin();
+
+    id_string.reserve(videos.size() * youtube::YOUTUBE_VIDEO_ID_LENGTH);
+    id_string += (*it).id;
+
+    while (++it != videos.cend()) id_string += delimiter + (*it).id;
+
+    std::vector<VideoStats> stats = fetch_video_stats(id_string);
+
+    if (stats.size() == videos.size())
+    {
+      for (uint8_t i = 0; i < stats.size(); i++)
+      {
+        videos.at(i).stats = stats.at(i);
+      }
+    }
+
+    int score{};
+
+    for (const auto& video : videos) {
+      if (std::stoi(video.stats.views) > 100)
+        score ++;
+    }
+
+    for (const auto& term : terms)
+      metadata_v.emplace_back(
+        TermInfo{
+          .term = term, .value = score
+        });
+    }
+  }
+
+  return metadata_v;
+}
+
+/**
+ * get_quota_used
+ *
+ * @returns [out] {uint32_t}
+ */
+const uint32_t API::get_quota_used() const {
+  return m_quota;
 }

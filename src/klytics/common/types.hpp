@@ -25,6 +25,11 @@ std::string term;
 int         value;
 };
 
+struct TermInfo {
+  std::string term;
+  int         value;
+};
+
 struct VideoStats {
 std::string              views;
 std::string              likes;
@@ -36,6 +41,7 @@ double                   like_score;
 double                   dislike_score;
 double                   comment_score;
 std::vector<GoogleTrend> trends;
+double                   keyword_score;
 };
 
 /**

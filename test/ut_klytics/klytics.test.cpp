@@ -4,10 +4,41 @@ TEST(KLyticsTest, Instantiate) {
   EXPECT_NO_THROW(klytics::KLytics{});
 }
 
-/**
+TEST(KlyticsTest, DISABLED_ComputeYouTubeKeywordScore) {
+  using namespace klytics;
 
+  API api{};
+
+  auto videos = api.fetch_youtube_stats();
+
+  std::vector<std::string> keywords{};
+
+  for (const auto& video : videos) {
+    for (const auto& keyword : video.stats.keywords) {
+      keywords.emplace_back(keyword);
+      if (keywords.size() == 3) break;
+    }
+    if (keywords.size() == 3) break;
+  }
+
+  std::vector<TermInfo> term_info_v = api.fetch_term_info(keywords);
+
+  EXPECT_FALSE(term_info_v.empty());
+
+  std::cout << "Terms\n\n" << std::endl;
+
+  for (const auto& info : term_info_v) {
+    std::cout << "Term:  " << info.term << "\nScore: " << info.value << "\n" << std::endl;
+  }
+
+  auto quota_used = api.get_quota_used();
+
+  std::cout << "Used " << quota_used << " quota units" << std::endl;
+}
+/**
+*
 */
-TEST(KLyticsTest, ComparatorComparesVideoVectors) {
+TEST(KLyticsTest, DISABLED_ComparatorComparesVideoVectors) {
   using namespace klytics;
   using VideoAnalysis = VideoAnalyst::VideoAnalysis;
 

@@ -66,7 +66,7 @@ class KLytics : public VideoAnalyzer,
                 public SummaryGenerator {
 
 public:
-virtual       ~KLytics() {}
+virtual                                ~KLytics()                                   override;
 
 virtual       std::string              fetch_follower_count()                       override;
 virtual       std::string              generate_report()                            override;
