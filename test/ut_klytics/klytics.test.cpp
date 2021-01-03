@@ -8,37 +8,9 @@ TEST(KLyticsTest, Instantiate) {
 }
 
 /**
- * Instantiate
- */
-TEST(APITest, Instantiate) {
-  EXPECT_NO_THROW(API{});
-}
-
-/**
- * ComputeYouTubeKeywordScore
- */
-TEST(APITest, DISABLED_ComputeYouTubeKeywordScore) {
-  using namespace klytics;
-
-  API api{};
-
-  std::vector<TermInfo> term_info_v =
-  api.fetch_term_info(
-    api.fetch_youtube_stats().front().get_primary_keywords()
-  );
-
-  for (const auto& info : term_info_v)
-    std::cout << "Term:  " << info.term << "\nScore: " << info.value << "\n" << std::endl;
-
-  std::cout << "Used " << api.get_quota_used() << " quota units" << std::endl;
-
-  EXPECT_FALSE(term_info_v.empty());
-}
-
-/**
 * ComparatorComparesVideoVectors
 */
-TEST(KLyticsTest, DISABLED_ComparatorComparesVideoVectors) {
+TEST(KLyticsTest, ComparatorComparesVideoVectors) {
   using namespace klytics;
   using VideoAnalysis = VideoAnalyst::VideoAnalysis;
 
@@ -92,4 +64,20 @@ TEST(KLyticsTest, DISABLED_ComparatorComparesVideoVectors) {
   EXPECT_EQ(most_likes_channel,     most_likes_it->channel_id);
   EXPECT_EQ(most_dislikes_channel,  most_dislikes_it->channel_id);
   EXPECT_EQ(best_viewscore_channel, best_viewscore_it->channel_id);
+}
+
+TEST(KLyticsTest, GoogleTrends) {
+  using namespace klytics;
+
+  KLytics klytics{};
+
+  std::vector<GoogleTrend> trends = klytics.fetch_trends(GetTestTerms());
+
+  std::cout << "Google Trends" << std::endl;
+  for (const auto& trend : trends) {
+    std::cout << "Trend: " << trend.term << "Value: " << trend.value << std::endl;
+  }
+
+  EXPECT_FALSE(trends.empty());
+  EXPECT_EQ(trends.front().term, GetTestTerms().front());
 }

@@ -1,9 +1,9 @@
 all_tests = [
-  "//test/ut_klytics"
+  "//test/ut_klytics",
+  "//test/ut_api"
 ]
 
 executable("klytics") {
-
   public_deps = [
     "//src/klytics:klytics_sources"
   ]

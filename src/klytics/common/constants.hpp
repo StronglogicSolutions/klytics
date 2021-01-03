@@ -94,12 +94,23 @@ const std::vector<std::string> PARAM_NAMES = {
   "q"
 };
 
+const uint8_t KSTYLEYO_CHANNEL_ID_INDEX             = 0x00;
+const uint8_t WALKAROUNDWORLD_CHANNEL_ID_INDEX      = 0x01;
+const uint8_t STRONGLOGICSOLUTIONS_CHANNEL_ID_INDEX = 0x02;
+
+const std::vector<std::string> CHANNEL_IDS{
+  "UC1XoiwW6b0VIYPOaP1KgV7A", // KStyleYo
+  "UCAQ52nRnrg5epd6znUny-VA", // Walk Around The World
+  "UCK0xH_L9OBM0CVwC438bMGA", // StrongLogic Solutions
+};
+
 const std::vector<std::string> PARAM_VALUES{
-  // "UCK0xH_L9OBM0CVwC438bMGA",   // StrongLogic Solutions
+  "UC1XoiwW6b0VIYPOaP1KgV7A",    // KStyleYo
+  // "UCAQ52nRnrg5epd6znUny-VA", // Walk Around The World
+  // "UCK0xH_L9OBM0CVwC438bMGA", // StrongLogic Solutions
   // "UCm5J1Fu_dHgBcMTpXu-NXUw", // Pangburn
   // "UCLwNTXWEjVd2qIHLcXxQWxA", // Timecast IRL
-  "UC1XoiwW6b0VIYPOaP1KgV7A", // KStyleYo
-  // "UCfpnY5NnBl-8L7SvICuYkYQ",  // Scott Adams
+  // "UCfpnY5NnBl-8L7SvICuYkYQ", // Scott Adams
   // "UCQ7ZcQSfCiY0EJL8ZdbZ3Hw", // Samara games
   // "UCPfC_6VjklQDGuxgRt43m1w", // Fazmash
   // "UCPGuorlvarThSlwJpyTHOmQ", // Capcom fighting

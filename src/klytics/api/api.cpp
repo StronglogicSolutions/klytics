@@ -1,10 +1,39 @@
 #include "api.hpp"
 
+/**
+ * @brief Construct a new API::API object
+ *
+ * @constructor
+ *
+ * @returns [out] {API}
+ *
+ * Notes:
+ * - Sets the channels upon which API functions will be performed
+ *
+ */
+API::API()
+: m_channels{
+  constants::URL_VALUES.at(constants::KSTYLEYO_CHANNEL_ID_INDEX),
+  constants::URL_VALUES.at(constants::WALKAROUNDWORLD_CHANNEL_ID_INDEX)
+} {}
+
+/**
+ * @brief
+ *
+ * @return true
+ * @return false
+ */
 bool API::is_authenticated()
 {
   return m_authenticator.is_authenticated();
 }
 
+/**
+ * @brief
+ *
+ * @return true
+ * @return false
+ */
 bool API::init()
 {
   return m_authenticator.FetchToken();
@@ -17,58 +46,64 @@ std::vector<VideoInfo> API::fetch_channel_videos()
 
   std::vector<VideoInfo> info_v{};
 
-  cpr::Response r = cpr::Get(
-    cpr::Url{URL_VALUES.at(SEARCH_URL_INDEX)},
-    cpr::Header{
-      {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
-      {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}},
-    cpr::Parameters{
-      {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},    // snippet
-      {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},         // key
-      {PARAM_NAMES.at(CHAN_ID_INDEX),    PARAM_VALUES.at(CHAN_KEY_INDEX)},   // channel id
-      {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)}, // type
-      {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(DATE_VALUE_INDEX)}, // order by
-      {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                  // limit
-    }
-  );
-
-  m_quota += youtube::QUOTA_LIMIT.at(youtube::SEARCH_LIST_QUOTA_INDEX);
-
-  json video_info = json::parse(r.text);
-
-  if (!video_info.is_null() && video_info.is_object())
-  {
-    auto items = video_info["items"];
-    if (!items.is_null() && items.is_array() && items.size() > 0)
+  std::for_each(
+    m_channels.cbegin(), m_channels.cend(),
+    [this, &info_v](const std::string channel_id)
     {
-      for (const auto &item : items)
+      cpr::Response r = cpr::Get(
+        cpr::Url{URL_VALUES.at(SEARCH_URL_INDEX)},
+        cpr::Header{
+          {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
+          {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}},
+        cpr::Parameters{
+          {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},    // snippet
+          {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},         // key
+          {PARAM_NAMES.at(CHAN_ID_INDEX),    PARAM_VALUES.at(CHAN_KEY_INDEX)},   // channel id
+          {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)}, // type
+          {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(DATE_VALUE_INDEX)}, // order by
+          {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                  // limit
+        }
+      );
+
+      m_quota += youtube::QUOTA_LIMIT.at(youtube::SEARCH_LIST_QUOTA_INDEX);
+
+      json video_info = json::parse(r.text);
+
+      if (!video_info.is_null() && video_info.is_object())
       {
-        try
+        auto items = video_info["items"];
+        if (!items.is_null() && items.is_array() && items.size() > 0)
         {
-          auto video_id = SanitizeJSON(item["id"]["videoId"].dump());
-          auto datetime = SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str();
+          for (const auto &item : items)
+          {
+            try
+            {
+              auto video_id = SanitizeJSON(item["id"]["videoId"].dump());
+              auto datetime = SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str();
 
-          VideoInfo info{
-            .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
-            .id          = video_id,
-            .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
-            .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
-            .datetime    = datetime,
-            .time        = to_readable_time(datetime),
-            .url         = youtube_id_to_url(video_id)};
+              VideoInfo info{
+                .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
+                .id          = video_id,
+                .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
+                .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
+                .datetime    = datetime,
+                .time        = to_readable_time(datetime),
+                .url         = youtube_id_to_url(video_id)};
 
-          info_v.push_back(info);
+              info_v.push_back(info);
+            }
+            catch (const std::exception &e)
+            {
+              std::string error_message{"Exception was caught: "};
+              error_message += e.what();
+              log(error_message);
+            }
+          }
         }
-        catch (const std::exception &e)
-        {
-          std::string error_message{"Exception was caught: "};
-          error_message += e.what();
-          log(error_message);
-        }
+        // log("Fetched video info for channel " + PARAM_VALUES.at(CHAN_KEY_INDEX));
       }
     }
-    // log("Fetched video info for channel " + PARAM_VALUES.at(CHAN_KEY_INDEX));
-  }
+  );
 
   return info_v;
 }
@@ -148,13 +183,10 @@ std::vector<VideoInfo> API::fetch_youtube_stats()
     m_videos = fetch_channel_videos();
     std::string id_string{};
 
-    for (const auto &info : m_videos)
-    {
-      id_string += info.id + ",";
-    }
+    for (const auto &info : m_videos) id_string += info.id + ",";
 
     std::vector<VideoStats> stats = fetch_video_stats(id_string);
-    auto stats_size = stats.size();
+    std::size_t             stats_size = stats.size();
 
     if (stats_size == m_videos.size())
     {

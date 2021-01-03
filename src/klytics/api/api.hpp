@@ -17,6 +17,9 @@ class API : public SecureAPI,
             public VideoAPI {
 
 public:
+
+  API();
+
   virtual bool                     is_authenticated() override;
   virtual bool                     init()             override;
   virtual bool                     has_videos()       override;
@@ -34,9 +37,10 @@ public:
   const   uint32_t                 get_quota_used() const;
 
 private:
-  Authenticator          m_authenticator;
-  std::vector<VideoInfo> m_videos;
-  uint32_t               m_quota;
+  Authenticator            m_authenticator;
+  std::vector<VideoInfo>   m_videos;
+  uint32_t                 m_quota;
+  std::vector<std::string> m_channels;
 };
 
 #endif // __API_HPP__

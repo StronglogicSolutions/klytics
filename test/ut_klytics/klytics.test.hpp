@@ -159,4 +159,12 @@ std::vector<VideoInfo> GetTestVideos_2() {
   };
 }
 
+std::vector<std::string> GetTestTerms() {
+  return std::vector<std::string>{
+    "kpop",
+    "korean",
+    "hangeul"
+  };
+}
+
 #endif // __KLYTICS_TEST_HPP__
