@@ -1,42 +1,42 @@
 #include "klytics.test.hpp"
 
+/**
+ * Instantiate
+ */
 TEST(KLyticsTest, Instantiate) {
   EXPECT_NO_THROW(klytics::KLytics{});
 }
 
-TEST(KlyticsTest, DISABLED_ComputeYouTubeKeywordScore) {
+/**
+ * Instantiate
+ */
+TEST(APITest, Instantiate) {
+  EXPECT_NO_THROW(API{});
+}
+
+/**
+ * ComputeYouTubeKeywordScore
+ */
+TEST(APITest, DISABLED_ComputeYouTubeKeywordScore) {
   using namespace klytics;
 
   API api{};
 
-  auto videos = api.fetch_youtube_stats();
+  std::vector<TermInfo> term_info_v =
+  api.fetch_term_info(
+    api.fetch_youtube_stats().front().get_primary_keywords()
+  );
 
-  std::vector<std::string> keywords{};
+  for (const auto& info : term_info_v)
+    std::cout << "Term:  " << info.term << "\nScore: " << info.value << "\n" << std::endl;
 
-  for (const auto& video : videos) {
-    for (const auto& keyword : video.stats.keywords) {
-      keywords.emplace_back(keyword);
-      if (keywords.size() == 3) break;
-    }
-    if (keywords.size() == 3) break;
-  }
-
-  std::vector<TermInfo> term_info_v = api.fetch_term_info(keywords);
+  std::cout << "Used " << api.get_quota_used() << " quota units" << std::endl;
 
   EXPECT_FALSE(term_info_v.empty());
-
-  std::cout << "Terms\n\n" << std::endl;
-
-  for (const auto& info : term_info_v) {
-    std::cout << "Term:  " << info.term << "\nScore: " << info.value << "\n" << std::endl;
-  }
-
-  auto quota_used = api.get_quota_used();
-
-  std::cout << "Used " << quota_used << " quota units" << std::endl;
 }
+
 /**
-*
+* ComparatorComparesVideoVectors
 */
 TEST(KLyticsTest, DISABLED_ComparatorComparesVideoVectors) {
   using namespace klytics;

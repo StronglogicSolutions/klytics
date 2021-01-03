@@ -59,6 +59,20 @@ std::string              time;
 std::string              url;
 VideoStats               stats;
 
+/**
+ * get_primary_keywords
+ *
+ * @returns [out] {std::vector<std::string>} up to 3 keywords
+ */
+std::vector<std::string> get_primary_keywords() {
+  return std::vector<std::string>{
+    stats.keywords.cbegin(),
+    stats.keywords.size() > 2 ?
+      stats.keywords.cbegin() + 3 :
+      stats.keywords.cbegin() + stats.keywords.size()
+    };
+}
+
 friend std::ostream &operator<<(std::ostream& o, const VideoInfo& v) {
   o << "Channel ID:  " << v.channel_id     << "\n" <<
        "Video ID:    " << v.id             << "\n" <<
