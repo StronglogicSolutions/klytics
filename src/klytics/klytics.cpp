@@ -67,7 +67,8 @@ std::string KLytics::generate_report() {
   output += "COMPETITOR VIDEOS (based on your most recent video)\n\n";
   output += competitor_stats_output;
   output += "\n\n";
-  output += "Thank you!!!";
+  output += "QUOTA USED: " + std::to_string(m_api.get_quota_used()) + "\n\n";
+  output += "Have a nice dat";
 
   /** add video sets to comparator **/
   // TODO: VideoInfo should become a class with a container of videos and an ID member

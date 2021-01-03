@@ -13,8 +13,8 @@
  */
 API::API()
 : m_channels{
-  constants::URL_VALUES.at(constants::KSTYLEYO_CHANNEL_ID_INDEX),
-  constants::URL_VALUES.at(constants::WALKAROUNDWORLD_CHANNEL_ID_INDEX)
+  constants::CHANNEL_IDS.at(constants::KSTYLEYO_CHANNEL_ID_INDEX),
+  constants::CHANNEL_IDS.at(constants::WALKAROUNDWORLD_CHANNEL_ID_INDEX)
 } {}
 
 /**
@@ -58,7 +58,7 @@ std::vector<VideoInfo> API::fetch_channel_videos()
         cpr::Parameters{
           {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},    // snippet
           {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},         // key
-          {PARAM_NAMES.at(CHAN_ID_INDEX),    PARAM_VALUES.at(CHAN_KEY_INDEX)},   // channel id
+          {PARAM_NAMES.at(CHAN_ID_INDEX),    channel_id},                        // channel id
           {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)}, // type
           {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(DATE_VALUE_INDEX)}, // order by
           {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                  // limit
