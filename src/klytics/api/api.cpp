@@ -347,12 +347,12 @@ std::vector<VideoInfo> API::fetch_videos_by_terms(std::vector<std::string> terms
       {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
       {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}},
     cpr::Parameters{
-      {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},    // snippet
-      {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},         // key
-      {PARAM_NAMES.at(QUERY_INDEX),      query},                             // query terms
-      {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)}, // type
-      {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(VIEW_COUNT_INDEX)}, // order by
-      {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                  // limit
+      {PARAM_NAMES.at(PART_INDEX),           PARAM_VALUES.at(SNIPPET_INDEX)},    // snippet
+      {PARAM_NAMES.at(KEY_INDEX),            m_authenticator.get_key()},         // key
+      {PARAM_NAMES.at(QUERY_INDEX),          query},                             // query terms
+      {PARAM_NAMES.at(TYPE_INDEX),           PARAM_VALUES.at(VIDEO_TYPE_INDEX)}, // type
+      {PARAM_NAMES.at(ORDER_INDEX),          PARAM_VALUES.at(VIEW_COUNT_INDEX)}, // order by
+      {PARAM_NAMES.at(MAX_RESULT_INDEX),     std::to_string(5)}                  // limit
     }
   );
 
@@ -449,6 +449,58 @@ std::vector<TermInfo> API::fetch_term_info(std::vector<std::string> terms) {
   return metadata_v;
 }
 
+std::vector<ChannelInfo> API::fetch_channel_info(std::string id_string) {
+  using namespace constants;
+  using json = nlohmann::json;
+
+  bool  NO_EXCEPTIONS_THROWN{false};
+
+  std::vector<ChannelInfo> info_v{};
+
+  cpr::Response r = cpr::Get(
+    cpr::Url{URL_VALUES.at(CHANNELS_URL_INDEX)},
+    cpr::Header{
+      {HEADER_NAMES.at(ACCEPT_HEADER_INDEX), HEADER_VALUES.at(APP_JSON_INDEX)},
+      {HEADER_NAMES.at(AUTH_HEADER_INDEX),   m_authenticator.get_token()}},
+    cpr::Parameters{
+      {PARAM_NAMES.at(PART_INDEX),           PARAM_VALUES.at(SNIPPET_STATS_INDEX)}, // snippet
+      {PARAM_NAMES.at(KEY_INDEX),            m_authenticator.get_key()},            // key
+      {PARAM_NAMES.at(ID_NAME_INDEX),        id_string},                            // query term
+      {PARAM_NAMES.at(TYPE_INDEX),           PARAM_VALUES.at(VIDEO_TYPE_INDEX)},    // type
+      {PARAM_NAMES.at(ORDER_INDEX),          PARAM_VALUES.at(VIEW_COUNT_INDEX)},    // order by
+      {PARAM_NAMES.at(MAX_RESULT_INDEX),     std::to_string(5)}                     // limit
+    }
+  );
+
+  m_quota += youtube::QUOTA_LIMIT.at(youtube::SEARCH_LIST_QUOTA_INDEX);
+
+  json channel_json = json::parse(r.text, nullptr, NO_EXCEPTIONS_THROWN);
+
+  if (!channel_json.is_null() && channel_json.is_object() && channel_json.contains("items")) {
+    json items = channel_json["items"];
+
+    // TODO: Combine follower counts with channel info
+    if (!items.is_null() && items.is_array()) {
+      for (const auto& item : items) {
+        info_v.emplace_back(
+          ChannelInfo{
+            .name          = item["snippet"]["title"],
+            .description   = item["snippet"]["description"],
+            .created       = item["snippet"]["publishedAt"],
+            .thumb_url     = item["snippet"]["thumbnails"]["default"]["url"],
+            .stats         = ChannelStats{
+                .views       = item["statistics"]["viewCount"],
+                .subscribers = item["statistics"]["subscriberCount"],
+                .videos      = item["statistics"]["videoCount"]
+            }
+          }
+        );
+      }
+    }
+  }
+
+  return info_v;
+}
 /**
  * get_quota_used
  *

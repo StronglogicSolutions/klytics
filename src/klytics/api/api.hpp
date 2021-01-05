@@ -24,6 +24,7 @@ public:
   virtual bool                     init()             override;
   virtual bool                     has_videos()       override;
 
+          std::vector<ChannelInfo> fetch_channel_info(std::string id_string);
           std::vector<VideoInfo>   fetch_channel_videos();
           std::vector<VideoStats>  fetch_video_stats(std::string id_string);
           std::vector<VideoInfo>   fetch_youtube_stats();

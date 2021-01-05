@@ -17,6 +17,7 @@ const uint8_t SEARCH_URL_INDEX           = 0x00;
 const uint8_t VIDEOS_URL_INDEX           = 0x01;
 const uint8_t LIVE_CHAT_URL_INDEX        = 0x02;
 const uint8_t GOOGLE_AUTH_URL_INDEX      = 0x03;
+const uint8_t CHANNELS_URL_INDEX         = 0x04;
 
 // Header Name Indexes
 const uint8_t ACCEPT_HEADER_INDEX        = 0x00;
@@ -57,13 +58,15 @@ const uint8_t REFRESH_TOKEN_VALUE_INDEX  = 0x09;
 const uint8_t DATE_VALUE_INDEX           = 0x0A;
 const uint8_t CONTENT_DETAILS_INDEX      = 0x0B;
 const uint8_t VIEW_COUNT_INDEX           = 0x0C;
+const uint8_t SNIPPET_STATS_INDEX        = 0x0D;
 
 // Strings
 const std::vector<std::string> URL_VALUES{
   "https://www.googleapis.com/youtube/v3/search",
   "https://www.googleapis.com/youtube/v3/videos",
   "https://www.googleapis.com/youtube/v3/liveChat/messages",
-  "https://oauth2.googleapis.com/token"
+  "https://oauth2.googleapis.com/token",
+  "https://www.googleapis.com/youtube/v3/channels"
 };
 
 const std::vector<std::string> HEADER_NAMES{
@@ -128,7 +131,8 @@ const std::vector<std::string> PARAM_VALUES{
   "refresh_token",
   "date",
   "contentDetails",
-  "viewCount"
+  "viewCount",
+  "snippet,statistics"
 };
 
 const std::string E_CHANNEL_ID{"UCFP7BAwQIzqml"};

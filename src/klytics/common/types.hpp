@@ -30,6 +30,37 @@ struct TermInfo {
   int         value;
 };
 
+struct ChannelStats {
+std::string views;
+std::string subscribers;
+std::string videos;
+};
+
+struct ChannelInfo {
+std::string  name;
+std::string  description;
+std::string  created;
+std::string  thumb_url;
+ChannelStats stats;
+std::string  id;
+
+friend std::ostream &operator<<(std::ostream& o, const ChannelInfo& c) {
+  o << "ID:  " << c.id     << "\n" <<
+       "Name:    " << c.name             << "\n" <<
+       "Description:       " << c.description          << "\n" <<
+       "Created: " << c.created    << "\n" <<
+       "Thumbnail:    " << c.thumb_url       << "\n" <<
+
+       "STATISTICS\n" <<
+
+       "➝ Views:         " << c.stats.views      << "\n" <<
+       "➝ Subscribers:         " << c.stats.subscribers      << "\n" <<
+       "➝ Videos:      " << c.stats.videos   << "\n";
+
+  return o;
+}
+};
+
 struct VideoStats {
 std::string              views;
 std::string              likes;
