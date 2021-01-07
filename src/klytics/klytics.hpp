@@ -75,8 +75,9 @@ virtual       std::vector<VideoInfo>   get_youtube_videos()                     
 virtual       bool                     add_videos(std::vector<VideoInfo> videos)    override;
 virtual const VideoCreatorComparison   get_findings()                               override;
 virtual       std::vector<GoogleTrend> fetch_trends(std::vector<std::string> terms) override;
-        std::string            fetch_trends_string(std::vector<std::string> terms);
-        std::string            generate_video_stats_table();
+
+              std::string              fetch_trends_string(std::vector<std::string> terms);
+              std::string              generate_video_stats_table();
 
 private:
 API               m_api;
