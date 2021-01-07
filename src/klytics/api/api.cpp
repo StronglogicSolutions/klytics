@@ -110,7 +110,7 @@ bool API::fetch_channel_videos()
             try
             {
               auto video_id = SanitizeJSON(item["id"]["videoId"].dump());
-              auto datetime = SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str();
+              auto datetime = SanitizeJSON(item["snippet"]["publishedAt"].dump());
 
               info_v.emplace_back(
                 VideoInfo{
@@ -119,7 +119,7 @@ bool API::fetch_channel_videos()
                   .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
                   .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
                   .datetime    = datetime,
-                  .time        = to_readable_time(datetime),
+                  .time        = to_readable_time(datetime.c_str()),
                   .url         = youtube_id_to_url(video_id)
                 }
               );
