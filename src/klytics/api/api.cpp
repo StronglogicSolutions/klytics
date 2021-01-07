@@ -12,7 +12,7 @@
  *
  */
 API::API()
-: m_channels{
+: m_channel_ids{
   constants::CHANNEL_IDS.at(constants::KSTYLEYO_CHANNEL_ID_INDEX),
   constants::CHANNEL_IDS.at(constants::WALKAROUNDWORLD_CHANNEL_ID_INDEX)
 } {}
@@ -39,17 +39,48 @@ bool API::init()
   return m_authenticator.FetchToken();
 }
 
-std::vector<VideoInfo> API::fetch_channel_videos()
+bool API::fetch_channel_data() {
+  std::string id_string{};
+  for (const auto& channel_id : m_channel_ids) id_string += channel_id + ",";
+
+  try {
+    m_channels = fetch_channel_info(id_string);
+    if (m_channels.size() == m_channel_ids.size()) {
+      for (uint8_t i = 0; i < m_channels.size(); i++) {
+        m_channels.at(i).id = m_channel_ids.at(i);
+      }
+      return true;
+    }
+  }
+  catch (const std::exception& e) {
+    log(e.what());
+  }
+  return false;
+}
+
+/**
+ * fetch_channel_videos
+ *
+ * @return std::vector<VideoInfo>
+ */
+bool API::fetch_channel_videos()
 {
   using namespace constants;
   using json = nlohmann::json;
 
-  std::vector<VideoInfo> info_v{};
+  if (m_channels.empty()) {
+    if (!fetch_channel_data()) {
+      log("Unable to fetch channel data");
+      return false;
+    }
+  }
 
   std::for_each(
-    m_channels.cbegin(), m_channels.cend(),
-    [this, &info_v](const std::string channel_id)
+    m_channels.begin(), m_channels.end(),
+    [this](ChannelInfo& channel)
     {
+      std::vector<VideoInfo> info_v{};
+
       cpr::Response r = cpr::Get(
         cpr::Url{URL_VALUES.at(SEARCH_URL_INDEX)},
         cpr::Header{
@@ -58,7 +89,7 @@ std::vector<VideoInfo> API::fetch_channel_videos()
         cpr::Parameters{
           {PARAM_NAMES.at(PART_INDEX),       PARAM_VALUES.at(SNIPPET_INDEX)},    // snippet
           {PARAM_NAMES.at(KEY_INDEX),        m_authenticator.get_key()},         // key
-          {PARAM_NAMES.at(CHAN_ID_INDEX),    channel_id},                        // channel id
+          {PARAM_NAMES.at(CHAN_ID_INDEX),    channel.id},                        // channel id
           {PARAM_NAMES.at(TYPE_INDEX),       PARAM_VALUES.at(VIDEO_TYPE_INDEX)}, // type
           {PARAM_NAMES.at(ORDER_INDEX),      PARAM_VALUES.at(DATE_VALUE_INDEX)}, // order by
           {PARAM_NAMES.at(MAX_RESULT_INDEX), std::to_string(5)}                  // limit
@@ -81,33 +112,41 @@ std::vector<VideoInfo> API::fetch_channel_videos()
               auto video_id = SanitizeJSON(item["id"]["videoId"].dump());
               auto datetime = SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str();
 
-              VideoInfo info{
-                .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
-                .id          = video_id,
-                .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
-                .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
-                .datetime    = datetime,
-                .time        = to_readable_time(datetime),
-                .url         = youtube_id_to_url(video_id)};
-
-              info_v.push_back(info);
+              info_v.emplace_back(
+                VideoInfo{
+                  .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
+                  .id          = video_id,
+                  .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
+                  .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
+                  .datetime    = datetime,
+                  .time        = to_readable_time(datetime),
+                  .url         = youtube_id_to_url(video_id)
+                }
+              );
             }
             catch (const std::exception &e)
             {
               std::string error_message{"Exception was caught: "};
               error_message += e.what();
               log(error_message);
+              return false;
             }
           }
         }
-        // log("Fetched video info for channel " + PARAM_VALUES.at(CHAN_KEY_INDEX));
       }
+      channel.videos = info_v;
     }
   );
 
-  return info_v;
+  return true;
 }
 
+/**
+ * fetch_video_stats
+ *
+ * @param id_string
+ * @return std::vector<VideoStats>
+ */
 std::vector<VideoStats> API::fetch_video_stats(std::string id_string)
 {
   using namespace constants;
@@ -171,34 +210,42 @@ std::vector<VideoStats> API::fetch_video_stats(std::string id_string)
  *
  * @returns [out] {std::vector<VideoInfo}
  */
-std::vector<VideoInfo> API::fetch_youtube_stats()
+std::vector<ChannelInfo> API::fetch_youtube_stats()
 {
   using namespace constants;
   using json = nlohmann::json;
 
-  m_videos.clear();
-
   if (m_authenticator.is_authenticated() || m_authenticator.FetchToken())
   {
-    m_videos = fetch_channel_videos();
-    std::string id_string{};
+    if (fetch_channel_videos()) {
+      for (auto& channel : m_channels) {
+        std::string id_string{};
 
-    for (const auto &info : m_videos) id_string += info.id + ",";
+        for (const auto &info : channel.videos) id_string += info.id + ",";
 
-    std::vector<VideoStats> stats = fetch_video_stats(id_string);
-    std::size_t             stats_size = stats.size();
+        std::vector<VideoStats> stats = fetch_video_stats(id_string);
+        std::size_t             stats_size = stats.size();
 
-    if (stats_size == m_videos.size())
-    {
-      for (uint8_t i = 0; i < stats_size; i++)
-      {
-        m_videos.at(i).stats = stats.at(i);
+        if (stats_size == channel.videos.size())
+        {
+          for (uint8_t i = 0; i < stats_size; i++)
+          {
+            channel.videos.at(i).stats = stats.at(i);
+          }
+        }
       }
     }
   }
-  return m_videos;
+
+  return m_channels;
 }
 
+/**
+ * fetch_rival_videos
+ *
+ * @param video
+ * @return std::vector<VideoInfo>
+ */
 std::vector<VideoInfo> API::fetch_rival_videos(VideoInfo video)
 {
   using namespace constants;
@@ -294,7 +341,17 @@ std::vector<VideoInfo> API::find_similar_videos(VideoInfo video)
  */
 std::vector<VideoInfo> API::get_videos()
 {
-  return m_videos;
+  std::vector<VideoInfo> videos{};
+
+  for (const auto& channel : m_channels) {
+    videos.insert(
+      videos.end(),
+      channel.videos.begin(),
+      channel.videos.end()
+    );
+  }
+
+  return videos;
 }
 
 /**

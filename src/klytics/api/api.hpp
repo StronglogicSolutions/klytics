@@ -24,10 +24,11 @@ public:
   virtual bool                     init()             override;
   virtual bool                     has_videos()       override;
 
+          bool                     fetch_channel_data();
           std::vector<ChannelInfo> fetch_channel_info(std::string id_string);
-          std::vector<VideoInfo>   fetch_channel_videos();
+          bool                     fetch_channel_videos();
           std::vector<VideoStats>  fetch_video_stats(std::string id_string);
-          std::vector<VideoInfo>   fetch_youtube_stats();
+          std::vector<ChannelInfo> fetch_youtube_stats();
           std::vector<VideoInfo>   fetch_rival_videos(VideoInfo video);
           std::vector<VideoInfo>   find_similar_videos(VideoInfo video);
           std::vector<VideoInfo>   get_videos();
@@ -41,7 +42,8 @@ private:
   Authenticator            m_authenticator;
   std::vector<VideoInfo>   m_videos;
   uint32_t                 m_quota;
-  std::vector<std::string> m_channels;
+  std::vector<std::string> m_channel_ids;
+  std::vector<ChannelInfo> m_channels;
 };
 
 #endif // __API_HPP__

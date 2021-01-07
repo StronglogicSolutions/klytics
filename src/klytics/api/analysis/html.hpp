@@ -65,6 +65,17 @@ inline std::string youtube_id_to_url(std::string id)
 }
 
 /**
+ * youtube_title_link
+ *
+ * @param title
+ * @param video_id
+ * @return HTML::Link
+ */
+inline HTML::Link youtube_title_link(std::string title, std::string video_id) {
+  return HTML::Link{title, youtube_id_to_url(video_id)};
+}
+
+/**
  * tags_to_string
  *
  * @param
@@ -123,7 +134,7 @@ inline std::string counts_to_html(std::vector<FollowerCount> counts) {
  * @param
  * @returns
  */
-inline std::string videos_to_html(const std::vector<VideoInfo> &videos)
+inline std::string channel_videos_to_html(const std::vector<ChannelInfo> &channels)
 {
   HTML::Document document{"KIQ Analytics"};
 
@@ -140,31 +151,89 @@ inline std::string videos_to_html(const std::vector<VideoInfo> &videos)
 
   HTML::Table table{};
   table.cls("table");
-  table << (HTML::Row() << HTML::ColHeader("ID").style("color:#ef5e3f; padding: 4px;")
+  table << (HTML::Row() << HTML::ColHeader("Channel").style("color:#ef5e3f; padding: 4px;")
+                        << HTML::ColHeader("Subscribers").style("color:#ef5e3f; padding: 4px;")
                         << HTML::ColHeader("Title").style("color:#ef5e3f; padding: 4px;")
                         << HTML::ColHeader("Time").style("color:#ef5e3f; padding: 4px;")
                         << HTML::ColHeader("Views").style("color:#ef5e3f; padding: 4px;")
                         << HTML::ColHeader("Likes").style("color:#ef5e3f; padding: 4px;")
-                        << HTML::ColHeader("Dislikes").style("color:#ef5e3f; padding: 4px;")
+                        << HTML::ColHeader("Boos").style("color:#ef5e3f; padding: 4px;")
                         << HTML::ColHeader("Comments").style("color:#ef5e3f; padding: 4px;"));
 
-  for (const auto &video : videos)
+  for (const auto& channel : channels)
   {
-    table << (HTML::Row()
-              << HTML::Col(video.id).style("color: #000; padding: 8px;")
-              << HTML::Col(video.title).style("color: #000; padding: 8px;")
-              << HTML::Col(video.time).style("color: #000; padding: 8px;")
-              << HTML::Col(video.stats.views).style("color: #000; padding: 8px;")
-              << HTML::Col(video.stats.likes).style("color: #000; padding: 8px;")
-              << HTML::Col(video.stats.dislikes).style("color: #000; padding: 8px;")
-              << HTML::Col(video.stats.comments).style("color: #000; padding: 8px;"));
-    table << (HTML::Row()
-              << HTML::Col(tags_to_string(video.stats.keywords)).style("color: #333; padding: 8px;").addAttribute("rowspan", 1).addAttribute("colspan", 10));
+    for (const auto& video : channel.videos)
+    {
+      table << (HTML::Row()
+                << HTML::Col(channel.name).style("color: #000; padding: 8px;")
+                << HTML::Col(channel.stats.subscribers).style("color: #000; padding: 8px")
+                << HTML::Col().style("color: #000; padding: 8px;") << youtube_title_link(video.title, video.id)
+                << HTML::Col(video.time).style("color: #000; padding: 8px;")
+                << HTML::Col(video.stats.views).style("color: #000; padding: 8px;")
+                << HTML::Col(video.stats.likes).style("color: #000; padding: 8px;")
+                << HTML::Col(video.stats.dislikes).style("color: #000; padding: 8px;")
+                << HTML::Col(video.stats.comments).style("color: #000; padding: 8px;"));
+      table << (HTML::Row()
+                << HTML::Col(tags_to_string(video.stats.keywords)).style("color: #333; padding: 8px;").addAttribute("rowspan", 1).addAttribute("colspan", 10));
+    }
+
   }
 
   main << std::move(table);
   main << HTML::Break() << HTML::Break();
   document << std::move(main);
+
+  return SanitizeOutput(document.toString());
+}
+
+/**
+ * channels_to_html
+ *
+ * @param
+ * @returns
+ */
+inline std::string channels_to_html(const std::vector<ChannelInfo> &channels)
+{
+  HTML::Document document{"KIQ Analytics"};
+
+  // document.addAttribute("lang", "en");
+  // document.head() << HTML::Meta("utf-8")
+  //                 << HTML::Meta("viewport", "width=device-width, initial-scale=1, shrink-to-fit=no");
+  // document.head() << HTML::Style(constants::HTML_STYLE);
+  // document.body().cls("videos");
+
+  // HTML::Div main{"container"};
+  // main.style("background-color:#FFF;");
+  // main << HTML::Header1("KIQ Analytics").style("color:#ef5e3f; padding: 12px;text-align: center;");
+  // main << HTML::Header2("Video Statistics").style("color:#ef5e3f; padding: 12px;text-align: center;");
+
+  // HTML::Table table{};
+  // table.cls("table");
+  // table << (HTML::Row() << HTML::ColHeader("ID").style("color:#ef5e3f; padding: 4px;")
+  //                       << HTML::ColHeader("Title").style("color:#ef5e3f; padding: 4px;")
+  //                       << HTML::ColHeader("Time").style("color:#ef5e3f; padding: 4px;")
+  //                       << HTML::ColHeader("Views").style("color:#ef5e3f; padding: 4px;")
+  //                       << HTML::ColHeader("Likes").style("color:#ef5e3f; padding: 4px;")
+  //                       << HTML::ColHeader("Dislikes").style("color:#ef5e3f; padding: 4px;")
+  //                       << HTML::ColHeader("Comments").style("color:#ef5e3f; padding: 4px;"));
+
+  // for (const auto &video : videos)
+  // {
+  //   table << (HTML::Row()
+  //             << HTML::Col(video.id).style("color: #000; padding: 8px;")
+  //             << HTML::Col(video.title).style("color: #000; padding: 8px;")
+  //             << HTML::Col(video.time).style("color: #000; padding: 8px;")
+  //             << HTML::Col(video.stats.views).style("color: #000; padding: 8px;")
+  //             << HTML::Col(video.stats.likes).style("color: #000; padding: 8px;")
+  //             << HTML::Col(video.stats.dislikes).style("color: #000; padding: 8px;")
+  //             << HTML::Col(video.stats.comments).style("color: #000; padding: 8px;"));
+  //   table << (HTML::Row()
+  //             << HTML::Col(tags_to_string(video.stats.keywords)).style("color: #333; padding: 8px;").addAttribute("rowspan", 1).addAttribute("colspan", 10));
+  // }
+
+  // main << std::move(table);
+  // main << HTML::Break() << HTML::Break();
+  // document << std::move(main);
 
   return SanitizeOutput(document.toString());
 }

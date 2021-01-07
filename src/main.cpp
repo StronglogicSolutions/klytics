@@ -14,9 +14,9 @@ int main(int argc, char** argv) {
       if (arg.compare("followers") == 0) {
         std_out += k_lytics.fetch_follower_count() + "\n";
       }
-      if (arg.compare("stats") == 0) {
-        std_out += k_lytics.generate_video_stats_table()  + "\n";
-      }
+      // if (arg.compare("stats") == 0) {
+      //   std_out += k_lytics.generate_video_stats_table()  + "\n";
+      // }
       if (arg.compare("report") == 0) {
         std_out += k_lytics.generate_report()    + "\n";
       }

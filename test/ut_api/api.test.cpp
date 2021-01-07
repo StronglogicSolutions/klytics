@@ -15,7 +15,7 @@ TEST(APITest, ComputeYouTubeKeywordScore) {
 
   std::vector<TermInfo> term_info_v =
   api.fetch_term_info(
-    api.fetch_youtube_stats().front().get_primary_keywords()
+    api.fetch_youtube_stats().front().videos.front().get_primary_keywords()
   );
 
   for (const auto& info : term_info_v)

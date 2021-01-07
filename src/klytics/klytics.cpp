@@ -43,40 +43,44 @@ std::string KLytics::fetch_follower_count() {
 std::string KLytics::generate_report() {
   std::string::size_type extra_text_size{102};
 
-  std::string            output, video_stats_output, competitor_stats_output;
+  std::string            output, youtube_stats_output, competitor_stats_output;
   std::string            follower_count = fetch_follower_count();
-  std::vector<VideoInfo> videos         = m_api.fetch_youtube_stats();
-  std::vector<VideoInfo> c_videos;
+  std::vector<ChannelInfo> channel_data = m_api.fetch_youtube_stats();
 
-  if (!videos.empty()) {
-    video_stats_output      = videos_to_html(videos);
-    c_videos = m_api.find_similar_videos(videos.front());
-    competitor_stats_output = videos_to_html(c_videos);
+  // TODO: modify "find_similar_videos" to return ChannelInfo objects
+  // std::vector<VideoInfo> c_videos;
+
+  if (!channel_data.empty()) {
+    youtube_stats_output = channel_videos_to_html(channel_data);
+    // c_videos = m_api.find_similar_videos(videos.front());
+    // competitor_stats_output = videos_to_html(c_videos);
   }
 
   output.reserve(
-    follower_count.size() + video_stats_output.size() + competitor_stats_output.size() + extra_text_size
+    follower_count.size() + youtube_stats_output.size() + competitor_stats_output.size() + extra_text_size
   );
 
   output += "FOLLOWER COUNT\n\n";
   output += follower_count;
   output += "\n\n";
   output += "LATEST VIDEOS\n\n";
-  output += video_stats_output;
+  output += youtube_stats_output;
   output += "\n\n";
-  output += "COMPETITOR VIDEOS (based on your most recent video)\n\n";
-  output += competitor_stats_output;
-  output += "\n\n";
+  // output += "COMPETITOR VIDEOS (based on your most recent video)\n\n";
+  // output += competitor_stats_output;
+  // output += "\n\n";
   output += "QUOTA USED: " + std::to_string(m_api.get_quota_used()) + "\n\n";
-  output += "Have a nice dat";
+  output += "Have a nice day";
 
   /** add video sets to comparator **/
-  // TODO: VideoInfo should become a class with a container of videos and an ID member
-  if (!videos.empty() && !c_videos.empty()) {
-    if (!m_comparator.add_content(videos.front().channel_id, videos))
-      log("Unable to add videos to comparator");
-    if (!m_comparator.add_content(c_videos.front().channel_id, c_videos))
-      log("Unable to add competitor videos to comparator");
+  if (!channel_data.empty() && !channel_data.front().videos.empty()) {
+    for (const auto& channel : channel_data) {
+      if (!m_comparator.add_content(channel.videos.front().channel_id, channel.videos))
+        log("Unable to add videos to comparator");
+      // if (!m_comparator.add_content(c_videos.front().channel_id, c_videos))
+      //   log("Unable to add competitor videos to comparator");
+
+    }
   }
 
   return output;
@@ -88,16 +92,21 @@ std::string KLytics::generate_report() {
  * @returns [out] {std::string}
  */
 std::string KLytics::generate_video_stats_table() {
-  return videos_to_html(
-    m_api.fetch_youtube_stats()
-  );
+  // return videos_to_html(
+  //   m_api.fetch_youtube_stats()
+  // );
+  return "";
 }
 
 /**
  * fetch_videos
  */
 std::vector<VideoInfo> KLytics::fetch_videos() {
-  return m_api.fetch_channel_videos();
+  std::vector<VideoInfo> videos;
+  if (m_api.fetch_channel_videos()) {
+    videos = m_api.get_videos();
+  }
+  return videos;
 }
 /**
  * get_youtube_videos
