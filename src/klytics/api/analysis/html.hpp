@@ -165,14 +165,14 @@ inline std::string channel_videos_to_html(const std::vector<ChannelInfo> &channe
     for (const auto& video : channel.videos)
     {
       table << (HTML::Row()
-                << HTML::Col(channel.name).style("color: #000; padding: 8px;")
-                << HTML::Col(channel.stats.subscribers).style("color: #000; padding: 8px")
-                << HTML::Col().style("color: #000; padding: 8px;") << youtube_title_link(video.title, video.id)
-                << HTML::Col(video.time).style("color: #000; padding: 8px;")
-                << HTML::Col(video.stats.views).style("color: #000; padding: 8px;")
-                << HTML::Col(video.stats.likes).style("color: #000; padding: 8px;")
-                << HTML::Col(video.stats.dislikes).style("color: #000; padding: 8px;")
-                << HTML::Col(video.stats.comments).style("color: #000; padding: 8px;"));
+                << HTML::Col(channel.name).style("color: #000; padding: 4px;")
+                << HTML::Col(channel.stats.subscribers).style("color: #000; padding: 4px")
+                << HTML::Col().style("color: #000; padding: 4px;") << youtube_title_link(video.title, video.id)
+                << HTML::Col(video.time).style("color: #000; padding: 4px;")
+                << HTML::Col(video.stats.views).style("color: #000; padding: 4px;")
+                << HTML::Col(video.stats.likes).style("color: #000; padding: 4px;")
+                << HTML::Col(video.stats.dislikes).style("color: #000; padding: 4px;")
+                << HTML::Col(video.stats.comments).style("color: #000; padding: 4px;"));
       table << (HTML::Row()
                 << HTML::Col(tags_to_string(video.stats.keywords)).style("color: #333; padding: 8px;").addAttribute("rowspan", 1).addAttribute("colspan", 10));
     }
