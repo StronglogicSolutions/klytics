@@ -43,17 +43,18 @@ std::string KLytics::fetch_follower_count() {
 std::string KLytics::generate_report() {
   std::string::size_type extra_text_size{102};
 
-  std::string            output, youtube_stats_output, competitor_stats_output;
+  std::string            output, youtube_stats_output;
+  std::string            competitor_stats_output{};
   std::string            follower_count = fetch_follower_count();
   std::vector<ChannelInfo> channel_data = m_api.fetch_youtube_stats();
 
   // TODO: modify "find_similar_videos" to return ChannelInfo objects
-  // std::vector<VideoInfo> c_videos;
+  std::vector<ChannelInfo> similar_channels;
 
   if (!channel_data.empty()) {
     youtube_stats_output = channel_videos_to_html(channel_data);
-    // c_videos = m_api.find_similar_videos(videos.front());
-    // competitor_stats_output = videos_to_html(c_videos);
+    similar_channels = m_api.find_similar_videos(channel_data.front().videos.front());
+    competitor_stats_output = channel_videos_to_html(similar_channels);
   }
 
   output.reserve(
@@ -66,20 +67,25 @@ std::string KLytics::generate_report() {
   output += "LATEST VIDEOS\n\n";
   output += youtube_stats_output;
   output += "\n\n";
-  // output += "COMPETITOR VIDEOS (based on your most recent video)\n\n";
-  // output += competitor_stats_output;
-  // output += "\n\n";
+  output += "COMPETITOR VIDEOS (based on your most recent video)\n\n";
+  output += competitor_stats_output;
+  output += "\n\n";
   output += "QUOTA USED: " + std::to_string(m_api.get_quota_used()) + "\n\n";
   output += "Have a nice day";
 
   /** add video sets to comparator **/
   if (!channel_data.empty() && !channel_data.front().videos.empty()) {
     for (const auto& channel : channel_data) {
-      if (!m_comparator.add_content(channel.videos.front().channel_id, channel.videos))
-        log("Unable to add videos to comparator");
-      // if (!m_comparator.add_content(c_videos.front().channel_id, c_videos))
-      //   log("Unable to add competitor videos to comparator");
-
+      if (!channel.videos.empty()) {
+        if (!m_comparator.add_content(channel.videos.front().channel_id, channel.videos))
+          log("Unable to add videos to comparator");
+      }
+    }
+    for (const auto& channel : similar_channels) {
+      if (!channel.videos.empty()) {
+        if (!m_comparator.add_content(channel.videos.front().channel_id, channel.videos))
+          log("Unable to add competitor videos to comparator");
+      }
     }
   }
 

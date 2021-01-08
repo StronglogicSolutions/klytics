@@ -74,7 +74,7 @@ bool API::fetch_channel_videos()
       return false;
     }
   }
-
+  // TODO: Replace below with standard for loop?
   std::for_each(
     m_channels.begin(), m_channels.end(),
     [this](ChannelInfo& channel)
@@ -286,7 +286,7 @@ std::vector<VideoInfo> API::fetch_rival_videos(VideoInfo video)
         try
         {
           auto video_id = SanitizeJSON(item["id"]["videoId"].dump());
-          auto datetime = SanitizeJSON(item["snippet"]["publishedAt"].dump()).c_str();
+          auto datetime = SanitizeJSON(item["snippet"]["publishedAt"].dump());
 
           VideoInfo info{
               .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
@@ -294,7 +294,7 @@ std::vector<VideoInfo> API::fetch_rival_videos(VideoInfo video)
               .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
               .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
               .datetime    = datetime,
-              .time        = to_readable_time(datetime),
+              .time        = to_readable_time(datetime.c_str()),
               .url         = youtube_id_to_url(video_id)};
 
           info_v.push_back(info);
@@ -329,11 +329,41 @@ std::vector<VideoInfo> API::fetch_rival_videos(VideoInfo video)
  * find_similar_videos
  *
  * @param   [in]  {VideoInfo}
- * @returns [out] {std::vector<VideoInfo>}
+ * @returns [out] {std::vector<ChannelInfo>}
  */
-std::vector<VideoInfo> API::find_similar_videos(VideoInfo video)
+std::vector<ChannelInfo> API::find_similar_videos(VideoInfo video)
 {
-  return fetch_rival_videos(video);
+  std::vector<ChannelInfo> channels{};
+  std::vector<VideoInfo>   videos = fetch_rival_videos(video);
+
+  auto    it     = std::make_move_iterator(videos.begin());
+  auto    it_end = std::make_move_iterator(videos.end());
+  uint8_t idx{0};
+  while (it != it_end) {
+    auto chan_it = std::find_if(channels.begin(), channels.end(), [&it](const ChannelInfo& channel) {
+      return channel.id.compare(it->channel_id) == 0;
+    });
+
+    if (chan_it != channels.cend()) {
+      chan_it->videos.emplace_back(std::move((*it)));
+    } else {
+      std::vector<ChannelInfo> channel_infos = fetch_channel_info(it->channel_id);
+      if (!channel_infos.empty()) {
+        if (channel_infos.size() > 1) {
+          // TODO: Logger should note that this was a strange result
+        }
+        channels.emplace_back(std::move(channel_infos.front()));
+        channels.back().videos.emplace_back(std::move((*it)));
+      } else {
+        // TODO: Unable to find channel. Strange
+      }
+    }
+
+    idx++;
+    it = std::make_move_iterator(videos.begin() + idx);
+  }
+
+  return channels;
 }
 
 /**
@@ -549,7 +579,8 @@ std::vector<ChannelInfo> API::fetch_channel_info(std::string id_string) {
                 .views       = item["statistics"]["viewCount"],
                 .subscribers = item["statistics"]["subscriberCount"],
                 .videos      = item["statistics"]["videoCount"]
-            }
+            },
+            .id            = item["id"]
           }
         );
       }
