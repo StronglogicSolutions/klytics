@@ -114,7 +114,7 @@ bool API::fetch_channel_videos()
 
               info_v.emplace_back(
                 VideoInfo{
-                  .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
+                  .channel_id  = channel.id,
                   .id          = video_id,
                   .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
                   .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
@@ -289,7 +289,7 @@ std::vector<VideoInfo> API::fetch_rival_videos(VideoInfo video)
           auto datetime = SanitizeJSON(item["snippet"]["publishedAt"].dump());
 
           VideoInfo info{
-              .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
+              .channel_id  = SanitizeOutput(SanitizeJSON(item["snippet"]["channelId"].dump())),
               .id          = video_id,
               .title       = SanitizeOutput(SanitizeJSON(item["snippet"]["title"].dump())),
               .description = SanitizeOutput(SanitizeJSON(item["snippet"]["description"].dump())),
@@ -348,7 +348,7 @@ std::vector<ChannelInfo> API::find_similar_videos(VideoInfo video)
       }
     );
 
-    if (chan_it != channels.cend()) {
+    if (chan_it != channels.end()) {
       chan_it->videos.emplace_back(std::move((*it)));
     } else {
       std::vector<ChannelInfo> channel_infos = fetch_channel_info(it->channel_id);

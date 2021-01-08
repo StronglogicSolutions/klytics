@@ -377,7 +377,7 @@ Platform ContentComparator::get_type() {
  */
 bool ContentComparator::add_content(std::string key, Videos videos) {
   if (m_map.find(key) != m_map.end()) {
-    return false;
+    return false; // Is this right? or do we append?
   }
 
   VideoStudy study{videos};
