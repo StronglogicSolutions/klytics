@@ -339,19 +339,25 @@ std::vector<ChannelInfo> API::find_similar_videos(VideoInfo video)
   auto    it     = std::make_move_iterator(videos.begin());
   auto    it_end = std::make_move_iterator(videos.end());
   uint8_t idx{0};
+
   while (it != it_end) {
-    auto chan_it = std::find_if(channels.begin(), channels.end(), [&it](const ChannelInfo& channel) {
-      return channel.id.compare(it->channel_id) == 0;
-    });
+    auto chan_it = std::find_if(
+      channels.begin(), channels.end(),
+      [&it](const ChannelInfo& channel) {
+        return channel.id.compare(it->channel_id) == 0;
+      }
+    );
 
     if (chan_it != channels.cend()) {
       chan_it->videos.emplace_back(std::move((*it)));
     } else {
       std::vector<ChannelInfo> channel_infos = fetch_channel_info(it->channel_id);
+
       if (!channel_infos.empty()) {
         if (channel_infos.size() > 1) {
           // TODO: Logger should note that this was a strange result
         }
+
         channels.emplace_back(std::move(channel_infos.front()));
         channels.back().videos.emplace_back(std::move((*it)));
       } else {
