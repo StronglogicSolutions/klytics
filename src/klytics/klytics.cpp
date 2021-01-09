@@ -98,10 +98,9 @@ std::string KLytics::generate_report() {
  * @returns [out] {std::string}
  */
 std::string KLytics::generate_video_stats_table() {
-  // return videos_to_html(
-  //   m_api.fetch_youtube_stats()
-  // );
-  return "";
+  return channel_videos_to_html(
+    m_api.fetch_youtube_stats()
+  );
 }
 
 /**

@@ -78,8 +78,8 @@ inline std::string youtube_id_to_url(std::string id)
  * @param video_id
  * @return HTML::Link
  */
-inline HTML::Link youtube_title_link(std::string title, std::string video_id) {
-  return HTML::Link{title, youtube_id_to_url(video_id)};
+inline std::string youtube_title_link(std::string title, std::string video_id) {
+  return HTML::Link{title, youtube_id_to_url(video_id)}.toString();
 }
 
 /**
@@ -174,8 +174,7 @@ inline std::string channel_videos_to_html(const std::vector<ChannelInfo> &channe
       table << (HTML::Row()
                 << HTML::Col(channel.name)             .style(constants::HTML_COL_VALUE_STYLE)
                 << HTML::Col(channel.stats.subscribers).style(constants::HTML_COL_VALUE_STYLE)
-                << HTML::Col()                         .style(constants::HTML_COL_VALUE_STYLE)
-                  << youtube_title_link(video.title, video.id)
+                << HTML::Col(youtube_title_link(video.title, video.id)).style(constants::HTML_COL_VALUE_STYLE)
                 << HTML::Col(video.time)               .style(constants::HTML_COL_VALUE_STYLE)
                 << HTML::Col(video.stats.views)        .style(constants::HTML_COL_VALUE_STYLE)
                 << HTML::Col(video.stats.likes)        .style(constants::HTML_COL_VALUE_STYLE)
@@ -189,7 +188,6 @@ inline std::string channel_videos_to_html(const std::vector<ChannelInfo> &channe
                                                         .addAttribute("colspan", 10)
       );
     }
-
   }
 
   main     << std::move(table);
