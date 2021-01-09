@@ -15,8 +15,15 @@
 namespace constants
 {
   const std::string HTML_STYLE{
-      ".container{background-color:#333;}.container h1,.container h2,.container th{color:#ef5e3f;}"
-      ".container td{color: #FFF;}}"};
+    ".container{background-color:#333;}.container h1,.container h2,.container th{color:#ef5e3f;}"
+    ".container td{color: #FFF;}}"
+  };
+  const std::string HTML_COL_HEADER_STYLE{
+    "color:#ef5e3f; padding: 12px;text-align: center;"
+  };
+  const std::string HTML_COL_VALUE_STYLE{
+    "color: #000; padding: 4px; text-align: center"
+  };
 } // namespace constants
 
 
@@ -151,36 +158,42 @@ inline std::string channel_videos_to_html(const std::vector<ChannelInfo> &channe
 
   HTML::Table table{};
   table.cls("table");
-  table << (HTML::Row() << HTML::ColHeader("Channel").style("color:#ef5e3f; padding: 4px;")
-                        << HTML::ColHeader("Subscribers").style("color:#ef5e3f; padding: 4px;")
-                        << HTML::ColHeader("Title").style("color:#ef5e3f; padding: 4px;")
-                        << HTML::ColHeader("Time").style("color:#ef5e3f; padding: 4px;")
-                        << HTML::ColHeader("Views").style("color:#ef5e3f; padding: 4px;")
-                        << HTML::ColHeader("Likes").style("color:#ef5e3f; padding: 4px;")
-                        << HTML::ColHeader("Boos").style("color:#ef5e3f; padding: 4px;")
-                        << HTML::ColHeader("Comments").style("color:#ef5e3f; padding: 4px;"));
+  table << (HTML::Row() << HTML::ColHeader("Channel")    .style(constants::HTML_COL_HEADER_STYLE)
+                        << HTML::ColHeader("Subscribers").style(constants::HTML_COL_HEADER_STYLE)
+                        << HTML::ColHeader("Title")      .style(constants::HTML_COL_HEADER_STYLE)
+                        << HTML::ColHeader("Time")       .style(constants::HTML_COL_HEADER_STYLE)
+                        << HTML::ColHeader("Views")      .style(constants::HTML_COL_HEADER_STYLE)
+                        << HTML::ColHeader("Likes")      .style(constants::HTML_COL_HEADER_STYLE)
+                        << HTML::ColHeader("Boos")       .style(constants::HTML_COL_HEADER_STYLE)
+                        << HTML::ColHeader("Comments")   .style(constants::HTML_COL_HEADER_STYLE));
 
   for (const auto& channel : channels)
   {
     for (const auto& video : channel.videos)
     {
       table << (HTML::Row()
-                << HTML::Col(channel.name).style("color: #000; padding: 4px;")
-                << HTML::Col(channel.stats.subscribers).style("color: #000; padding: 4px")
-                << HTML::Col().style("color: #000; padding: 4px;") << youtube_title_link(video.title, video.id)
-                << HTML::Col(video.time).style("color: #000; padding: 4px;")
-                << HTML::Col(video.stats.views).style("color: #000; padding: 4px;")
-                << HTML::Col(video.stats.likes).style("color: #000; padding: 4px;")
-                << HTML::Col(video.stats.dislikes).style("color: #000; padding: 4px;")
-                << HTML::Col(video.stats.comments).style("color: #000; padding: 4px;"));
+                << HTML::Col(channel.name)             .style(constants::HTML_COL_VALUE_STYLE)
+                << HTML::Col(channel.stats.subscribers).style(constants::HTML_COL_VALUE_STYLE)
+                << HTML::Col()                         .style(constants::HTML_COL_VALUE_STYLE)
+                  << youtube_title_link(video.title, video.id)
+                << HTML::Col(video.time)               .style(constants::HTML_COL_VALUE_STYLE)
+                << HTML::Col(video.stats.views)        .style(constants::HTML_COL_VALUE_STYLE)
+                << HTML::Col(video.stats.likes)        .style(constants::HTML_COL_VALUE_STYLE)
+                << HTML::Col(video.stats.dislikes)     .style(constants::HTML_COL_VALUE_STYLE)
+                << HTML::Col(video.stats.comments)     .style(constants::HTML_COL_VALUE_STYLE)
+      );
       table << (HTML::Row()
-                << HTML::Col(tags_to_string(video.stats.keywords)).style("color: #333; padding: 8px;").addAttribute("rowspan", 1).addAttribute("colspan", 10));
+                << HTML::Col(tags_to_string(video.stats.keywords))
+                                                        .style("color: #333; padding: 8px;")
+                                                        .addAttribute("rowspan", 1)
+                                                        .addAttribute("colspan", 10)
+      );
     }
 
   }
 
-  main << std::move(table);
-  main << HTML::Break() << HTML::Break();
+  main     << std::move(table);
+  main     << HTML::Break() << HTML::Break();
   document << std::move(main);
 
   return SanitizeOutput(document.toString());
@@ -188,6 +201,8 @@ inline std::string channel_videos_to_html(const std::vector<ChannelInfo> &channe
 
 /**
  * channels_to_html
+ *
+ * TODO: Decide if we want to keep this
  *
  * @param
  * @returns
