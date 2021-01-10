@@ -1,0 +1,11 @@
+sequenceDiagram
+KLytics-->>VideoCreatorComparison: get_findings();
+VideoCreatorComparison-->>VideoAnalysis: get_result();
+note over VideoCreatorComparison: owns a map of Video Studies;
+VideoAnalysis-->>ResultMap: get_result_map();
+note over VideoAnalysis: Logic to display results
+ResultMap-->>VideoStudy: Access by key;
+note over ResultMap: A map of VideoStudy objects;
+VideoStudy-->>VideoStudyResult: analyze();
+note over VideoStudy: Studies a set of VideoInfo objects
+note over VideoStudyResult: Summarizes VideoInfo organized by criteria;
