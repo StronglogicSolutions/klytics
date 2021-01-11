@@ -577,15 +577,16 @@ std::vector<ChannelInfo> API::fetch_channel_info(std::string id_string) {
       for (const auto& item : items) {
         info_v.emplace_back(
           ChannelInfo{
-            .name          = SanitizeJSON(item["snippet"]["title"].dump()),
-            .description   = SanitizeJSON(item["snippet"]["description"].dump()),
-            .created       = SanitizeJSON(item["snippet"]["publishedAt"].dump()),
-            .thumb_url     = SanitizeJSON(item["snippet"]["thumbnails"]["default"]["url"].dump()),
+            .name          = item["snippet"]["title"],
+            .description   = item["snippet"]["description"],
+            .created       = item["snippet"]["publishedAt"],
+            .thumb_url     = item["snippet"]["thumbnails"]["default"]["url"],
             .stats         = ChannelStats{
-                .views       = SanitizeJSON(item["statistics"]["viewCount"].dump()),
+                .views       = item["statistics"]["viewCount"],
                 .subscribers = (item["statistics"].contains("subscriberCount")) ?
-                                SanitizeJSON(item["statistics"]["subscriberCount"].dump()) : std::to_string(0),
-                .videos      = SanitizeJSON(item["statistics"]["videoCount"].dump())
+                                std::string{item["statistics"]["subscriberCount"]} :
+                                std::to_string(0),
+                .videos      = item["statistics"]["videoCount"]
             },
             .id            = item["id"]
           }
