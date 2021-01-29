@@ -22,32 +22,32 @@ KLytics::~KLytics() {
  */
 std::string KLytics::fetch_follower_count() {
   std::string   output{};
-  // ProcessResult result = execute(constants::FOLLOWER_YT_APP);
 
-  // if (result.error) {
-  //   output += "Error executing followers app\n\n";
-  // }
+  // YOUTUBE
+  ProcessResult result = execute(constants::FOLLOWER_YT_APP);
 
-  // YouTubeFollowResult json{};
-  // if (json.read(result.output)) {
-  //   output += json.to_string();
-  // }
+  if (result.error) {
+    output += "Error executing followers app\n\n";
+  }
 
+  YouTubeFollowResult json{};
+  if (json.read(result.output)) {
+    output += json.to_string();
+  }
+
+  // INSTAGRAM
   std::string ig_user = INIReader{
     std::string{get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH}
   }.GetString(constants::INSTAGRAM_CONFIG_SECTION, constants::INSTAGRAM_USERNAME, "");
 
   if (!ig_user.empty()) {
-    std::string command{constants::FOLLOWER_IG_APP + " --i=\"true\" --u=\"" + ig_user + "\""};
-    log(command);
-    ProcessResult ig_result = execute(constants::FOLLOWER_IG_APP + " --i=\"true\" --u=\"" + ig_user + "\"");
-
-    if (ig_result.error) {
-      output += "Error return IG Followers app: " + ig_result.output + "\n\n";
+    std::string result = system_read(constants::FOLLOWER_IG_APP + " --i=\"true\" --u=\"" + ig_user + "\"");
+    if (result.empty()) {
+      output += "Error running IG Followers app\n\n";
     }
 
     InstagramFollowResult json{};
-    if (json.read(ig_result.output)) {
+    if (json.read(result)) {
       output += json.to_string();
     }
   }
