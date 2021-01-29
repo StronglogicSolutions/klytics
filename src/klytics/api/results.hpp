@@ -78,31 +78,30 @@ using namespace constants;
 
   bool file_valid = (!f_json.is_null() && f_json.is_object());
 
-  if (!r_json.is_null() && r_json.is_object()) {
-    json f_instagram = (file_valid && f_json.contains("instagram")) ? f_json["instagram"] : json{};
+  if (!r_json.is_null() && r_json.is_array()) {
+    std::string as_string = r_json.dump();
+    json        f_instagram   = (file_valid && f_json.contains("instagram")) ? f_json["instagram"] : json{};
+    bool        found_ig_file = (!f_instagram.is_null() && f_instagram.is_object());
+    std::string current_time  = get_simple_datetime();
 
-    bool found_ig_file = (!f_instagram.is_null() && f_instagram.is_object());
-
-    std::string current_time = get_simple_datetime();
-
-
-    for (const auto& it : r_json.items()) {
-      std::string name           = it.key();
-      std::string value          = it.value();
+    for (const auto& item : r_json.items()) {
+      json ig_result = item.value();
+      std::string username       = GetJSONStringValue(ig_result, "username");
+      std::string value          = std::to_string(GetJSONValue<uint32_t>(ig_result, "follower_count"));
       std::string previous_date {};
       uint32_t    previous_count{};
 
-      s_json["instagram"][name]["value"] = GetJSONValue<uint32_t>(value, "followers_count");
-      s_json["instagram"][name]["date"]  = current_time;
+      s_json["instagram"][username]["value"] = value;
+      s_json["instagram"][username]["date"]  = current_time;
 
-      if (f_instagram.contains(name) && !f_instagram[name].is_null()) {
-        previous_date  = f_instagram[name]["date"];
-        previous_count = std::stoi(SanitizeJSON(f_instagram[name]["value"].dump()));
+      if (f_instagram.contains(username) && !f_instagram[username].is_null()) {
+        previous_date  = f_instagram[username]["date"];
+        previous_count = std::stoi(SanitizeJSON(f_instagram[username]["value"].dump()));
       }
 
       m_counts.push_back(
         FollowerCount{
-          .name     = it.key(),
+          .name     = username,
           .platform = "instagram",
           .value    = value,
           .time     = current_time,
