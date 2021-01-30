@@ -112,7 +112,7 @@ bool API::fetch_channel_videos()
                   .title       = item["snippet"]["title"],
                   .description = item["snippet"]["description"],
                   .datetime    = datetime,
-                  .time        = to_readable_time(datetime.dump().c_str()),
+                  .time        = to_readable_time(datetime),
                   .url         = youtube_id_to_url(video_id)
                 }
               );
@@ -293,7 +293,7 @@ std::vector<VideoInfo> API::fetch_rival_videos(VideoInfo video)
               .url         = youtube_id_to_url(video_id)};
 
           info_v.push_back(info);
-          id_string += delim + video_id.dump();
+          id_string += delim + video_id.get<std::string>();
           delim = ",";
         }
         catch (const std::exception &e)
