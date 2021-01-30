@@ -132,7 +132,7 @@ virtual bool read(std::string s) override {
   using json = nlohmann::json;
   using namespace constants;
 
-  json r_json = json::parse(s);
+  json r_json = json::parse(s, nullptr, false);
   json f_json = json::parse(ReadFromFile(get_executable_cwd() + FOLLOWER_JSON), nullptr, false);
   json s_json{};
 

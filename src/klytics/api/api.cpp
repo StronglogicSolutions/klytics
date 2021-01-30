@@ -185,11 +185,10 @@ std::vector<VideoStats> API::fetch_video_stats(std::string id_string)
             .likes = (item["statistics"].contains("likeCount")) ? item["statistics"]["likeCount"] : "0",
             .dislikes = (item["statistics"].contains("dislikeCount")) ? item["statistics"]["dislikeCount"] : "0",
             .comments = (item["statistics"].contains("commentCount")) ? item["statistics"]["commentCount"] : "0",
-            .keywords = (item["snippet"].contains("tags")) &&
-                        (!item["snippet"]["tags"].empty()) ?
-                          keywords_from_string(SanitizeJSON(item["snippet"]["tags"])) :
-                          std::vector<std::string>{}});
-          // TODO: Remove use of `SanitizeJSON()` above
+            .keywords = (item["snippet"].contains("tags")) ?
+                          item["snippet"]["tags"].get<std::vector<std::string>>() :
+                          std::vector<std::string>{}
+          });
         }
         catch (const std::exception &e)
         {
@@ -249,11 +248,14 @@ std::vector<VideoInfo> API::fetch_rival_videos(VideoInfo video)
   using namespace constants;
   using json = nlohmann::json;
 
-  auto search_term = video.stats.keywords.front();
-
   std::vector<VideoInfo> info_v{};
   std::string            id_string{};
   std::string            delim{};
+
+  if (video.stats.keywords.empty()) // Nothing to search
+    return info_v;
+
+  auto search_term = video.stats.keywords.front();
 
   cpr::Response r = cpr::Get(
     cpr::Url{URL_VALUES.at(SEARCH_URL_INDEX)},
