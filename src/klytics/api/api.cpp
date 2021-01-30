@@ -45,12 +45,7 @@ bool API::fetch_channel_data() {
 
   try {
     m_channels = fetch_channel_info(id_string);
-    if (m_channels.size() == m_channel_ids.size()) {
-      for (uint8_t i = 0; i < m_channels.size(); i++) {
-        m_channels.at(i).id = m_channel_ids.at(i);
-      }
-      return true;
-    }
+    return !(m_channels.empty());
   }
   catch (const std::exception& e) {
     log(e.what());
@@ -112,7 +107,7 @@ bool API::fetch_channel_videos()
 
               info_v.emplace_back(
                 VideoInfo{
-                  .channel_id  = channel.id,
+                  .channel_id  = item["snippet"]["channelId"],
                   .id          = video_id,
                   .title       = item["snippet"]["title"],
                   .description = item["snippet"]["description"],
