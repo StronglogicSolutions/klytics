@@ -75,9 +75,7 @@ bool API::fetch_channel_videos()
     }
   }
   // TODO: Replace below with standard for loop?
-  std::for_each(
-    m_channels.begin(), m_channels.end(),
-    [this](ChannelInfo& channel)
+  for (ChannelInfo& channel : m_channels)
     {
       std::vector<VideoInfo> info_v{};
 
@@ -117,7 +115,7 @@ bool API::fetch_channel_videos()
                   .channel_id  = channel.id,
                   .id          = video_id,
                   .title       = item["snippet"]["title"],
-                  .description = SanitizeOutput(item["snippet"]["description"]),
+                  .description = item["snippet"]["description"],
                   .datetime    = datetime,
                   .time        = to_readable_time(datetime.dump().c_str()),
                   .url         = youtube_id_to_url(video_id)
@@ -136,7 +134,6 @@ bool API::fetch_channel_videos()
       }
       channel.videos = info_v;
     }
-  );
 
   return true;
 }
@@ -192,6 +189,7 @@ std::vector<VideoStats> API::fetch_video_stats(std::string id_string)
                         (!item["snippet"]["tags"].empty()) ?
                           keywords_from_string(SanitizeJSON(item["snippet"]["tags"])) :
                           std::vector<std::string>{}});
+          // TODO: Remove use of `SanitizeJSON()` above
         }
         catch (const std::exception &e)
         {
@@ -254,8 +252,8 @@ std::vector<VideoInfo> API::fetch_rival_videos(VideoInfo video)
   auto search_term = video.stats.keywords.front();
 
   std::vector<VideoInfo> info_v{};
-  std::string id_string{};
-  std::string delim{};
+  std::string            id_string{};
+  std::string            delim{};
 
   cpr::Response r = cpr::Get(
     cpr::Url{URL_VALUES.at(SEARCH_URL_INDEX)},
@@ -289,16 +287,16 @@ std::vector<VideoInfo> API::fetch_rival_videos(VideoInfo video)
           auto datetime = item["snippet"]["publishedAt"];
 
           VideoInfo info{
-              .channel_id  = SanitizeOutput(item["snippet"]["channelId"]),
+              .channel_id  = item["snippet"]["channelId"],
               .id          = video_id,
-              .title       = SanitizeOutput(item["snippet"]["title"]),
-              .description = SanitizeOutput(item["snippet"]["description"]),
+              .title       = item["snippet"]["title"],
+              .description = item["snippet"]["description"],
               .datetime    = datetime,
               .time        = to_readable_time(datetime),
               .url         = youtube_id_to_url(video_id)};
 
           info_v.push_back(info);
-          id_string += delim + SanitizeJSON(video_id.dump());
+          id_string += delim + video_id.dump();
           delim = ",";
         }
         catch (const std::exception &e)
@@ -308,7 +306,6 @@ std::vector<VideoInfo> API::fetch_rival_videos(VideoInfo video)
           log(error_message);
         }
       }
-      // log("Fetched rival videos");
     }
   }
 
@@ -468,8 +465,8 @@ std::vector<VideoInfo> API::fetch_videos_by_terms(std::vector<std::string> terms
           VideoInfo info{
             .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
             .id          = video_id,
-            .title       = SanitizeOutput(item["snippet"]["title"]),
-            .description = SanitizeOutput(item["snippet"]["description"]),
+            .title       = item["snippet"]["title"],
+            .description = item["snippet"]["description"],
             .datetime    = datetime,
             .time        = to_readable_time(datetime),
             .url         = youtube_id_to_url(video_id)};
