@@ -1,5 +1,4 @@
-#ifndef __AUTH_HPP__
-#define __AUTH_HPP__
+#pragma once
 
 #include <process.hpp>
 #include <INIReader.h>
@@ -9,6 +8,7 @@
 #include "klytics/common/constants.hpp"
 #include "klytics/common/util.hpp"
 
+namespace klytics {
 struct AuthData {
   std::string access_token;
   std::string refresh_token;
@@ -26,7 +26,8 @@ class Authenticator {
 public:
 
 Authenticator() {
-  INIReader reader{std::string{get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH}};
+
+  INIReader reader{std::string{get_current_working_directory() + "../" + constants::DEFAULT_CONFIG_PATH}};
 
   if (reader.ParseError() < 0) {
     log("Error loading config");
@@ -146,4 +147,4 @@ AuthData     m_auth;
 bool         m_authenticated;
 };
 
-#endif // __AUTH_HPP__
+} // namespace klytics

@@ -1,19 +1,18 @@
 #include "klytics.hpp"
 
 namespace klytics {
-
-
 /**
  * @destructor
  */
 
 KLytics::~KLytics() {
+using namespace ktube;
   // Save number of youtube quota units used in this session
   // TODO: read and append for each day
   uint32_t youtube_quota_units_used = m_api.get_quota_used();
   SaveToFile(
     std::to_string(youtube_quota_units_used),
-    get_executable_cwd() + constants::YOUTUBE_QUOTA_PATH
+    get_current_working_directory() + constants::YOUTUBE_QUOTA_PATH
   );
 }
 /**
@@ -24,29 +23,29 @@ std::string KLytics::fetch_follower_count() {
   std::string   output{};
 
   // YOUTUBE
-  ProcessResult result = execute(constants::FOLLOWER_YT_APP);
+  ProcessResult result = ktube::execute(constants::FOLLOWER_YT_APP);
 
   if (result.error) {
     output += "Error executing followers app\n\n";
   }
 
-  YouTubeFollowResult json{};
+  ktube::YouTubeFollowResult json{};
   if (json.read(result.output)) {
     output += json.to_string();
   }
 
   // INSTAGRAM
   std::string ig_user = INIReader{
-    std::string{get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH}
+    std::string{get_current_working_directory() + "../" + constants::DEFAULT_CONFIG_PATH}
   }.GetString(constants::INSTAGRAM_CONFIG_SECTION, constants::INSTAGRAM_USERNAME, "");
 
   if (!ig_user.empty()) {
-    std::string result = system_read(constants::FOLLOWER_IG_APP + " --i=\"true\" --u=\"" + ig_user + "\"");
+    std::string result = ktube::system_read(constants::FOLLOWER_IG_APP + " --i=\"true\" --u=\"" + ig_user + "\"");
     if (result.empty()) {
       output += "Error running IG Followers app\n\n";
     }
 
-    InstagramFollowResult json{};
+    ktube::InstagramFollowResult json{};
     if (json.read(result)) {
       output += json.to_string();
     }
@@ -62,6 +61,7 @@ std::string KLytics::fetch_follower_count() {
  * @returns [out] {std::string}
  */
 std::string KLytics::generate_report() {
+  using namespace ktube;
   std::string::size_type extra_text_size{102};
 
   std::string            output, youtube_stats_output;

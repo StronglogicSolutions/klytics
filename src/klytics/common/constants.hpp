@@ -1,9 +1,10 @@
-#ifndef __YOUTUBE_CONSTANTS_HPP__
-#define __YOUTUBE_CONSTANTS_HPP__
+#pragma once
 
 #include <vector>
 #include <string>
 #include <string_view>
+
+namespace klytics {
 
 namespace constants {
 // Paths
@@ -185,5 +186,4 @@ const std::vector<uint32_t> QUOTA_LIMIT{
 const uint8_t YOUTUBE_VIDEO_ID_LENGTH     = 11;
 } // namespace youtube
 } // namespace constants
-
-#endif // __YOUTUBE_CONSTANTS_HPP__
+} // namespace klytics

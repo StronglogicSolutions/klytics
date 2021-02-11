@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
 
   if (argc > 1) {
     for (int i = 1; i < argc; i++) {
-      std::string arg = SanitizeInput(argv[i]);
+      std::string arg = ktube::SanitizeInput(argv[i]);
 
       if (arg.compare("followers") == 0) {
         std_out += k_lytics.fetch_follower_count() + "\n";

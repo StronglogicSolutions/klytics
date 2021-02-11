@@ -4,16 +4,16 @@
  * Instantiate
  */
 TEST(APITest, Instantiate) {
-  EXPECT_NO_THROW(API{});
+  EXPECT_NO_THROW(ktube::YouTubeDataAPI{});
 }
 
 /**
  * ComputeYouTubeKeywordScore
  */
 TEST(APITest, ComputeYouTubeKeywordScore) {
-  API api{};
+  ktube::YouTubeDataAPI api{};
 
-  std::vector<TermInfo> term_info_v =
+  std::vector<ktube::TermInfo> term_info_v =
   api.fetch_term_info(
     api.fetch_youtube_stats().front().videos.front().get_primary_keywords()
   );
@@ -27,12 +27,12 @@ TEST(APITest, ComputeYouTubeKeywordScore) {
 }
 
 TEST(APITest, FetchChannelInfo) {
-  API api{};
+  ktube::YouTubeDataAPI api{};
 
-  std::vector<ChannelInfo> channel_v = api.fetch_channel_info(
+  std::vector<ktube::ChannelInfo> channel_v = api.fetch_channel_info(
     std::string{
-      constants::CHANNEL_IDS.at(constants::KSTYLEYO_CHANNEL_ID_INDEX) + "," +
-      constants::CHANNEL_IDS.at(constants::STRONGLOGICSOLUTIONS_CHANNEL_ID_INDEX)
+      ktube::constants::CHANNEL_IDS.at(ktube::constants::KSTYLEYO_CHANNEL_ID_INDEX) + "," +
+      ktube::constants::CHANNEL_IDS.at(ktube::constants::STRONGLOGICSOLUTIONS_CHANNEL_ID_INDEX)
     }
   );
 

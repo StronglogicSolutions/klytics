@@ -12,7 +12,7 @@ TEST(KLyticsTest, Instantiate) {
 */
 TEST(KLyticsTest, ComparatorComparesVideoVectors) {
   using namespace klytics;
-  using VideoAnalysis = VideoAnalyst::VideoAnalysis;
+  using VideoAnalysis = ktube::VideoAnalyst::VideoAnalysis;
 
   bool all_videos_added{true};
   KLytics klytics{};
@@ -30,7 +30,7 @@ TEST(KLyticsTest, ComparatorComparesVideoVectors) {
 
   VideoCreatorComparison  comparison_result = klytics.get_findings();
   VideoAnalysis           analysis          = comparison_result.get_result();
-  ResultMap               result_map        = analysis.get_result_map();
+  ktube::ResultMap        result_map        = analysis.get_result_map();
 
   auto most_likes_it           = result_map.at(analysis.most_likes_key).most_likes;
   auto most_dislikes_it        = result_map.at(analysis.most_dislikes_key).most_dislikes;

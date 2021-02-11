@@ -1,16 +1,17 @@
-#ifndef __KLYTICS_HPP__
-#define __KLYTICS_HPP__
+#pragma once
 
 #include <iostream>
 #include <ctime>
 #include <cpr/cpr.h>
 #include <string>
-
-#include <nlohmann/json.hpp>
-
-#include "api/api.hpp"
+#include <ktube/ktube.hpp>
+#include "common/constants.hpp"
 
 namespace klytics {
+using VideoInfo              = ktube::VideoInfo;
+using VideoCreatorComparison = ktube::VideoCreatorComparison;
+using GoogleTrend            = ktube::GoogleTrend;
+
 
 /**
   ┌───────────────────────────────────────────────────────────┐
@@ -80,10 +81,8 @@ virtual       std::vector<GoogleTrend> fetch_trends(std::vector<std::string> ter
               std::string              generate_video_stats_table();
 
 private:
-API               m_api;
-ContentComparator m_comparator;
+ktube::YouTubeDataAPI    m_api;
+ktube::ContentComparator m_comparator;
 };
 
 } // namespace klytics
-
-#endif // __KLYTICS_HPP__

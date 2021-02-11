@@ -4,9 +4,16 @@ config("inih") {
   ]
 }
 
-config("json") {
+config("kjson") {
   include_dirs = [
+    "//third_party/kjson",
     "//third_party/json/include",
+  ]
+}
+
+config("knlp") {
+  include_dirs = [
+    "//third_party/knlp/src"
   ]
 }
 
@@ -22,15 +29,13 @@ config("html") {
   ]
 }
 
-# config("youtube_api") {
-#   public_configs = [
-#     ":inih"
-#   ]
-#   include_dirs = ["//src"]
-#   # lib_dirs = [ "//src/klytics" ]
-#   libs = ["//src/klytics/libyoutube_api.so"] # or use full path directly
-#   # visibility = [ ":klytics_sources" ]
-# }
+config("ktube") {
+  include_dirs = ["//third_party/ktube/src",
+  #  "//third_party/kjson"
+   ]
+  # lib_dirs = [ "//src/klytics" ]
+  libs = ["//third_party/ktube/out/libktube_lib.so"]
+}
 
 
 source_set("ini_reader") {
@@ -48,9 +53,11 @@ source_set("klytics_sources") {
 
   public_configs = [
     ":inih",
-    ":json",
+    ":kjson",
+    ":knlp",
     ":process_executor",
-    ":html"
+    ":html",
+    ":ktube"
   ]
 
   include_dirs = [
@@ -65,8 +72,8 @@ source_set("klytics_sources") {
 
   sources = [
     "//src/klytics/klytics.cpp",
-    "//src/klytics/api/api.cpp",
-    "//src/klytics/api/analysis/tools.cpp"
+    # "//src/klytics/api/api.cpp",
+    # "//src/klytics/api/analysis/tools.cpp"
   ]
 }
 

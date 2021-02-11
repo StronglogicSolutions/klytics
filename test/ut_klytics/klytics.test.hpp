@@ -1,5 +1,5 @@
-#ifndef __KLYTICS_TEST_HPP__
-#define __KLYTICS_TEST_HPP__
+#pragma once
+
 #include "gtest/gtest.h"
 
 #include "klytics/klytics.hpp"
@@ -31,12 +31,12 @@ const std::string TEST_DATETIME_3{"2020-12-27T05:52:45"};
 const std::string TEST_DATETIME_4{"2020-12-26T05:52:45"};
 const std::string TEST_DATETIME_5{"2020-12-25T05:52:45"};
 const std::string TEST_DATETIME_6{"2020-12-24T05:52:45"};
-const std::string TEST_HUMAN_DATETIME_1 = to_readable_time(TEST_DATETIME_1.c_str());
-const std::string TEST_HUMAN_DATETIME_2 = to_readable_time(TEST_DATETIME_2.c_str());
-const std::string TEST_HUMAN_DATETIME_3 = to_readable_time(TEST_DATETIME_3.c_str());
-const std::string TEST_HUMAN_DATETIME_4 = to_readable_time(TEST_DATETIME_4.c_str());
-const std::string TEST_HUMAN_DATETIME_5 = to_readable_time(TEST_DATETIME_5.c_str());
-const std::string TEST_HUMAN_DATETIME_6 = to_readable_time(TEST_DATETIME_6.c_str());
+const std::string TEST_HUMAN_DATETIME_1 = ktube::to_readable_time(TEST_DATETIME_1.c_str());
+const std::string TEST_HUMAN_DATETIME_2 = ktube::to_readable_time(TEST_DATETIME_2.c_str());
+const std::string TEST_HUMAN_DATETIME_3 = ktube::to_readable_time(TEST_DATETIME_3.c_str());
+const std::string TEST_HUMAN_DATETIME_4 = ktube::to_readable_time(TEST_DATETIME_4.c_str());
+const std::string TEST_HUMAN_DATETIME_5 = ktube::to_readable_time(TEST_DATETIME_5.c_str());
+const std::string TEST_HUMAN_DATETIME_6 = ktube::to_readable_time(TEST_DATETIME_6.c_str());
 const std::string TEST_VIEWS_LOW{"9"};
 const std::string TEST_VIEWS_MEDIUM{"999"};
 const std::string TEST_VIEWS_HIGH{"999999"};
@@ -53,9 +53,9 @@ const std::vector<std::string> TEST_KEYWORDS{
   "test", "testing", "unittesting", "klytics", "kiq"
 };
 
-std::vector<VideoInfo> GetTestVideos_1() {
-  return std::vector<VideoInfo>{
-    VideoInfo{
+std::vector<ktube::VideoInfo> GetTestVideos_1() {
+  return std::vector<ktube::VideoInfo>{
+    ktube::VideoInfo{
       .channel_id  = TEST_CHANNEL_ID_1,
       .id          = TEST_VIDEO_ID_1,
       .title       = TEST_TITLE_1,
@@ -63,7 +63,7 @@ std::vector<VideoInfo> GetTestVideos_1() {
       .datetime    = TEST_DATETIME_1,
       .time        = TEST_HUMAN_DATETIME_1,
       .url         = TEST_URL,
-      .stats       = VideoStats{
+      .stats       = ktube::VideoStats{
         .views       = TEST_VIEWS_LOW,
         .likes       = TEST_LIKES_HIGH,
         .dislikes    = TEST_DISLIKES_LOW,
@@ -71,7 +71,7 @@ std::vector<VideoInfo> GetTestVideos_1() {
         .keywords    = TEST_KEYWORDS
       }
     },
-    VideoInfo{
+    ktube::VideoInfo{
       .channel_id  = TEST_CHANNEL_ID_1,
       .id          = TEST_VIDEO_ID_2,
       .title       = TEST_TITLE_2,
@@ -79,7 +79,7 @@ std::vector<VideoInfo> GetTestVideos_1() {
       .datetime    = TEST_DATETIME_2,
       .time        = TEST_HUMAN_DATETIME_2,
       .url         = TEST_URL,
-      .stats       = VideoStats{
+      .stats       = ktube::VideoStats{
         .views       = TEST_VIEWS_MEDIUM,
         .likes       = TEST_LIKES_MEDIUM,
         .dislikes    = TEST_DISLIKES_LOW,
@@ -87,7 +87,7 @@ std::vector<VideoInfo> GetTestVideos_1() {
         .keywords    = TEST_KEYWORDS
       }
     },
-    VideoInfo{
+    ktube::VideoInfo{
       .channel_id  = TEST_CHANNEL_ID_1,
       .id          = TEST_VIDEO_ID_3,
       .title       = TEST_TITLE_3,
@@ -95,7 +95,7 @@ std::vector<VideoInfo> GetTestVideos_1() {
       .datetime    = TEST_DATETIME_3,
       .time        = TEST_HUMAN_DATETIME_3,
       .url         = TEST_URL,
-      .stats       = VideoStats{
+      .stats       = ktube::VideoStats{
         .views       = TEST_VIEWS_LOW,
         .likes       = TEST_LIKES_LOW,
         .dislikes    = TEST_DISLIKES_HIGH,
@@ -106,9 +106,9 @@ std::vector<VideoInfo> GetTestVideos_1() {
   };
 }
 
-std::vector<VideoInfo> GetTestVideos_2() {
-  return std::vector<VideoInfo>{
-    VideoInfo{
+std::vector<ktube::VideoInfo> GetTestVideos_2() {
+  return std::vector<ktube::VideoInfo>{
+    ktube::VideoInfo{
       .channel_id  = TEST_CHANNEL_ID_2,
       .id          = TEST_VIDEO_ID_4,
       .title       = TEST_TITLE_4,
@@ -116,7 +116,7 @@ std::vector<VideoInfo> GetTestVideos_2() {
       .datetime    = TEST_DATETIME_4,
       .time        = TEST_HUMAN_DATETIME_4,
       .url         = TEST_URL,
-      .stats       = VideoStats{
+      .stats       = ktube::VideoStats{
         .views       = TEST_VIEWS_MEDIUM,
         .likes       = TEST_LIKES_HIGH,
         .dislikes    = TEST_DISLIKES_LOW,
@@ -124,7 +124,7 @@ std::vector<VideoInfo> GetTestVideos_2() {
         .keywords    = TEST_KEYWORDS
       }
     },
-    VideoInfo{
+    ktube::VideoInfo{
       .channel_id  = TEST_CHANNEL_ID_2,
       .id          = TEST_VIDEO_ID_5,
       .title       = TEST_TITLE_5,
@@ -132,7 +132,7 @@ std::vector<VideoInfo> GetTestVideos_2() {
       .datetime    = TEST_DATETIME_5,
       .time        = TEST_HUMAN_DATETIME_5,
       .url         = TEST_URL,
-      .stats       = VideoStats{
+      .stats       = ktube::VideoStats{
         .views       = TEST_VIEWS_LOW,
         .likes       = TEST_LIKES_LOW,
         .dislikes    = TEST_DISLIKES_MEDIUM,
@@ -140,7 +140,7 @@ std::vector<VideoInfo> GetTestVideos_2() {
         .keywords    = TEST_KEYWORDS
       }
     },
-    VideoInfo{
+    ktube::VideoInfo{
       .channel_id  = TEST_CHANNEL_ID_2,
       .id          = TEST_VIDEO_ID_6,
       .title       = TEST_TITLE_6,
@@ -148,7 +148,7 @@ std::vector<VideoInfo> GetTestVideos_2() {
       .datetime    = TEST_DATETIME_6,
       .time        = TEST_HUMAN_DATETIME_6,
       .url         = TEST_URL,
-      .stats       = VideoStats{
+      .stats       = ktube::VideoStats{
         .views       = TEST_VIEWS_HIGH,
         .likes       = TEST_LIKES_HIGH,
         .dislikes    = TEST_DISLIKES_HIGH,
@@ -166,5 +166,3 @@ std::vector<std::string> GetTestTerms() {
     "hangeul"
   };
 }
-
-#endif // __KLYTICS_TEST_HPP__
