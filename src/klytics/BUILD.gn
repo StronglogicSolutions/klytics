@@ -33,8 +33,13 @@ config("ktube") {
   include_dirs = ["//third_party/ktube/src",
   #  "//third_party/kjson"
    ]
-  # lib_dirs = [ "//src/klytics" ]
+  lib_dirs = [ "//third_party/ktube/out" ]
   libs = ["//third_party/ktube/out/libktube_lib.so"]
+  visibility = [ ":ktube_lib" ]
+}
+
+group("ktube_lib") {
+  public_configs = [":ktube"]
 }
 
 
@@ -48,7 +53,8 @@ source_set("ini_reader") {
 source_set("klytics_sources") {
 
   deps = [
-    ":ini_reader"
+    ":ini_reader",
+    # ":ktube_lib"
   ]
 
   public_configs = [
@@ -77,3 +83,29 @@ source_set("klytics_sources") {
   ]
 }
 
+executable("klytics") {
+  public_deps = [
+    "//src/klytics:klytics_sources"
+  ]
+
+  deps = [
+    ":ktube_lib"
+  ]
+
+  include_dirs = [
+    "//src",
+    "//third_party/json/include",
+  ]
+
+  libs = [
+    "pthread",
+    "crypto",
+    "cpr",
+    "curl",
+  ]
+
+
+  sources = [
+    "//src/main.cpp",
+  ]
+}

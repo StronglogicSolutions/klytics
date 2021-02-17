@@ -181,4 +181,22 @@ std::string KLytics::fetch_trends_string(std::vector<std::string> terms) {
 
   return result;
 }
+
+std::string KLytics::fetch_ig_posts(const std::string& username)
+{
+  std::string                    output{};
+  // const std::vector<std::string> argv{};
+  std::string result = ktube::system_read(constants::USERFEED_IG_APP + " --user=" + username);
+
+  if (result.empty())
+    output += "Error executing followers app\n\n";
+  else
+  {
+    IGFeedJSONResult feed_result{};
+    if (feed_result.read(result))
+      output += feed_result.to_string();
+  }
+
+  return output;
+}
 } // namespace klytics
