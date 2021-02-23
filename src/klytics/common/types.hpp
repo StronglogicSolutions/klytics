@@ -87,7 +87,7 @@ virtual std::string to_string() override {
       throw std::runtime_error{"invalid json"};
   }
 
-  return output_json.dump();
+  return output_json.get<std::string>();
 }
 
 private:
