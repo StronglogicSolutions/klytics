@@ -25,8 +25,8 @@ const inline ExecuteConfig ParseRuntimeArguments(int argc, char** argv)
   for (int i = 1; i < argc; i++) {
     std::string argument{argv[i]};
 
-    if (argument.find("--username") == 0) {
-      config.username = argument.substr(11);
+    if (argument.find("--user") == 0) {
+      config.username = argument.substr(7);
     }
   }
 
