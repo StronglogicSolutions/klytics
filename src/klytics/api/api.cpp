@@ -102,8 +102,8 @@ bool API::fetch_channel_videos()
           {
             try
             {
-              auto video_id = item["id"]["videoId"];
-              auto datetime = item["snippet"]["publishedAt"];
+              auto video_id = std::string{item["id"]["videoId"]};
+              auto datetime = std::string{item["snippet"]["publishedAt"]};
 
               info_v.emplace_back(
                 VideoInfo{
@@ -173,7 +173,8 @@ std::vector<VideoStats> API::fetch_video_stats(std::string id_string)
       {
         try
         {
-          const auto &item = items.at(i);
+          const auto        &item = items.at(i);
+          const std::string tags  = item["snippet"].contains("tags") ? std::string{item["snippet"]["tags"].dump()} : "";
 
           stats.emplace_back(VideoStats{
             .views = (item["statistics"].contains("viewCount")) ? item["statistics"]["viewCount"] : "0",
@@ -280,8 +281,8 @@ std::vector<VideoInfo> API::fetch_rival_videos(VideoInfo video)
       {
         try
         {
-          auto video_id = item["id"]["videoId"];
-          auto datetime = item["snippet"]["publishedAt"];
+          auto video_id = std::string{item["id"]["videoId"]};
+          auto datetime = std::string{item["snippet"]["publishedAt"]};
 
           VideoInfo info{
               .channel_id  = item["snippet"]["channelId"],
@@ -456,8 +457,8 @@ std::vector<VideoInfo> API::fetch_videos_by_terms(std::vector<std::string> terms
       {
         try
         {
-          auto video_id = item["id"]["videoId"];
-          auto datetime = item["snippet"]["publishedAt"];
+          auto video_id = std::string{item["id"]["videoId"]};
+          auto datetime = std::string{item["snippet"]["publishedAt"]};
 
           VideoInfo info{
             .channel_id  = PARAM_VALUES.at(CHAN_KEY_INDEX),
