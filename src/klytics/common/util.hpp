@@ -2,6 +2,7 @@
 #define __UTIL_HPP__
 
 #include <ctime>
+#include <cstdlib>
 #include <iomanip>
 #include <ctype.h>
 #include <chrono>
@@ -9,6 +10,8 @@
 #include <ostream>
 #include <fstream>
 #include <sstream>
+#include <type_traits>
+#include <nlohmann/json.hpp>
 
 namespace constants {
 static const char* SIMPLE_DATE_FORMAT{"%Y-%m-%dT%H:%M:%S"};
@@ -30,6 +33,13 @@ inline std::string ReadFromFile(std::string path) {
   std::stringstream fs{};
   fs << f.rdbuf();
   return fs.str();
+}
+
+inline std::string system_read(std::string command) {
+  std::system(std::string{command + "> file.txt"}.c_str());
+  std::stringstream stream{};
+  stream << std::ifstream("file.txt").rdbuf();
+  return stream.str();
 }
 
 /**
@@ -154,6 +164,24 @@ inline const std::time_t to_unixtime(const char* datetime) {
  * @returns
  */
 inline std::string to_readable_time(const char* datetime) {
+  uint8_t            buffer_size{24};
+  std::tm            t{};
+  std::istringstream ss{datetime};
+  char               b[buffer_size];
+  ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S");
+
+  strftime(b, buffer_size, "%B %d %H:%M:%S", &t);
+
+  return std::string{b};
+}
+
+/**
+ * to_readable_time
+ *
+ * @param
+ * @returns
+ */
+inline std::string to_readable_time(const std::string datetime) {
   uint8_t            buffer_size{24};
   std::tm            t{};
   std::istringstream ss{datetime};

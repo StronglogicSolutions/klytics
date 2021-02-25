@@ -1,9 +1,9 @@
 #ifndef __RESULTS_HPP__
 #define __RESULTS_HPP__
 
-#include <nlohmann/json.hpp>
 #include <process.hpp>
 
+#include "klytics/common/kjson.hpp"
 #include "klytics/api/analysis/html.hpp"
 #include "klytics/common/constants.hpp"
 #include "klytics/common/types.hpp"
@@ -50,21 +50,89 @@ private:
 std::string m_data;
 };
 
-class FollowersJSONResult : public ResultInterface {
+class FollowerResultInterface : public ResultInterface {
 using counts = std::vector<FollowerCount>;
 public:
+virtual ~FollowerResultInterface() {}
+
+virtual bool read(std::string s) = 0;
+
 virtual std::string to_string() override {
   return counts_to_html(m_counts);
 }
 
+protected:
+counts m_counts;
+};
+
+class InstagramFollowResult : public FollowerResultInterface {
+public:
+virtual ~InstagramFollowResult() override {}
+
+virtual bool read(std::string s) override {
+using json = nlohmann::json;
+using namespace constants;
+  json r_json = json::parse(s, nullptr, JSON_PARSE_NO_THROW);
+  json f_json = json::parse(ReadFromFile(get_executable_cwd() + FOLLOWERS_IG_JSON), nullptr, JSON_PARSE_NO_THROW);
+  json s_json{};
+
+  bool file_valid = (!f_json.is_null() && f_json.is_object());
+
+  if (!r_json.is_null() && r_json.is_array()) {
+    std::string as_string = r_json.dump();
+    json        f_instagram   = (file_valid && f_json.contains("instagram")) ? f_json["instagram"] : json{};
+    bool        found_ig_file = (!f_instagram.is_null() && f_instagram.is_object());
+    std::string current_time  = get_simple_datetime();
+
+    for (const auto& item : r_json.items()) {
+      json ig_result = item.value();
+      std::string username       = GetJSONStringValue(ig_result, "username");
+      std::string value          = std::to_string(GetJSONValue<uint32_t>(ig_result, "follower_count"));
+      std::string previous_date {};
+      uint32_t    previous_count{};
+
+      s_json["instagram"][username]["value"] = value;
+      s_json["instagram"][username]["date"]  = current_time;
+
+      if (f_instagram.contains(username) && !f_instagram[username].is_null()) {
+        previous_date  = f_instagram[username]["date"];
+        previous_count = std::stoi(SanitizeJSON(f_instagram[username]["value"].dump()));
+      }
+
+      m_counts.push_back(
+        FollowerCount{
+          .name     = username,
+          .platform = "instagram",
+          .value    = value,
+          .time     = current_time,
+          .delta_t  = datetime_delta_string(current_time, (previous_date.empty()) ? current_time : previous_date),
+          .delta_v  = std::to_string(std::stoi(value) - previous_count),
+        }
+      );
+    }
+
+    SaveToFile(s_json.dump(), get_executable_cwd() + FOLLOWERS_IG_JSON);
+
+    return true;
+  }
+
+  return false;
+}
+
+
+};
+class YouTubeFollowResult : public FollowerResultInterface {
+public:
+virtual ~YouTubeFollowResult() override {}
+
 /**
  * read
  */
-bool read(std::string s) {
+virtual bool read(std::string s) override {
   using json = nlohmann::json;
   using namespace constants;
 
-  json r_json = json::parse(s);
+  json r_json = json::parse(s, nullptr, false);
   json f_json = json::parse(ReadFromFile(get_executable_cwd() + FOLLOWER_JSON), nullptr, false);
   json s_json{};
 
@@ -144,18 +212,6 @@ bool read(std::string s) {
   return false;
 }
 
-private:
-
-void compute_delta() {
-using json = nlohmann::json;
-using namespace constants;
-
-json follower_json = json::parse(ReadFromFile(FOLLOWER_JSON));
-if (!follower_json.is_null()) {
-
-}
-}
-counts m_counts;
 };
 
 #endif // __RESULTS_HPP__
