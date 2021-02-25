@@ -2,6 +2,7 @@
 #define __UTIL_HPP__
 
 #include <ctime>
+#include <cstdlib>
 #include <iomanip>
 #include <ctype.h>
 #include <chrono>
@@ -32,6 +33,13 @@ inline std::string ReadFromFile(std::string path) {
   std::stringstream fs{};
   fs << f.rdbuf();
   return fs.str();
+}
+
+inline std::string system_read(std::string command) {
+  std::system(std::string{command + "> file.txt"}.c_str());
+  std::stringstream stream{};
+  stream << std::ifstream("file.txt").rdbuf();
+  return stream.str();
 }
 
 /**

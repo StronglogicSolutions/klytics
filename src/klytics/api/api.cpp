@@ -45,7 +45,7 @@ bool API::fetch_channel_data() {
 
   try {
     m_channels = fetch_channel_info(id_string);
-    return true;
+    return !(m_channels.empty());
   }
   catch (const std::exception& e) {
     log(e.what());
@@ -70,9 +70,7 @@ bool API::fetch_channel_videos()
     }
   }
   // TODO: Replace below with standard for loop?
-  std::for_each(
-    m_channels.begin(), m_channels.end(),
-    [this](ChannelInfo& channel)
+  for (ChannelInfo& channel : m_channels)
     {
       std::vector<VideoInfo> info_v{};
 
@@ -109,7 +107,7 @@ bool API::fetch_channel_videos()
 
               info_v.emplace_back(
                 VideoInfo{
-                  .channel_id  = channel.id,
+                  .channel_id  = item["snippet"]["channelId"],
                   .id          = video_id,
                   .title       = item["snippet"]["title"],
                   .description = item["snippet"]["description"],
@@ -131,7 +129,6 @@ bool API::fetch_channel_videos()
       }
       channel.videos = info_v;
     }
-  );
 
   return true;
 }
@@ -184,7 +181,9 @@ std::vector<VideoStats> API::fetch_video_stats(std::string id_string)
             .likes = (item["statistics"].contains("likeCount")) ? item["statistics"]["likeCount"] : "0",
             .dislikes = (item["statistics"].contains("dislikeCount")) ? item["statistics"]["dislikeCount"] : "0",
             .comments = (item["statistics"].contains("commentCount")) ? item["statistics"]["commentCount"] : "0",
-            .keywords =   keywords_from_string(SanitizeJSON(tags))
+            .keywords = (item["snippet"].contains("tags")) ?
+                          item["snippet"]["tags"].get<std::vector<std::string>>() :
+                          std::vector<std::string>{}
           });
         }
         catch (const std::exception &e)
@@ -245,11 +244,14 @@ std::vector<VideoInfo> API::fetch_rival_videos(VideoInfo video)
   using namespace constants;
   using json = nlohmann::json;
 
-  auto search_term = video.stats.keywords.front();
-
   std::vector<VideoInfo> info_v{};
-  std::string id_string{};
-  std::string delim{};
+  std::string            id_string{};
+  std::string            delim{};
+
+  if (video.stats.keywords.empty()) // Nothing to search
+    return info_v;
+
+  auto search_term = video.stats.keywords.front();
 
   cpr::Response r = cpr::Get(
     cpr::Url{URL_VALUES.at(SEARCH_URL_INDEX)},
@@ -292,7 +294,7 @@ std::vector<VideoInfo> API::fetch_rival_videos(VideoInfo video)
               .url         = youtube_id_to_url(video_id)};
 
           info_v.push_back(info);
-          id_string += delim + SanitizeJSON(video_id);
+          id_string += delim + video_id.get<std::string>();
           delim = ",";
         }
         catch (const std::exception &e)
@@ -302,7 +304,6 @@ std::vector<VideoInfo> API::fetch_rival_videos(VideoInfo video)
           log(error_message);
         }
       }
-      // log("Fetched rival videos");
     }
   }
 
