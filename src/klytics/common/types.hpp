@@ -1,140 +1,97 @@
-#ifndef __TYPES_HPP__
-#define __TYPES_HPP__
+#pragma once
 
 #include <vector>
 #include <string>
-#include <unordered_map>
+#include <nlohmann/json.hpp>
 
-/**
-  ┌───────────────────────────────────────────────────────────┐
-  │░░░░░░░░░░░░░░░░░░░░░░░░░░ STRUCTS ░░░░░░░░░░░░░░░░░░░░░░░│
-  └───────────────────────────────────────────────────────────┘
-*/
+namespace klytics {
 
-struct FollowerCount {
-std::string name;
-std::string platform;
-std::string value;
-std::string time;
-std::string delta_t;
-std::string delta_v;
+class ResultInterface {
+public:
+virtual ~ResultInterface() {}
+virtual bool read(std::string s) = 0;
+virtual std::string to_string() = 0;
 };
 
-struct GoogleTrend {
-std::string term;
-int         value;
-};
-
-struct TermInfo {
-  std::string term;
-  int         value;
-};
-
-
-struct VideoStats {
-std::string              views;
-std::string              likes;
-std::string              dislikes;
-std::string              comments;
-std::vector<std::string> keywords;
-double                   view_score;
-double                   like_score;
-double                   dislike_score;
-double                   comment_score;
-std::vector<GoogleTrend> trends;
-double                   keyword_score;
-};
-
-/**
- * VideoInfo struct
- *
- * TODO: consider wrapping as a class with an ID
- */
-struct VideoInfo {
-std::string              channel_id;
+struct IGFeedItem {
+uint32_t                 time;
+uint32_t                 pk;
 std::string              id;
-std::string              title;
-std::string              description;
-std::string              datetime;
-std::string              time;
-std::string              url;
-VideoStats               stats;
+std::string              username;
+std::string              content;
+std::vector<std::string> media_urls;
+};
 
-/**
- * get_primary_keywords
- *
- * @returns [out] {std::vector<std::string>} up to 3 keywords
- */
-std::vector<std::string> get_primary_keywords() {
-  return std::vector<std::string>{
-    stats.keywords.cbegin(),
-    stats.keywords.size() > 2 ?
-      stats.keywords.cbegin() + 3 :
-      stats.keywords.cbegin() + stats.keywords.size()
-    };
-}
+inline std::vector<std::string> get_media_urls(const nlohmann::json& data)
+{
+  std::vector<std::string> urls{};
 
-friend std::ostream &operator<<(std::ostream& o, const VideoInfo& v) {
-  o << "Channel ID:  " << v.channel_id     << "\n" <<
-       "Video ID:    " << v.id             << "\n" <<
-       "Title:       " << v.title          << "\n" <<
-       "Description: " << v.description    << "\n" <<
-       "Datetime:    " << v.datetime       << "\n" <<
-       "URL:         " << v.url            << "\n" <<
-
-       "STATISTICS\n" <<
-
-       "➝ Views:         " << v.stats.views      << "\n" <<
-       "➝ Likes:         " << v.stats.likes      << "\n" <<
-       "➝ Dislikes:      " << v.stats.dislikes   << "\n" <<
-       "➝ Comments:      " << v.stats.comments   << "\n" <<
-       "➝ View Score:    " << v.stats.view_score << "\n" <<
-       "➝ Like Score:    " << v.stats.like_score << "\n" <<
-       "➝ Dislike Score: " << v.stats.dislike_score << "\n" <<
-       "➝ Comment Score: " << v.stats.comment_score << "\n";
-
-  if (!v.stats.trends.empty()) {
-    o << "KEYWORDS\n";
-    for (const auto& trend : v.stats.trends)
-      o << "➤ Term:  " << trend.term  << "\n" <<
-           "  Value: " << trend.value << "\n";
+  for (const auto& media_data : data)
+  {
+    urls.emplace_back(media_data["url"]);
   }
 
-  return o;
+  return urls;
 }
-}; // struct VideoInfo
 
-struct ChannelStats {
-std::string views;
-std::string subscribers;
-std::string videos;
+class IGFeedJSONResult : public ResultInterface {
+public:
+virtual ~IGFeedJSONResult() override {}
+
+virtual bool read(std::string s) override {
+  using json = nlohmann::json;
+
+  auto items_json = json::parse(s, nullptr, false);
+
+  if (!items_json.is_null() && items_json.is_array())
+  {
+    for (const auto& item : items_json)
+    {
+      std::string string_value = item.dump();
+      std::cout << string_value << std::endl;
+      m_feed_items.emplace_back(
+        IGFeedItem{
+          .time = GetJSONValue<uint32_t>(item, "taken_at"),
+          .pk   = GetJSONValue<uint32_t>(item["user"], "pk"),
+          .id   = GetJSONStringValue(item, "id"),
+          .username = GetJSONStringValue(item["user"], "username"),
+          .content = GetJSONStringValue(item["caption"], "text"),
+          .media_urls = get_media_urls(item["image_versions2"]["candidates"])
+        }
+      );
+    }
+    return true;
+  }
+  return false;
+}
+
+virtual std::string to_string() override {
+  nlohmann::json output_json = nlohmann::json::array();
+
+  for (const auto& item : m_feed_items)
+  {
+    nlohmann::json item_json{};
+
+    item_json["content"] = item.content;
+    item_json["time"] = std::to_string(item.time);
+    item_json["pk"] = item.pk;
+    item_json["username"] = item.username;
+    item_json["id"] = item.id;
+    item_json["urls"] = item.media_urls;
+
+    if (item_json.is_structured())
+      output_json.emplace_back(
+        item_json
+      );
+    else
+      throw std::runtime_error{"invalid json"};
+  }
+
+  return output_json.dump();
+}
+
+private:
+std::vector<IGFeedItem> m_feed_items;
 };
 
-struct ChannelInfo {
-std::string            name;
-std::string            description;
-std::string            created;
-std::string            thumb_url;
-ChannelStats           stats;
-std::string            id;
-std::vector<VideoInfo> videos;
-
-friend std::ostream &operator<<(std::ostream& o, const ChannelInfo& c) {
-  o << "ID:          " << c.id     << "\n" <<
-       "Name:        " << c.name             << "\n" <<
-       "Description: " << c.description          << "\n" <<
-       "Created:     " << c.created    << "\n" <<
-       "Thumbnail:   " << c.thumb_url       << "\n" <<
-
-       "STATISTICS\n" <<
-
-       "➝ Views:       " << c.stats.views      << "\n" <<
-       "➝ Subscribers: " << c.stats.subscribers      << "\n" <<
-       "➝ Videos:      " << c.stats.videos   << "\n";
-
-  return o;
-}
-};
-
-
-#endif // __TYPES_HPP__
+} // namespace klytics

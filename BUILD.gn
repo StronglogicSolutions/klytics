@@ -3,27 +3,12 @@ all_tests = [
   "//test/ut_api"
 ]
 
-executable("klytics") {
-  public_deps = [
-    "//src/klytics:klytics_sources"
-  ]
+all_executables = [
+  "//src/klytics"
+]
 
-  include_dirs = [
-    "//src",
-    "//third_party/json/include",
-  ]
-
-  libs = [
-    "pthread",
-    "crypto",
-    "cpr",
-    "curl",
-  ]
-
-
-  sources = [
-    "//src/main.cpp",
-  ]
+group("executables") {
+  deps = all_executables
 }
 
 group("tests") {
