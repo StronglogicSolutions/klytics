@@ -7,6 +7,7 @@
 #include <ktube/ktube.hpp>
 #include "common/types.hpp"
 #include "common/constants.hpp"
+#include <process.hpp>
 
 namespace klytics {
 using VideoInfo              = ktube::VideoInfo;
