@@ -6,6 +6,14 @@
 
 namespace klytics {
 
+static std::string ParseMediaURL(const std::string& url)
+{
+  auto pos = url.find_first_of('?');
+  if (pos != std::string::npos)
+    return url.substr(0, pos);
+  return url;
+}
+
 class ResultInterface {
 public:
 virtual ~ResultInterface() {}
@@ -47,8 +55,6 @@ virtual bool read(std::string s) override {
   {
     for (const auto& item : items_json)
     {
-      std::string string_value = item.dump();
-      std::cout << string_value << std::endl;
       m_feed_items.emplace_back(
         IGFeedItem{
           .time = GetJSONValue<uint32_t>(item, "taken_at"),
