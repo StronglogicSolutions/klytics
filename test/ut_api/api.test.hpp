@@ -1,8 +1,8 @@
-#ifndef __API_TEST_HPP__
-#define __API_TEST_HPP__
+#pragma once
+
 #include "gtest/gtest.h"
 
-#include "klytics/api/api.hpp"
+#include <ktube/ktube.hpp>
 
 std::vector<std::string> GetTestTerms() {
   return std::vector<std::string>{
@@ -11,5 +11,3 @@ std::vector<std::string> GetTestTerms() {
     "hangeul"
   };
 }
-
-#endif // __API_TEST_HPP__

@@ -1,14 +1,16 @@
-#ifndef __YOUTUBE_CONSTANTS_HPP__
-#define __YOUTUBE_CONSTANTS_HPP__
+#pragma once
 
 #include <vector>
 #include <string>
 #include <string_view>
 
+namespace klytics {
+
 namespace constants {
 // Paths
 const std::string FOLLOWER_YT_APP{"../external/followers/followers.js"};
 const std::string FOLLOWER_IG_APP{"/data/stronglogic/simyoung/./index.js"};
+const std::string USERFEED_IG_APP{"/data/stronglogic/simyoung/./get_user_history"};
 const std::string TRENDS_APP{"../external/trends/index.js"};
 const std::string FOLLOWER_JSON{"../config/followers.json"};
 const std::string FOLLOWERS_IG_JSON{"../config/ig_followers.json"};
@@ -185,5 +187,4 @@ const std::vector<uint32_t> QUOTA_LIMIT{
 const uint8_t YOUTUBE_VIDEO_ID_LENGTH     = 11;
 } // namespace youtube
 } // namespace constants
-
-#endif // __YOUTUBE_CONSTANTS_HPP__
+} // namespace klytics

@@ -1,16 +1,37 @@
-#ifndef __KLYTICS_HPP__
-#define __KLYTICS_HPP__
+#pragma once
 
 #include <iostream>
 #include <ctime>
 #include <cpr/cpr.h>
 #include <string>
-
-#include <nlohmann/json.hpp>
-
-#include "api/api.hpp"
+#include <ktube/ktube.hpp>
+#include "common/types.hpp"
+#include "common/constants.hpp"
 
 namespace klytics {
+using VideoInfo              = ktube::VideoInfo;
+using VideoCreatorComparison = ktube::VideoCreatorComparison;
+using GoogleTrend            = ktube::GoogleTrend;
+
+
+struct ExecuteConfig {
+std::string username;
+};
+
+const inline ExecuteConfig ParseRuntimeArguments(int argc, char** argv)
+{
+  ExecuteConfig config{};
+
+  for (int i = 1; i < argc; i++) {
+    std::string argument{argv[i]};
+
+    if (argument.find("--user") == 0) {
+      config.username = argument.substr(7);
+    }
+  }
+
+  return config;
+}
 
 /**
   ┌───────────────────────────────────────────────────────────┐
@@ -78,12 +99,11 @@ virtual       std::vector<GoogleTrend> fetch_trends(std::vector<std::string> ter
 
               std::string              fetch_trends_string(std::vector<std::string> terms);
               std::string              generate_video_stats_table();
+              std::string              fetch_ig_posts(const std::string& username);
 
 private:
-API               m_api;
-ContentComparator m_comparator;
+ktube::YouTubeDataAPI    m_api;
+ktube::ContentComparator m_comparator;
 };
 
 } // namespace klytics
-
-#endif // __KLYTICS_HPP__
