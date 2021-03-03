@@ -9,7 +9,7 @@ namespace klytics {
 namespace constants {
 // Paths
 const std::string FOLLOWER_YT_APP{"../external/followers/followers.js"};
-const std::string FOLLOWER_IG_APP{"/data/stronglogic/simyoung/./index.js"};
+const std::string FOLLOWER_IG_APP{"/data/www/simyoung/index.js"}; // TODO: This should be configurable
 const std::string USERFEED_IG_APP{"/data/stronglogic/simyoung/./get_user_history"};
 const std::string TRENDS_APP{"../external/trends/index.js"};
 const std::string FOLLOWER_JSON{"../config/followers.json"};

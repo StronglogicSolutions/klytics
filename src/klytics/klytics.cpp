@@ -12,7 +12,7 @@ using namespace ktube;
   uint32_t youtube_quota_units_used = m_api.get_quota_used();
   SaveToFile(
     std::to_string(youtube_quota_units_used),
-    get_current_working_directory() + constants::YOUTUBE_QUOTA_PATH
+    ktube::get_executable_cwd() + constants::YOUTUBE_QUOTA_PATH
   );
 }
 /**
@@ -36,7 +36,7 @@ std::string KLytics::fetch_follower_count() {
 
   // INSTAGRAM
   std::string ig_user = INIReader{
-    std::string{get_current_working_directory() + "../" + constants::DEFAULT_CONFIG_PATH}
+    std::string{ktube::get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH}
   }.GetString(constants::INSTAGRAM_CONFIG_SECTION, constants::INSTAGRAM_USERNAME, "");
 
   if (!ig_user.empty()) {
