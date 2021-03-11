@@ -190,8 +190,7 @@ std::string KLytics::fetch_trends_string(std::vector<std::string> terms) {
  */
 std::string KLytics::fetch_ig_posts(const std::string& username)
 {
-  std::string                    output{};
-  // const std::vector<std::string> argv{};
+  std::string output{};
   std::string result = ktube::system_read(constants::USERFEED_IG_APP + " --user=" + username);
 
   if (result.empty())
@@ -247,6 +246,5 @@ std::string KLytics::fetch_yt_posts(const std::string& channel_id)
 
   return data.dump();
 }
-
 
 } // namespace klytics
