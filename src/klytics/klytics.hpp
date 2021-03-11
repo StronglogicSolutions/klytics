@@ -10,7 +10,7 @@
 #include <process.hpp>
 
 namespace klytics {
-using VideoInfo              = ktube::VideoInfo;
+using Video                  = ktube::Video;
 using VideoCreatorComparison = ktube::VideoCreatorComparison;
 using GoogleTrend            = ktube::GoogleTrend;
 
@@ -56,15 +56,15 @@ class YouTubeAnalyzer {
 public:
 virtual ~YouTubeAnalyzer() {}
 
-virtual std::vector<VideoInfo> fetch_videos()       = 0;
-virtual std::vector<VideoInfo> get_youtube_videos() = 0;
+virtual std::vector<Video> fetch_videos()       = 0;
+virtual std::vector<Video> get_youtube_videos() = 0;
 };
 
 class VideoAnalyzer {
 public:
 virtual       ~VideoAnalyzer() {}
 
-virtual       bool add_videos(std::vector<VideoInfo> v) = 0;
+virtual       bool add_videos(std::vector<Video> v) = 0;
 virtual const VideoCreatorComparison get_findings()     = 0;
 };
 
@@ -92,15 +92,16 @@ virtual                                ~KLytics()                               
 
 virtual       std::string              fetch_follower_count()                       override;
 virtual       std::string              generate_report()                            override;
-virtual       std::vector<VideoInfo>   fetch_videos()                               override;
-virtual       std::vector<VideoInfo>   get_youtube_videos()                         override;
-virtual       bool                     add_videos(std::vector<VideoInfo> videos)    override;
+virtual       std::vector<Video>       fetch_videos()                               override;
+virtual       std::vector<Video>       get_youtube_videos()                         override;
+virtual       bool                     add_videos(std::vector<Video> videos)        override;
 virtual const VideoCreatorComparison   get_findings()                               override;
 virtual       std::vector<GoogleTrend> fetch_trends(std::vector<std::string> terms) override;
 
               std::string              fetch_trends_string(std::vector<std::string> terms);
               std::string              generate_video_stats_table();
               std::string              fetch_ig_posts(const std::string& username);
+              std::string              fetch_yt_posts(const std::string& channel_id);
 
 private:
 ktube::YouTubeDataAPI    m_api;
