@@ -101,7 +101,7 @@ virtual       std::vector<GoogleTrend> fetch_trends(std::vector<std::string> ter
               std::string              fetch_trends_string(std::vector<std::string> terms);
               std::string              generate_video_stats_table();
               std::string              fetch_ig_posts(const std::string& username);
-              std::string              fetch_yt_posts(const std::string& channel_id);
+              std::string              fetch_yt_posts(std::string channel_id);
 
 private:
 ktube::YouTubeDataAPI    m_api;

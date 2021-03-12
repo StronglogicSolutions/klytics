@@ -1,4 +1,5 @@
 #include "klytics.hpp"
+#include "common/util.hpp"
 
 namespace klytics {
 /**
@@ -211,9 +212,10 @@ std::string KLytics::fetch_ig_posts(const std::string& username)
  * @param channel_id
  * @return std::string
  */
-std::string KLytics::fetch_yt_posts(const std::string& channel_id)
+std::string KLytics::fetch_yt_posts(std::string channel_id)
 {
   using namespace ktube;
+  AlpaNumericOnly(channel_id);
 
   nlohmann::json data =
   [this, &channel_id]()
