@@ -1,5 +1,4 @@
-#ifndef __UTIL_HPP__
-#define __UTIL_HPP__
+#pragma once
 
 #include <ctime>
 #include <cstdlib>
@@ -13,6 +12,7 @@
 #include <type_traits>
 #include <nlohmann/json.hpp>
 
+namespace klytics {
 namespace constants {
 static const char* SIMPLE_DATE_FORMAT{"%Y-%m-%dT%H:%M:%S"};
 } // namespace constants
@@ -40,16 +40,6 @@ inline std::string system_read(std::string command) {
   std::stringstream stream{};
   stream << std::ifstream("file.txt").rdbuf();
   return stream.str();
-}
-
-/**
- * Poor man's log
- *
- * @param
- */
-template<typename T>
-inline void log(T s) {
-  std::cout << s << std::endl;
 }
 
 inline std::string SanitizeOutput(const std::string& s) {
@@ -142,6 +132,17 @@ inline std::string CreateStringWithBreaks(const std::string &in, const size_t ev
   return out;
 }
 
+static void AlpaNumericOnly(std::string& s)
+{
+  s.erase(std::remove_if(
+    s.begin(), s.end(),
+    [](char c)
+    {
+      return !isalnum(c);
+    }),
+    s.end()
+  );
+}
 /**
  * to_unixtime
  *
@@ -263,4 +264,4 @@ inline std::string datetime_delta_string(std::string dt1, std::string dt2) {
   return delta_to_string(datetime_delta);
 }
 
-#endif // __UTIL_HPP__
+} // namespace klytics
