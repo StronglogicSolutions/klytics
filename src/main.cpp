@@ -32,7 +32,6 @@ int main(int argc, char** argv) {
           throw std::invalid_argument{"No username provided"};
         else
           std_out += k_lytics.fetch_yt_posts(config.username);
-
     }
   }
 
