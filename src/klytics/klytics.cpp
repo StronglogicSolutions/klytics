@@ -1,4 +1,5 @@
 #include "klytics.hpp"
+#include "common/util.hpp"
 
 namespace klytics {
 /**
@@ -127,8 +128,8 @@ std::string KLytics::generate_video_stats_table() {
 /**
  * fetch_videos
  */
-std::vector<VideoInfo> KLytics::fetch_videos() {
-  std::vector<VideoInfo> videos;
+std::vector<Video> KLytics::fetch_videos() {
+  std::vector<Video> videos;
   if (m_api.fetch_channel_videos()) {
     videos = m_api.get_videos();
   }
@@ -137,16 +138,16 @@ std::vector<VideoInfo> KLytics::fetch_videos() {
 /**
  * get_youtube_videos
  *
- * @returns [out] {std::vector<VideoInfo}
+ * @returns [out] {std::vector<Video}
  */
-std::vector<VideoInfo> KLytics::get_youtube_videos() {
+std::vector<Video> KLytics::get_youtube_videos() {
   return m_api.get_videos();
 }
 
 /**
  * add_videos
  */
-bool KLytics::add_videos(std::vector<VideoInfo> v) {
+bool KLytics::add_videos(std::vector<Video> v) {
   if (!v.empty()) {
     m_comparator.add_content(v.front().channel_id, v);
     return true;
@@ -182,10 +183,15 @@ std::string KLytics::fetch_trends_string(std::vector<std::string> terms) {
   return result;
 }
 
+/**
+ * @brief
+ *
+ * @param username
+ * @return std::string
+ */
 std::string KLytics::fetch_ig_posts(const std::string& username)
 {
-  std::string                    output{};
-  // const std::vector<std::string> argv{};
+  std::string output{};
   std::string result = ktube::system_read(constants::USERFEED_IG_APP + " --user=" + username);
 
   if (result.empty())
@@ -199,4 +205,48 @@ std::string KLytics::fetch_ig_posts(const std::string& username)
 
   return output;
 }
+
+/**
+ * @brief
+ *
+ * @param channel_id
+ * @return std::string
+ */
+std::string KLytics::fetch_yt_posts(std::string channel_id)
+{
+  using namespace ktube;
+  AlpaNumericOnly(channel_id);
+
+  nlohmann::json data =
+  [this, &channel_id]()
+  {
+    nlohmann::json json_data = nlohmann::json::array();
+
+    for (const auto& channel : m_api.fetch_youtube_stats())
+    {
+      if (channel.id == channel_id)
+      {
+        for (const auto& video : channel.videos)
+        {
+          nlohmann:json video_object{};
+          video_object["channel_id"]  = video.channel_id;
+          video_object["id"]          = video.id;
+          video_object["title"]       = video.title;
+          video_object["description"] = video.description;
+          video_object["datetime"]    = video.datetime;
+          video_object["keywords"]    = nlohmann::json::array();
+
+          for (auto&& keyword : video.stats.keywords)
+            video_object["keywords"].emplace_back(keyword);
+
+          json_data.emplace_back(video_object);
+        }
+      }
+    }
+    return json_data;
+  }();
+
+  return data.dump();
+}
+
 } // namespace klytics
