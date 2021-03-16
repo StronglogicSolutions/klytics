@@ -53,9 +53,9 @@ const std::vector<std::string> TEST_KEYWORDS{
   "test", "testing", "unittesting", "klytics", "kiq"
 };
 
-std::vector<ktube::VideoInfo> GetTestVideos_1() {
-  return std::vector<ktube::VideoInfo>{
-    ktube::VideoInfo{
+std::vector<ktube::Video> GetTestVideos_1() {
+  return std::vector<ktube::Video>{
+    ktube::Video{
       .channel_id  = TEST_CHANNEL_ID_1,
       .id          = TEST_VIDEO_ID_1,
       .title       = TEST_TITLE_1,
@@ -71,7 +71,7 @@ std::vector<ktube::VideoInfo> GetTestVideos_1() {
         .keywords    = TEST_KEYWORDS
       }
     },
-    ktube::VideoInfo{
+    ktube::Video{
       .channel_id  = TEST_CHANNEL_ID_1,
       .id          = TEST_VIDEO_ID_2,
       .title       = TEST_TITLE_2,
@@ -87,7 +87,7 @@ std::vector<ktube::VideoInfo> GetTestVideos_1() {
         .keywords    = TEST_KEYWORDS
       }
     },
-    ktube::VideoInfo{
+    ktube::Video{
       .channel_id  = TEST_CHANNEL_ID_1,
       .id          = TEST_VIDEO_ID_3,
       .title       = TEST_TITLE_3,
@@ -106,9 +106,9 @@ std::vector<ktube::VideoInfo> GetTestVideos_1() {
   };
 }
 
-std::vector<ktube::VideoInfo> GetTestVideos_2() {
-  return std::vector<ktube::VideoInfo>{
-    ktube::VideoInfo{
+std::vector<ktube::Video> GetTestVideos_2() {
+  return std::vector<ktube::Video>{
+    ktube::Video{
       .channel_id  = TEST_CHANNEL_ID_2,
       .id          = TEST_VIDEO_ID_4,
       .title       = TEST_TITLE_4,
@@ -124,7 +124,7 @@ std::vector<ktube::VideoInfo> GetTestVideos_2() {
         .keywords    = TEST_KEYWORDS
       }
     },
-    ktube::VideoInfo{
+    ktube::Video{
       .channel_id  = TEST_CHANNEL_ID_2,
       .id          = TEST_VIDEO_ID_5,
       .title       = TEST_TITLE_5,
@@ -140,7 +140,7 @@ std::vector<ktube::VideoInfo> GetTestVideos_2() {
         .keywords    = TEST_KEYWORDS
       }
     },
-    ktube::VideoInfo{
+    ktube::Video{
       .channel_id  = TEST_CHANNEL_ID_2,
       .id          = TEST_VIDEO_ID_6,
       .title       = TEST_TITLE_6,

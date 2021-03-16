@@ -17,7 +17,7 @@ TEST(KLyticsTest, ComparatorComparesVideoVectors) {
   bool all_videos_added{true};
   KLytics klytics{};
 
-  std::vector<std::vector<VideoInfo>> videos{
+  std::vector<std::vector<Video>> videos{
     GetTestVideos_1(),
     GetTestVideos_2()
   };

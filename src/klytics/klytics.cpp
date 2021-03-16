@@ -1,6 +1,4 @@
 #include "klytics.hpp"
-#include "common/util.hpp"
-
 namespace klytics {
 /**
  * @destructor
@@ -212,10 +210,9 @@ std::string KLytics::fetch_ig_posts(const std::string& username)
  * @param channel_id
  * @return std::string
  */
-std::string KLytics::fetch_yt_posts(std::string channel_id)
+std::string KLytics::fetch_yt_posts(const std::string& channel_id)
 {
   using namespace ktube;
-  AlpaNumericOnly(channel_id);
 
   nlohmann::json data =
   [this, &channel_id]()
@@ -233,7 +230,7 @@ std::string KLytics::fetch_yt_posts(std::string channel_id)
           video_object["id"]          = video.id;
           video_object["title"]       = video.title;
           video_object["description"] = video.description;
-          video_object["datetime"]    = video.datetime;
+          video_object["datetime"]    = to_unixtime_s(video.datetime);
           video_object["keywords"]    = nlohmann::json::array();
 
           for (auto&& keyword : video.stats.keywords)
