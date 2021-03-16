@@ -31,7 +31,7 @@ config("html") {
 
 config("ktube") {
   include_dirs = ["//third_party/ktube/src",
-  #  "//third_party/kjson"
+   "//third_party/kjson"
    ]
   lib_dirs = [ "//third_party/ktube/out" ]
   libs = ["//third_party/ktube/out/libktube_lib.so"]
@@ -54,7 +54,6 @@ source_set("klytics_sources") {
 
   deps = [
     ":ini_reader",
-    # ":ktube_lib"
   ]
 
   public_configs = [
@@ -87,12 +86,15 @@ executable("klytics") {
   ]
 
   deps = [
-    ":ktube_lib"
+    ":ktube_lib",
   ]
 
   include_dirs = [
     "//src",
-    "//third_party/json/include",
+  ]
+
+  public_configs = [
+    ":kjson"
   ]
 
   libs = [
