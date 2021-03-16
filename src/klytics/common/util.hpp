@@ -132,7 +132,7 @@ inline std::string CreateStringWithBreaks(const std::string &in, const size_t ev
   return out;
 }
 
-static void AlpaNumericOnly(std::string& s)
+static std::string AlpaNumericOnly(std::string s)
 {
   s.erase(std::remove_if(
     s.begin(), s.end(),
@@ -142,6 +142,8 @@ static void AlpaNumericOnly(std::string& s)
     }),
     s.end()
   );
+
+  return s;
 }
 /**
  * to_unixtime
@@ -156,6 +158,21 @@ inline const std::time_t to_unixtime(const char* datetime) {
   ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S");
 
   return mktime(&t);
+}
+
+/**
+ * to_unixtime
+ *
+ * @param
+ * @returns
+ */
+inline const std::string to_unixtime_s(const std::string& datetime) {
+  std::tm            t{};
+  std::istringstream ss{datetime};
+
+  ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S");
+
+  return std::to_string(mktime(&t));
 }
 
 /**
