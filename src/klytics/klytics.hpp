@@ -4,10 +4,11 @@
 #include <ctime>
 #include <cpr/cpr.h>
 #include <string>
+#include <process.hpp>
 #include <ktube/ktube.hpp>
 #include "common/types.hpp"
 #include "common/constants.hpp"
-#include <process.hpp>
+#include "common/util.hpp"
 
 namespace klytics {
 using Video                  = ktube::Video;
@@ -27,7 +28,7 @@ const inline ExecuteConfig ParseRuntimeArguments(int argc, char** argv)
     std::string argument{argv[i]};
 
     if (argument.find("--user") == 0) {
-      config.username = argument.substr(7);
+      config.username = AlphaNumericOnly(argument.substr(7));
     }
   }
 
@@ -101,7 +102,7 @@ virtual       std::vector<GoogleTrend> fetch_trends(std::vector<std::string> ter
               std::string              fetch_trends_string(std::vector<std::string> terms);
               std::string              generate_video_stats_table();
               std::string              fetch_ig_posts(const std::string& username);
-              std::string              fetch_yt_posts(std::string channel_id);
+              std::string              fetch_yt_posts(const std::string& channel_id);
 
 private:
 ktube::YouTubeDataAPI    m_api;
