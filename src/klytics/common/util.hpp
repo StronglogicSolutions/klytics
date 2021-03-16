@@ -132,7 +132,7 @@ inline std::string CreateStringWithBreaks(const std::string &in, const size_t ev
   return out;
 }
 
-static std::string AlpaNumericOnly(std::string s)
+static std::string AlphaNumericOnly(std::string s)
 {
   s.erase(std::remove_if(
     s.begin(), s.end(),
