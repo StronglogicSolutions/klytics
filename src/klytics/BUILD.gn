@@ -71,7 +71,6 @@ source_set("klytics_sources") {
 
   libs = [
     "crypto",
-    "cpr",
     "curl",
   ]
 
@@ -100,7 +99,6 @@ executable("klytics") {
   libs = [
     "pthread",
     "crypto",
-    "cpr",
     "curl",
   ]
 
