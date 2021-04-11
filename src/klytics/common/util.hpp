@@ -16,6 +16,22 @@ namespace klytics {
 namespace constants {
 static const char* SIMPLE_DATE_FORMAT{"%Y-%m-%dT%H:%M:%S"};
 } // namespace constants
+static const std::string get_executable_cwd() {
+  char* path = realpath("/proc/self/exe", NULL);
+  char* name = basename(path);
+  std::string executable_cwd{path, path + strlen(path) - strlen(name)};
+
+  return executable_cwd;
+}
+
+inline std::string GetConfigPath() {
+  return get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH;
+}
+
+inline INIReader GetConfigReader() {
+  return INIReader{GetConfigPath()};
+}
+
 
 /**
  * SaveToFile
