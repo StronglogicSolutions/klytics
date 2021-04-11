@@ -61,6 +61,15 @@ std::string              content;
 std::vector<std::string> media_urls;
 };
 
+struct TWFeedItem {
+// uint32_t                 time;
+// uint32_t                 pk;
+// std::string              id;
+// std::string              username;
+// std::string              content;
+// std::vector<std::string> media_urls;
+};
+
 inline std::vector<std::string> get_media_urls(const nlohmann::json& data)
 {
   std::vector<std::string> urls{};
@@ -129,6 +138,54 @@ virtual std::string to_string() override {
 
 private:
 std::vector<IGFeedItem> m_feed_items;
+};
+
+class TWFeedJSONResult : public ResultInterface {
+public:
+virtual ~TWFeedJSONResult() override {}
+
+virtual bool read(std::string s) override {
+  using json = nlohmann::json;
+
+  auto items_json = json::parse(s, nullptr, false);
+
+  if (!items_json.is_null() && items_json.is_array())
+  {
+    for (const auto& item : items_json)
+    {
+      m_feed_items.emplace_back(
+        TWFeedItem{
+
+        }
+      );
+    }
+    return true;
+  }
+  return false;
+}
+
+virtual std::string to_string() override {
+  nlohmann::json output_json = nlohmann::json::array();
+
+  for (const auto& item : m_feed_items)
+  {
+    nlohmann::json item_json{};
+
+
+
+    if (item_json.is_structured())
+      output_json.emplace_back(
+        item_json
+      );
+    else
+      throw std::runtime_error{"invalid json"};
+  }
+
+  return output_json.dump();
+}
+
+private:
+std::vector<TWFeedItem> m_feed_items;
 };
 
 } // namespace klytics

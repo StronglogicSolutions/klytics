@@ -14,7 +14,6 @@ using Video                  = ktube::Video;
 using VideoCreatorComparison = ktube::VideoCreatorComparison;
 using GoogleTrend            = ktube::GoogleTrend;
 
-
 struct ExecuteConfig {
 std::string username;
 };
@@ -88,6 +87,7 @@ class KLytics : public VideoAnalyzer,
                 public SummaryGenerator {
 
 public:
+                                       KLytics();
 virtual                                ~KLytics()                                   override;
 
 virtual       std::string              fetch_follower_count()                       override;
@@ -102,10 +102,13 @@ virtual       std::vector<GoogleTrend> fetch_trends(std::vector<std::string> ter
               std::string              generate_video_stats_table();
               std::string              fetch_ig_posts(const std::string& username);
               std::string              fetch_yt_posts(const std::string& channel_id);
+              std::string              fetch_tw_posts(const std::string& username);
 
 private:
 ktube::YouTubeDataAPI    m_api;
 ktube::ContentComparator m_comparator;
+std::string              m_ig_feed_app_path;
+std::string              m_tw_feed_app_path;
 };
 
 } // namespace klytics

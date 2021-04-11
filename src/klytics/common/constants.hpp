@@ -10,7 +10,6 @@ namespace constants {
 // Paths
 const std::string FOLLOWER_YT_APP{"../external/followers/followers.js"};
 const std::string FOLLOWER_IG_APP{"/data/www/simyoung/index.js"}; // TODO: This should be configurable
-const std::string USERFEED_IG_APP{"/data/stronglogic/simyoung/./get_user_history"};
 const std::string TRENDS_APP{"../external/trends/index.js"};
 const std::string FOLLOWER_JSON{"../config/followers.json"};
 const std::string FOLLOWERS_IG_JSON{"../config/ig_followers.json"};
@@ -141,6 +140,7 @@ const std::vector<std::string> PARAM_VALUES{
 
 const std::string E_CHANNEL_ID{"UCFP7BAwQIzqml"};
 const std::string DEFAULT_CONFIG_PATH{"config/config.ini"};
+const std::string KLYTICS_CONFIG_SECTION{"klytics"};
 const std::string GOOGLE_CONFIG_SECTION{"google"};
 const std::string REFRESH_TOKEN{"refresh_token"};
 const std::string CLIENT_ID{"client_id"};
@@ -154,6 +154,8 @@ const std::string YOUTUBE_TEST_MODE{"test_mode"};
 const std::string YOUTUBE_RETRY_MODE{"retry"};
 const std::string INSTAGRAM_CONFIG_SECTION{"instagram"};
 const std::string INSTAGRAM_USERNAME{"username"};
+const std::string IG_FEED_APP_KEY{"ig_feed_app"};
+const std::string TW_FEED_APP_KEY{"tw_feed_app"};
 
 inline const std::string VideoParamsFull() {
   return std::string{

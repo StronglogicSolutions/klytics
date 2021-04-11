@@ -1,9 +1,27 @@
 #include "klytics.hpp"
 namespace klytics {
+KLytics::KLytics()
+{
+  using namespace constants;
+  auto config = GetConfigReader();
+
+  if (config.ParseError() < 0) {
+    ktube::log("Error loading config");
+    throw std::invalid_argument{"No configuration path"};
+  }
+
+  m_ig_feed_app_path = config.GetString(KLYTICS_CONFIG_SECTION, IG_FEED_APP_KEY, "");
+  if (m_ig_feed_app_path.empty())
+    throw std::invalid_argument{"IG Feed app path must be set in configuration"};
+
+  m_tw_feed_app_path = config.GetString(KLYTICS_CONFIG_SECTION, TW_FEED_APP_KEY, "");
+  if (m_tw_feed_app_path.empty())
+    throw std::invalid_argument{"TW Feed app path must be set in configuration"};
+}
+
 /**
  * @destructor
  */
-
 KLytics::~KLytics() {
 using namespace ktube;
   // Save number of youtube quota units used in this session
@@ -190,10 +208,10 @@ std::string KLytics::fetch_trends_string(std::vector<std::string> terms) {
 std::string KLytics::fetch_ig_posts(const std::string& username)
 {
   std::string output{};
-  std::string result = ktube::system_read(constants::USERFEED_IG_APP + " --user=" + username);
+  std::string result = ktube::system_read(m_ig_feed_app_path + " --user=" + username);
 
   if (result.empty())
-    output += "Error executing followers app\n\n";
+    output += "Error executing ig feed app\n\n";
   else
   {
     IGFeedJSONResult feed_result{};
@@ -245,5 +263,29 @@ std::string KLytics::fetch_yt_posts(const std::string& channel_id)
 
   return data.dump();
 }
+
+/**
+ * @brief
+ *
+ * @param username
+ * @return std::string
+ */
+std::string KLytics::fetch_tw_posts(const std::string& username)
+{
+  std::string output{};
+  std::string result = ktube::system_read(m_tw_feed_app_path + " --user=" + username);
+
+  if (result.empty())
+    output += "Error executing tw feed app\n\n";
+  else
+  {
+    IGFeedJSONResult feed_result{};
+    if (feed_result.read(result))
+      output += feed_result.to_string();
+  }
+
+  return output;
+}
+
 
 } // namespace klytics
