@@ -97,6 +97,53 @@ virtual bool read(std::string s) override {
     {
       m_feed_items.emplace_back(
         IGFeedItem{
+          .time       = GetJSONValue<uint32_t>(item, "taken_at"),
+          .pk         = GetJSONValue<uint32_t>(item["user"], "pk"),
+          .id         = GetJSONStringValue    (item, "id"),
+          .username   = GetJSONStringValue    (item["user"], "username"),
+          .content    = GetJSONStringValue    (item["caption"], "text"),
+          .media_urls = get_media_urls        (item["image_versions2"]["candidates"])});
+    }
+    return true;
+  }
+  return false;
+}
+
+
+bool read(std::wstring s)
+{
+  using json = nlohmann::json;
+
+  auto items_json = json::parse(s, nullptr, false);
+
+  if (!items_json.is_null() && items_json.is_array())
+  {
+    for (const auto& item : items_json)
+    {
+      m_feed_items.emplace_back(
+        IGFeedItem{
+          .time = GetJSONValue<uint32_t>(item, "taken_at"),
+          .pk   = GetJSONValue<uint32_t>(item["user"], "pk"),
+          .id   = GetJSONStringValue(item, "id"),
+          .username = GetJSONStringValue(item["user"], "username"),
+          .content = GetJSONStringValue(item["caption"], "text"),
+          .media_urls = get_media_urls(item["image_versions2"]["candidates"])
+        }
+      );
+    }
+    return true;
+  }
+  return false;
+}
+
+bool read(const nlohmann::json& json)
+{
+  if (!json.is_null() && json.is_array())
+  {
+    for (const auto& item : json)
+    {
+      m_feed_items.emplace_back(
+        IGFeedItem{
           .time = GetJSONValue<uint32_t>(item, "taken_at"),
           .pk   = GetJSONValue<uint32_t>(item["user"], "pk"),
           .id   = GetJSONStringValue(item, "id"),

@@ -1,4 +1,6 @@
 #include "klytics.hpp"
+#include <process.hpp>
+
 namespace klytics {
 KLytics::KLytics()
 {
@@ -208,7 +210,7 @@ std::string KLytics::fetch_trends_string(std::vector<std::string> terms) {
 std::string KLytics::fetch_ig_posts(const std::string& username)
 {
   std::string output{};
-  std::string result = ktube::system_read(m_ig_feed_app_path + " --user=" + username);
+  std::string result = SanitizeJSONInput(ktube::system_read(m_ig_feed_app_path + " --user=" + username));
 
   if (result.empty())
     output += "Error executing ig feed app\n\n";

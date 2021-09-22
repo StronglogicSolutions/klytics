@@ -131,6 +131,20 @@ inline std::string StripLineBreaks(std::string s) {
 }
 
 /**
+ * SanitizeJSONInput
+ *
+ * Removes sequences known to cause problems with nlohmann::json
+ */
+static std::string SanitizeJSONInput(std::string s)
+{
+  static const char bad_chars[] = "\ufffdｎｇ";
+
+  for (auto it = s.find(bad_chars); it != std::string::npos; it = s.find(bad_chars))
+    s.erase(it);
+  return s;
+}
+
+/**
  * CreateStringWithBreaks
  *
  * @param
