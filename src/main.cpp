@@ -32,6 +32,15 @@ int main(int argc, char** argv) {
           throw std::invalid_argument{"No username provided"};
         else
           std_out += k_lytics.fetch_yt_posts(config.username);
+      else
+      if (arg == "tw_feed")
+      {
+        if (config.username.empty())
+          throw std::invalid_argument{"No username provided"};
+        else
+          std_out += k_lytics.fetch_tw_posts(config.username);
+      }
+
     }
   }
 
