@@ -2,15 +2,18 @@
 #include <stdio.h>
 #include "klytics/klytics.hpp"
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   klytics::KLytics       k_lytics{};
 
   std::string            std_out{};
   klytics::ExecuteConfig config = klytics::ParseRuntimeArguments(argc, argv);
 
-  if (argc > 1) {
-    for (int i = 1; i < argc; i++) {
-      std::string arg = ktube::SanitizeInput(argv[i]);
+  if (argc > 1)
+  {
+    for (int i = 1; i < argc; i++)
+    {
+      const std::string arg = ktube::SanitizeInput(argv[i]);
 
       if (arg == "followers")
         std_out += k_lytics.fetch_follower_count() + "\n";
@@ -39,6 +42,14 @@ int main(int argc, char** argv) {
           throw std::invalid_argument{"No username provided"};
         else
           std_out += k_lytics.fetch_tw_posts(config.username);
+      }
+      else
+      if (arg == "tw_search")
+      {
+        if (config.subject.empty())
+          throw std::invalid_argument{"No subject provided"};
+        else
+          std_out += k_lytics.fetch_tw_posts(config.subject);
       }
 
     }
