@@ -26,10 +26,10 @@ const inline ExecuteConfig ParseRuntimeArguments(int argc, char** argv)
   for (int i = 1; i < argc; i++) {
     std::string argument{argv[i]};
 
-    if (!argument.find("--user") == 0)
+    if (argument.find("--user") == 0)
       config.username = AlphaNumericOnly(argument.substr(7));
     else
-    if (!argument.find("--header"))
+    if (argument.find("--header") == 0)
       config.subject  = argument.substr(9);
 
 
