@@ -290,4 +290,27 @@ std::string KLytics::fetch_tw_posts(const std::string& username)
 }
 
 
+/**
+ * @brief
+ *
+ * @param subject
+ * @return std::string
+ */
+std::string KLytics::search_tw_posts(const std::string& subject)
+{
+  std::string output{};
+  std::string result = ktube::system_read(m_tw_feed_app_path + " --header=" + subject);
+
+  if (result.empty())
+    output += "Error executing tw feed app\n\n";
+  else
+  {
+    IGFeedJSONResult feed_result{};
+    if (feed_result.read(result))
+      output += feed_result.to_string();
+  }
+
+  return output;
+}
+
 } // namespace klytics

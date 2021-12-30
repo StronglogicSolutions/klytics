@@ -16,6 +16,7 @@ using GoogleTrend            = ktube::GoogleTrend;
 
 struct ExecuteConfig {
 std::string username;
+std::string subject;
 };
 
 const inline ExecuteConfig ParseRuntimeArguments(int argc, char** argv)
@@ -25,9 +26,13 @@ const inline ExecuteConfig ParseRuntimeArguments(int argc, char** argv)
   for (int i = 1; i < argc; i++) {
     std::string argument{argv[i]};
 
-    if (argument.find("--user") == 0) {
+    if (!argument.find("--user") == 0)
       config.username = AlphaNumericOnly(argument.substr(7));
-    }
+    else
+    if (!argument.find("--header"))
+      config.subject  = argument.substr(9);
+
+
   }
 
   return config;
@@ -100,9 +105,10 @@ virtual       std::vector<GoogleTrend> fetch_trends(std::vector<std::string> ter
 
               std::string              fetch_trends_string(std::vector<std::string> terms);
               std::string              generate_video_stats_table();
-              std::string              fetch_ig_posts(const std::string& username);
-              std::string              fetch_yt_posts(const std::string& channel_id);
-              std::string              fetch_tw_posts(const std::string& username);
+              std::string              fetch_ig_posts (const std::string& username);
+              std::string              fetch_yt_posts (const std::string& channel_id);
+              std::string              fetch_tw_posts (const std::string& username);
+              std::string              search_tw_posts(const std::string& subject);
 
 private:
 ktube::YouTubeDataAPI    m_api;
