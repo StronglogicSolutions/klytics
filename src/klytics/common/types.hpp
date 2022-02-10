@@ -80,15 +80,15 @@ inline std::vector<std::string> get_media_urls(const nlohmann::json& data)
   if (data.contains("video_versions"))
     for (const auto& media_data : data["video_versions"])
     {
-      const auto width = GetJSONValue<int32_t>(media_data["width"]);
+      const auto width = GetJSONValue<int32_t>(media_data, "width");
       if (width > largest_video_width)
       {
         largest_video_width = width;
-        video_url           = GetJSONStringValue(media_data["url"]);
+        video_url           = GetJSONStringValue(media_data, "url");
       }
     }
 
-  if (!video_url.empty()) urls.push_back
+  if (!video_url.empty()) urls.push_back(video_url);
 
   if (data.contains("image_versions2"))
     for (const auto& media_data : data["image_versions2"]["candidates"])
