@@ -72,12 +72,28 @@ struct TWFeedItem {
 
 inline std::vector<std::string> get_media_urls(const nlohmann::json& data)
 {
-  std::vector<std::string> urls{};
+  std::vector<std::string> urls;
+  std::string              video_url;
+  std::string              image_url;
+  int32_t                  largest_video_width{};
 
-  for (const auto& media_data : data)
-  {
-    urls.emplace_back(media_data["url"]);
-  }
+  if (data.contains("video_versions"))
+    for (const auto& media_data : data["video_versions"])
+    {
+      const auto width = GetJSONValue<int32_t>(media_data["width"]);
+      if (width > largest_video_width)
+      {
+        largest_video_width = width;
+        video_url           = GetJSONStringValue(media_data["url"]);
+      }
+    }
+
+  if (!video_url.empty()) urls.push_back
+
+  if (data.contains("image_versions2"))
+    for (const auto& media_data : data["image_versions2"]["candidates"])
+      urls.emplace_back(media_data["url"]);
+
 
   return urls;
 }
@@ -102,7 +118,7 @@ virtual bool read(std::string s) override {
           .id         = GetJSONStringValue    (item, "id"),
           .username   = GetJSONStringValue    (item["user"], "username"),
           .content    = GetJSONStringValue    (item["caption"], "text"),
-          .media_urls = get_media_urls        (item["image_versions2"]["candidates"])});
+          .media_urls = get_media_urls        (item)});
     }
     return true;
   }
