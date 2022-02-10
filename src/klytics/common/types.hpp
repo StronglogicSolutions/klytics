@@ -138,14 +138,12 @@ bool read(std::wstring s)
     {
       m_feed_items.emplace_back(
         IGFeedItem{
-          .time = GetJSONValue<uint32_t>(item, "taken_at"),
-          .pk   = GetJSONValue<uint32_t>(item["user"], "pk"),
-          .id   = GetJSONStringValue(item, "id"),
-          .username = GetJSONStringValue(item["user"], "username"),
-          .content = GetJSONStringValue(item["caption"], "text"),
-          .media_urls = get_media_urls(item["image_versions2"]["candidates"])
-        }
-      );
+          .time = GetJSONValue<uint32_t>      (item, "taken_at"),
+          .pk   = GetJSONValue<uint32_t>      (item["user"], "pk"),
+          .id   = GetJSONStringValue          (item, "id"),
+          .username = GetJSONStringValue      (item["user"], "username"),
+          .content = GetJSONStringValue       (item["caption"], "text"),
+          .media_urls = get_media_urls        (item)});
     }
     return true;
   }
@@ -165,16 +163,15 @@ bool read(const nlohmann::json& json)
           .id   = GetJSONStringValue(item, "id"),
           .username = GetJSONStringValue(item["user"], "username"),
           .content = GetJSONStringValue(item["caption"], "text"),
-          .media_urls = get_media_urls(item["image_versions2"]["candidates"])
-        }
-      );
+          .media_urls = get_media_urls        (item)});
     }
     return true;
   }
   return false;
 }
 
-virtual std::string to_string() override {
+virtual std::string to_string() override
+{
   nlohmann::json output_json = nlohmann::json::array();
 
   for (const auto& item : m_feed_items)
@@ -207,7 +204,8 @@ class TWFeedJSONResult : public ResultInterface {
 public:
 virtual ~TWFeedJSONResult() override {}
 
-virtual bool read(std::string s) override {
+virtual bool read(std::string s) override
+{
   using json = nlohmann::json;
 
   auto items_json = json::parse(s, nullptr, false);
@@ -227,7 +225,8 @@ virtual bool read(std::string s) override {
   return false;
 }
 
-virtual std::string to_string() override {
+virtual std::string to_string() override
+{
   nlohmann::json output_json = nlohmann::json::array();
 
   for (const auto& item : m_feed_items)
