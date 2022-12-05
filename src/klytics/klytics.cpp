@@ -2,22 +2,23 @@
 #include <process.hpp>
 
 namespace klytics {
+
+static std::string read_config(const std::string& section, const std::string& key)
+{
+  static const auto config = GetConfigReader();
+  return config.GetString(section, key, "");
+}
+
 KLytics::KLytics()
 {
   using namespace constants;
-  auto config = GetConfigReader();
-
-  if (config.ParseError() < 0) {
-    ktube::log("Error loading config");
+  if (GetConfigReader().ParseError() < 0)
     throw std::invalid_argument{"No configuration path"};
-  }
 
-  m_ig_feed_app_path = config.GetString(KLYTICS_CONFIG_SECTION, IG_FEED_APP_KEY, "");
-  if (m_ig_feed_app_path.empty())
+  if (m_ig_feed_app_path = read_config(KLYTICS_CONFIG_SECTION, IG_FEED_APP_KEY); m_ig_feed_app_path.empty())
     throw std::invalid_argument{"IG Feed app path must be set in configuration"};
 
-  m_tw_feed_app_path = config.GetString(KLYTICS_CONFIG_SECTION, TW_FEED_APP_KEY, "");
-  if (m_tw_feed_app_path.empty())
+  if (m_tw_feed_app_path = read_config(KLYTICS_CONFIG_SECTION, TW_FEED_APP_KEY); m_tw_feed_app_path.empty())
     throw std::invalid_argument{"TW Feed app path must be set in configuration"};
 }
 
@@ -25,49 +26,33 @@ KLytics::KLytics()
  * @destructor
  */
 KLytics::~KLytics() {
-using namespace ktube;
-  // Save number of youtube quota units used in this session
-  // TODO: read and append for each day
-  uint32_t youtube_quota_units_used = m_api.get_quota_used();
-  SaveToFile(
-    std::to_string(youtube_quota_units_used),
-    ktube::get_executable_cwd() + constants::YOUTUBE_QUOTA_PATH
-  );
+  SaveToFile(std::to_string(m_api.get_quota_used()),
+             ktube::get_executable_cwd() + constants::YOUTUBE_QUOTA_PATH);
 }
 /**
  * fetch_follower_count
  * @returns [out] {std::string}
  */
 std::string KLytics::fetch_follower_count() {
-  std::string   output{};
+  std::string   output;
+  ProcessResult result = ktube::execute(constants::FOLLOWER_YT_APP); // YOUTUBE
 
-  // YOUTUBE
-  ProcessResult result = ktube::execute(constants::FOLLOWER_YT_APP);
-
-  if (result.error) {
+  if (result.error)
     output += "Error executing followers app\n\n";
-  }
 
-  ktube::YouTubeFollowResult json{};
-  if (json.read(result.output)) {
+  if (ktube::YouTubeFollowResult json{}; json.read(result.output))
     output += json.to_string();
-  }
 
-  // INSTAGRAM
-  std::string ig_user = INIReader{
-    std::string{ktube::get_executable_cwd() + "../" + constants::DEFAULT_CONFIG_PATH}
-  }.GetString(constants::INSTAGRAM_CONFIG_SECTION, constants::INSTAGRAM_USERNAME, "");
+  std::string ig_user = read_config(constants::INSTAGRAM_CONFIG_SECTION, constants::INSTAGRAM_USERNAME);
 
-  if (!ig_user.empty()) {
+  if (!ig_user.empty())
+  {
     std::string result = ktube::system_read(constants::FOLLOWER_IG_APP + " --i=\"true\" --u=\"" + ig_user + "\"");
-    if (result.empty()) {
+    if (result.empty())
       output += "Error running IG Followers app\n\n";
-    }
 
-    ktube::InstagramFollowResult json{};
-    if (json.read(result)) {
+    if (ktube::InstagramFollowResult json{}; json.read(result))
       output += json.to_string();
-    }
   }
 
   return output;

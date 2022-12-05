@@ -19,17 +19,18 @@ std::string username;
 std::string subject;
 };
 
-const inline ExecuteConfig ParseRuntimeArguments(int argc, char** argv)
+static ExecuteConfig ParseRuntimeArguments(int argc, char** argv)
 {
   ExecuteConfig config{};
 
-  for (int i = 1; i < argc; i++) {
+  for (int i = 1; i < argc; i++)
+  {
     std::string argument{argv[i]};
 
-    if (argument.find("--user") == 0)
+    if (!argument.find("--user"))
       config.username = AlphaNumericOnly(argument.substr(7));
     else
-    if (argument.find("--header") == 0)
+    if (!argument.find("--header"))
       config.subject  = argument.substr(9);
 
 
@@ -46,36 +47,34 @@ const inline ExecuteConfig ParseRuntimeArguments(int argc, char** argv)
 
 class SummaryGenerator {
 public:
-virtual ~SummaryGenerator() {}
-virtual std::string generate_report() = 0;
+  virtual ~SummaryGenerator() {}
+  virtual std::string generate_report() = 0;
 };
 
 class SocialMediaAnalyzer {
 public:
-virtual ~SocialMediaAnalyzer() {}
-virtual std::string fetch_follower_count() = 0;
+  virtual ~SocialMediaAnalyzer() {}
+  virtual std::string fetch_follower_count() = 0;
 };
 
 class YouTubeAnalyzer {
 public:
-virtual ~YouTubeAnalyzer() {}
-
-virtual std::vector<Video> fetch_videos()       = 0;
-virtual std::vector<Video> get_youtube_videos() = 0;
+  virtual ~YouTubeAnalyzer() {}
+  virtual std::vector<Video> fetch_videos()       = 0;
+  virtual std::vector<Video> get_youtube_videos() = 0;
 };
 
 class VideoAnalyzer {
 public:
-virtual       ~VideoAnalyzer() {}
-
-virtual       bool add_videos(std::vector<Video> v) = 0;
-virtual const VideoCreatorComparison get_findings()     = 0;
+  virtual       ~VideoAnalyzer() {}
+  virtual       bool add_videos(std::vector<Video> v) = 0;
+  virtual const VideoCreatorComparison get_findings()     = 0;
 };
 
 class TrendsAnalyzer {
 public:
-virtual ~TrendsAnalyzer() {}
-virtual std::vector<GoogleTrend> fetch_trends(std::vector<std::string> terms) = 0;
+  virtual ~TrendsAnalyzer() {}
+  virtual std::vector<GoogleTrend> fetch_trends(std::vector<std::string> terms) = 0;
 };
 
 /**
@@ -93,15 +92,14 @@ class KLytics : public VideoAnalyzer,
 
 public:
                                        KLytics();
-virtual                                ~KLytics()                                   override;
-
-virtual       std::string              fetch_follower_count()                       override;
-virtual       std::string              generate_report()                            override;
-virtual       std::vector<Video>       fetch_videos()                               override;
-virtual       std::vector<Video>       get_youtube_videos()                         override;
-virtual       bool                     add_videos(std::vector<Video> videos)        override;
-virtual const VideoCreatorComparison   get_findings()                               override;
-virtual       std::vector<GoogleTrend> fetch_trends(std::vector<std::string> terms) override;
+virtual                                ~KLytics()                                   final;
+virtual       std::string              fetch_follower_count()                       final;
+virtual       std::string              generate_report()                            final;
+virtual       std::vector<Video>       fetch_videos()                               final;
+virtual       std::vector<Video>       get_youtube_videos()                         final;
+virtual       bool                     add_videos(std::vector<Video> videos)        final;
+virtual const VideoCreatorComparison   get_findings()                               final;
+virtual       std::vector<GoogleTrend> fetch_trends(std::vector<std::string> terms) final;
 
               std::string              fetch_trends_string(std::vector<std::string> terms);
               std::string              generate_video_stats_table();
@@ -111,10 +109,10 @@ virtual       std::vector<GoogleTrend> fetch_trends(std::vector<std::string> ter
               std::string              search_tw_posts(const std::string& subject);
 
 private:
-ktube::YouTubeDataAPI    m_api;
-ktube::ContentComparator m_comparator;
-std::string              m_ig_feed_app_path;
-std::string              m_tw_feed_app_path;
+  ktube::YouTubeDataAPI    m_api;
+  ktube::ContentComparator m_comparator;
+  std::string              m_ig_feed_app_path;
+  std::string              m_tw_feed_app_path;
 };
 
 } // namespace klytics

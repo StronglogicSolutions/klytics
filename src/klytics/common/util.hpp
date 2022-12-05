@@ -29,7 +29,8 @@ inline std::string GetConfigPath() {
 }
 
 inline INIReader GetConfigReader() {
-  return INIReader{GetConfigPath()};
+  static const auto config = INIReader{GetConfigPath()};
+  return config;
 }
 
 
