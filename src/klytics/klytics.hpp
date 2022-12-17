@@ -7,7 +7,7 @@
 #include <ktube/ktube.hpp>
 #include "common/types.hpp"
 #include "common/constants.hpp"
-#include "common/util.hpp"
+#include "kutils.hpp"
 
 namespace klytics {
 using Video                  = ktube::Video;
@@ -28,7 +28,7 @@ static ExecuteConfig ParseRuntimeArguments(int argc, char** argv)
     std::string argument{argv[i]};
 
     if (!argument.find("--user"))
-      config.username = AlphaNumericOnly(argument.substr(7));
+      config.username = kutils::AlphaNumericOnly(argument.substr(7));
     else
     if (!argument.find("--header"))
       config.subject  = argument.substr(9);

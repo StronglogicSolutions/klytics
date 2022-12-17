@@ -5,14 +5,14 @@ namespace klytics {
 
 static std::string read_config(const std::string& section, const std::string& key)
 {
-  static const auto config = GetConfigReader();
+  static const auto config = ktube::GetConfigReader();
   return config.GetString(section, key, "");
 }
 
 KLytics::KLytics()
 {
   using namespace constants;
-  if (GetConfigReader().ParseError() < 0)
+  if (ktube::GetConfigReader().ParseError() < 0)
     throw std::invalid_argument{"No configuration path"};
 
   if (m_ig_feed_app_path = read_config(KLYTICS_CONFIG_SECTION, IG_FEED_APP_KEY); m_ig_feed_app_path.empty())
@@ -26,7 +26,7 @@ KLytics::KLytics()
  * @destructor
  */
 KLytics::~KLytics() {
-  SaveToFile(std::to_string(m_api.get_quota_used()),
+  kutils::SaveToFile(std::to_string(m_api.get_quota_used()),
              ktube::get_executable_cwd() + constants::YOUTUBE_QUOTA_PATH);
 }
 /**
@@ -194,13 +194,20 @@ std::string KLytics::fetch_trends_string(std::vector<std::string> terms) {
  */
 std::string KLytics::fetch_ig_posts(const std::string& username)
 {
+
+  static const char bad_chars[] = "\ufffdｎｇ";
+
+  auto sanitize_json = [](auto& s) {for (auto it = s.find(bad_chars); it != std::string::npos; it = s.find(bad_chars))
+    s.erase(it); };
+
   std::string output{};
-  std::string result = SanitizeJSONInput(ktube::system_read(m_ig_feed_app_path + " --user=" + username));
+  std::string result = ktube::system_read(m_ig_feed_app_path + " --user=" + username);
 
   if (result.empty())
     output += "Error executing ig feed app\n\n";
   else
   {
+    sanitize_json(result);
     IGFeedJSONResult feed_result{};
     if (feed_result.read(result))
       output += feed_result.to_string();
@@ -235,7 +242,7 @@ std::string KLytics::fetch_yt_posts(const std::string& channel_id)
           video_object["id"]          = video.id;
           video_object["title"]       = video.title;
           video_object["description"] = video.description;
-          video_object["datetime"]    = to_unixtime_s(video.datetime);
+          video_object["datetime"]    = std::to_string(kutils::to_unixtime(video.datetime.c_str()));
           video_object["keywords"]    = nlohmann::json::array();
 
           for (auto&& keyword : video.stats.keywords)
