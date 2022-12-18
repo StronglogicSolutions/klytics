@@ -29,6 +29,12 @@ config("html") {
   ]
 }
 
+config("kutils") {
+  include_dirs = [
+    "//third_party/kutils/include"
+  ]
+}
+
 config("ktube") {
   include_dirs = ["//third_party/ktube/src",
    "//third_party/kjson"
@@ -62,7 +68,8 @@ source_set("klytics_sources") {
     ":knlp",
     ":process_executor",
     ":html",
-    ":ktube"
+    ":ktube",
+    ":kutils"
   ]
 
   include_dirs = [

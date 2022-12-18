@@ -8,9 +8,7 @@ namespace klytics {
 
 namespace constants {
 // Paths
-const std::string FOLLOWER_YT_APP{"../external/followers/followers.js"};
-const std::string FOLLOWER_IG_APP{"/data/stronglogic/simyoung/index.js"}; // TODO: This should be configurable
-const std::string TRENDS_APP{"../external/trends/index.js"};
+
 const std::string FOLLOWER_JSON{"../config/followers.json"};
 const std::string FOLLOWERS_IG_JSON{"../config/ig_followers.json"};
 const std::string YOUTUBE_QUOTA_PATH{"../config/youtube_quota.txt"};
@@ -100,17 +98,17 @@ const std::vector<std::string> PARAM_NAMES = {
   "q"
 };
 
-const uint8_t KSTYLEYO_CHANNEL_ID_INDEX             = 0x00;
-const uint8_t WALKAROUNDWORLD_CHANNEL_ID_INDEX      = 0x01;
-const uint8_t STRONGLOGICSOLUTIONS_CHANNEL_ID_INDEX = 0x02;
+static const uint8_t KSTYLEYO_CHANNEL_ID_INDEX             = 0x00;
+static const uint8_t WALKAROUNDWORLD_CHANNEL_ID_INDEX      = 0x01;
+static const uint8_t STRONGLOGICSOLUTIONS_CHANNEL_ID_INDEX = 0x02;
 
-const std::vector<std::string> CHANNEL_IDS{
+static const std::vector<std::string> CHANNEL_IDS{
   "UC1XoiwW6b0VIYPOaP1KgV7A", // KStyleYo
   "UCAQ52nRnrg5epd6znUny-VA", // Walk Around The World
   "UCK0xH_L9OBM0CVwC438bMGA", // StrongLogic Solutions
 };
 
-const std::vector<std::string> PARAM_VALUES{
+static const std::vector<std::string> PARAM_VALUES{
   "UC1XoiwW6b0VIYPOaP1KgV7A",    // KStyleYo
   // "UCAQ52nRnrg5epd6znUny-VA", // Walk Around The World
   // "UCK0xH_L9OBM0CVwC438bMGA", // StrongLogic Solutions
@@ -138,24 +136,26 @@ const std::vector<std::string> PARAM_VALUES{
   "snippet,statistics"
 };
 
-const std::string E_CHANNEL_ID{"UCFP7BAwQIzqml"};
-const std::string DEFAULT_CONFIG_PATH{"config/config.ini"};
-const std::string KLYTICS_CONFIG_SECTION{"klytics"};
-const std::string GOOGLE_CONFIG_SECTION{"google"};
-const std::string REFRESH_TOKEN{"refresh_token"};
-const std::string CLIENT_ID{"client_id"};
-const std::string CLIENT_SECRET{"client_secret"};
-const std::string YOUTUBE_KEY{"key"};
-const std::string YOUTUBE_CONFIG_SECTION{"youtube"};
-const std::string YOUTUBE_TOKEN_APP{"token_app"};
-const std::string YOUTUBE_USERNAME{"chat_name"};
-const std::string YOUTUBE_GREET{"greet"};
-const std::string YOUTUBE_TEST_MODE{"test_mode"};
-const std::string YOUTUBE_RETRY_MODE{"retry"};
-const std::string INSTAGRAM_CONFIG_SECTION{"instagram"};
-const std::string INSTAGRAM_USERNAME{"stronglogicp"};
-const std::string IG_FEED_APP_KEY{"ig_feed_app"};
-const std::string TW_FEED_APP_KEY{"tw_feed_app"};
+static const std::string E_CHANNEL_ID{"UCFP7BAwQIzqml"};
+static const std::string DEFAULT_CONFIG_PATH{"config/config.ini"};
+static const std::string KLYTICS_CONFIG_SECTION{"klytics"};
+static const std::string GOOGLE_CONFIG_SECTION{"google"};
+static const std::string REFRESH_TOKEN{"refresh_token"};
+static const std::string CLIENT_ID{"client_id"};
+static const std::string CLIENT_SECRET{"client_secret"};
+static const std::string YOUTUBE_KEY{"key"};
+static const std::string YOUTUBE_CONFIG_SECTION{"youtube"};
+static const std::string YOUTUBE_TOKEN_APP{"token_app"};
+static const std::string YOUTUBE_USERNAME{"chat_name"};
+static const std::string YOUTUBE_GREET{"greet"};
+static const std::string YOUTUBE_TEST_MODE{"test_mode"};
+static const std::string YOUTUBE_RETRY_MODE{"retry"};
+static const std::string INSTAGRAM_CONFIG_SECTION{"instagram"};
+static const std::string INSTAGRAM_USERNAME{"stronglogicp"};
+static const std::string IG_FEED_APP_KEY{"ig_feed_app"};
+static const std::string TW_FEED_APP_KEY{"tw_feed_app"};
+static const std::string YT_FOLL_APP_KEY = "yt_follower_app";
+static const std::string IG_FOLL_APP_KEY = "ig_follower_app";
 
 inline const std::string VideoParamsFull() {
   return std::string{

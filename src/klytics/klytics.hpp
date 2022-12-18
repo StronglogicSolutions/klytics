@@ -113,6 +113,8 @@ private:
   ktube::ContentComparator m_comparator;
   std::string              m_ig_feed_app_path;
   std::string              m_tw_feed_app_path;
+  std::string              m_yt_foll_app_path;
+  std::string              m_ig_foll_app_path;
 };
 
 } // namespace klytics
